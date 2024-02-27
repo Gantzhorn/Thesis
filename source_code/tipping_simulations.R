@@ -9,12 +9,11 @@
 #-----------------------------------------------------------------------------------------------------------------------------#
 # License: MIT License (for more information, see LICENSE file in the repository).
 # Dependencies: ggplot2, ggthemes, tibble - All part of the tidyverse.
-# Usage: See example usage in script below.
+# Usage: See usage in the bottom of the script
 # Acknowledgements: For algorithm see: Applied Stochastic Differential Equations Särkkä, Simo and Solin, Arno - Algorithm 8.5.
 # Keywords: Stochastic Differential Equations, Tipping Points, Simulation, Itô-taylor weak order 2.0
 #-----------------------------------------------------------------------------------------------------------------------------#
-ggplot2::theme_set(ggthemes::theme_base())
-
+# Implementation for model with additive noise structure
 simulate_additive_noise_tipping_model <- function(step_length, param,
                                                   tau = 100, t_0 = 10,
                                                   X_0 = NA, beyond_tipping = 0){
@@ -54,21 +53,8 @@ simulate_additive_noise_tipping_model <- function(step_length, param,
                  lambda_t, alpha_t, mu_t)
 }
 
-## Additive noise test simulations
-# true_param <- c(0.015, 300, -2, 1)
-# actual_dt <- 0.001
-# tau <- 100
-# t_0 <- 50
-# sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sim_res_add |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
-#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
-#   ggplot2::geom_vline(xintercept = t_0)
-# 
-# sim_res_add |>  ggplot2::ggplot(ggplot2::aes(x = t, y = lambda_t)) +
-#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
-#   ggplot2::geom_vline(xintercept = tau + t_0, linetype = "dashed")  +
-#   ggplot2::geom_vline(xintercept = t_0, linetype = "dashed")
-
+#-----------------------------------------------------------------------------------------------------------------------------#
+# Implementation for model with square-root noise structure
 simulate_squareroot_noise_tipping_model<- function(step_length, param,
                                                    tau = 100, t_0 = 10,
                                                    X_0 = NA, beyond_tipping = 0){
@@ -113,21 +99,8 @@ simulate_squareroot_noise_tipping_model<- function(step_length, param,
          lambda_t, alpha_t, mu_t)
 }
 
-## Square-root noise test simulations
-# true_param <- c(0.015, 300, -2, 0.1)
-# actual_dt <- 0.001
-# tau <- 100
-# t_0 <- 50
-# sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sim_res_sqrt |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
-#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
-#   ggplot2::geom_vline(xintercept = t_0)
-# 
-# sim_res_sqrt |>  ggplot2::ggplot(ggplot2::aes(x = t, y = lambda_t)) +
-#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
-#   ggplot2::geom_vline(xintercept = tau + t_0, linetype = "dashed")  +
-#   ggplot2::geom_vline(xintercept = t_0, linetype = "dashed")
-
+#-----------------------------------------------------------------------------------------------------------------------------#
+# Implementation for model with linear noise structure
 simulate_linear_noise_tipping_model<- function(step_length, param,
                                                tau = 100, t_0 = 10,
                                                X_0 = NA, beyond_tipping = 0){
@@ -171,8 +144,30 @@ simulate_linear_noise_tipping_model<- function(step_length, param,
          lambda_t, alpha_t, mu_t)
 }
 
-## Linear noise test simulations
-# true_param <- c(0.005, 50, -0.05, 0.005)
+#-----------------------------------------------------------------------------------------------------------------------------#
+## Example usage of each of the methods
+## Additive noise example
+# true_param <- c(0.87, -1.51, -2.69, 0.3)
+# actual_dt <- 0.001
+# tau <- 100
+# t_0 <- 50
+# sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
+# sim_res_add |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
+#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
+#   ggplot2::geom_vline(xintercept = t_0)
+
+## Square-root noise example
+# true_param <- c(0.5, 1.5, -2.69, 0.3)
+# actual_dt <- 0.001
+# tau <- 100
+# t_0 <- 50
+# sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param, tau, t_0)
+# sim_res_sqrt |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
+#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
+#   ggplot2::geom_vline(xintercept = t_0)
+
+## Linear noise example
+# true_param <- c(0.1, 1.5, -3, 0.15)
 # actual_dt <- 0.001
 # tau <- 100
 # t_0 <- 50
@@ -180,9 +175,3 @@ simulate_linear_noise_tipping_model<- function(step_length, param,
 # sim_res_linear |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = t_0)
-# 
-# sim_res_linear |>  ggplot2::ggplot(ggplot2::aes(x = t, y = lambda_t)) +
-#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
-#   ggplot2::geom_vline(xintercept = tau + t_0, linetype = "dashed")  +
-#   ggplot2::geom_vline(xintercept = t_0, linetype = "dashed")
-
