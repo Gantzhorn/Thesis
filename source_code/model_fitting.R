@@ -1,6 +1,6 @@
 # Title: Model fitting of Stochastic Differential Equations with tipping points.
 # Author: Anders Gantzhorn Kristensen (University of Copenhagen, andersgantzhorn@gmail.com)
-# Date: 2024-02-22 (Last Updated: 2024-02-22)
+# Date: 2024-02-22 (Last Updated: 2024-02-28)
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Project: Tipping Point Estimation in Ecological Systems using Stochastic Differential Equations
 # Description: This script implements optimizers, estimation methods and negative log-likelihood functions for estimation
@@ -16,6 +16,23 @@
 # Keywords: Stochastic Differential Equations, Likelihood methods, Estimation, Numerical Optimization
 
 #-----------------------------------------------------------------------------------------------------------------------------#
+# Helper functions
+runge_kutta <- function(y0, h, f, n = 1) {
+  h <- h / n
+  
+  for(i in 1:n) {
+    k1 <- f(0, y0)
+    k2 <- f(0.5 * h, y0 + 0.5 * h * k1)
+    k3 <- f(0.5 * h, y0 + 0.5 * h * k2)
+    k4 <- f(h, y0 + h * k3)
+    
+    y0 <- y0 + h * (k1 + 2 * k2 + 2 * k3 + k4) / 6
+  }
+  y0
+}
+
+#-----------------------------------------------------------------------------------------------------------------------------#
+
 # Implementation of methods that are based on the additive noise term process
 OU_likelihood <- function(par, data, delta){
   alpha0 <- par[1]
@@ -34,7 +51,7 @@ OU_likelihood <- function(par, data, delta){
   N * (log(v_part)) + sum(m_part^2 / v_part) 
 }
 
-score_OU <- function(par, data, dt){
+score_OU <- function(par, data, delta){
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   n <- length(x0)
@@ -43,7 +60,7 @@ score_OU <- function(par, data, dt){
   sigma <- par[3]
   
   gamma_square <- sigma^2 / (2 * beta)
-  rho <- exp(- beta * dt)
+  rho <- exp(- beta * delta)
   
   eq1 <- (1 - rho) / (gamma_square * (1 - rho^2)) * sum(x1 - x0 * rho - mu * (1 - rho))
   
@@ -95,6 +112,7 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma, pen = 0
 # Implementation of methods that are based on the square-root noise term process
 
 CIR_quadratic_martingale <- function(data, delta) {
+
   N <- length(data)
   M <- N - 1
   Xlow <- data[1:M]
@@ -102,9 +120,8 @@ CIR_quadratic_martingale <- function(data, delta) {
   S1 <- sum(Xupp)
   S2 <- sum(1 / Xlow)
   S3 <- sum(Xupp / Xlow)
-  
   ebdel <- (M * S3 - S1 * S2) / (M^2 - S1 * S2)
-  beta <- -log(ebdel) / dt
+  beta <- -log(ebdel) / delta
   
   mu <- (S3 - M * ebdel) / ((1 - ebdel) * S2)
   
@@ -113,8 +130,70 @@ CIR_quadratic_martingale <- function(data, delta) {
   
   sigma <- S4 / S5
   
-  c(beta = unname(beta), mu = unname(mu), sigma = unname(sqrt(sigma)))
+  c(beta, mu, sqrt(sigma))
 }
+
+alt_strang_splitting_CIR <- function(par, data, delta) {
+  x0 <- data[1:(length(data) - 1)]
+  x1 <- data[2:length(data)]
+  
+  beta <- par[1]
+  mu <- par[2]
+  sigma <- exp(par[3])
+  
+  if(4 * beta * mu - sigma^2 < 0){return(100000)}
+  
+  diff_f <- function(t, y){y/2 * ((4 * beta * mu - sigma^2)/log(y) - beta * log(y))}
+  
+  f <- runge_kutta(x0, delta / 2, diff_f)
+
+  mu_log <- log(f)
+
+  sd_log <- sigma * sqrt(delta)
+  
+  inv_f <- runge_kutta(x1, -delta / 2, diff_f)
+  
+  inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f)
+  inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f)
+  
+  df <- (inv_f2 - inv_f3) / (2 * 0.01)
+  
+  -sum(stats::dlnorm(inv_f, meanlog = mu_log, sdlog = sd_log, log = TRUE)) - sum(log(abs(df)))
+}
+
+strang_splitting_CIR <- function(par, data, delta) {
+  x0 <- data[1:(length(data) - 1)]
+  x1 <- data[2:length(data)]
+  
+  beta <- par[1]
+  mu <- par[2]
+  sigma <- par[3]
+  if((4 * beta * mu - sigma^2) < 0 | sigma < 0){return(100000)}
+  diff_f <- function(t, y){beta * y / 2 + (4 * mu * beta - sigma^2) / (2 * y) + sqrt(beta * (4 * beta * mu - sigma^2))}
+  
+  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  
+  A <- - beta
+  b <- - sqrt((4 * beta * mu - sigma^2) / beta)
+
+  mu_f <- exp(A * delta) * (f_h - b) + b
+  sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
+  
+  # Invers til løsning af ikke-lineær del
+  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  
+  # Den inverses afledede.
+  inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
+  inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
+  
+  df <- (inv_f2 - inv_f3) / (2 * 0.01) # Richardson Extrapolation
+  
+  # Strang likelihood
+  neg_loglik <- -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
+
+  neg_loglik
+}
+
 
 CIR_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma, pen = 0){
   tau     <-  par[1]
@@ -140,10 +219,17 @@ CIR_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma, pen = 0
   fh_half_inv = (mu_seq * fh_half_tmp_upp - Xupp) / (fh_half_tmp_upp-1)
   
   det_Dfh_half_inv = 1 / (fh_half_tmp_upp-1)^2
+  phi_dot <- fh_half / alpha_seq * (exp(-alpha_seq * delta) - exp(-2 * alpha_seq * delta)) +
+    mu_seq / (2 * alpha_seq) * (-expm1(-alpha_seq * delta))^2
   
-  sd.part <- sqrt(delta) * sigma * sqrt(fh_half)
+  if(any(phi_dot < 0)){return(50000)}
   
-  mu.part <- fh_half - alpha_seq * (fh_half - mu_seq) * delta
+  sd.part <- sigma * sqrt(phi_dot)
+  
+    #sqrt(delta) * sigma * sqrt(fh_half)
+  
+  mu.part <- exp(-alpha_seq * delta) * (fh_half - mu_seq) + mu_seq
+    #fh_half - alpha_seq * (fh_half - mu_seq) * delta
   
   negloglik <- -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
   negloglik
@@ -254,12 +340,13 @@ optimize_OU <- function(data, init_par, delta){
   res_optim$par
 }
 
-optimize_stationary_likelihood <- function(likelihood_fun, data, init_par, delta){
+optimize_stationary_likelihood <- function(likelihood_fun, data, init_par, delta, exp_sigma = TRUE){
   res_optim <- optim(init_par, fn = likelihood_fun,
                      method = "BFGS",
                      data = data, delta = delta)
-  
+  if(exp_sigma){
   res_optim$par[3] <- exp(res_optim$par[3])
+  }
   res_optim$par
 }
 
@@ -277,7 +364,7 @@ optimize_dynamic_likelihood <- function(likelihood_fun, data,
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Example usage
-# source("tipping_simulations.R")
+source("tipping_simulations.R")
 # 
 # ## Additive noise model
 # 
@@ -300,7 +387,7 @@ optimize_dynamic_likelihood <- function(likelihood_fun, data,
 # nleqslv::nleqslv(x = stationary_part_true_param,
 #                  fn = score_OU,
 #                  data = sim_res_add$X_weak_2.0[sim_res_add$t < t_0],
-#                  dt = actual_dt)$x - stationary_part_true_param
+#                  delta = actual_dt)$x - stationary_part_true_param
 # 
 # ## Dynamic part
 # dynamic_part_true_param <- c(tau, true_param[1])
@@ -314,11 +401,34 @@ optimize_dynamic_likelihood <- function(likelihood_fun, data,
 
 
 ## Square-root noise model
-# true_param <- c(0.5, 1.5, -2.69, 0.3)
-# actual_dt <- 0.001
+# true_param <- c(0.065, 500, -3, 0.025)
+# actual_dt <- 0.01
 # tau <- 100
 # t_0 <- 50
 # sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param, tau, t_0)
+
+# ## Stationary part
+# ## Parameters for stationary part
+# mu0 = true_param[2] + sqrt(abs(true_param[3]) / true_param[1])
+# alpha0 <- 2 * sqrt(true_param[1] * abs(true_param[3]))
+# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+#CIR_quadratic_martingale(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0], actual_dt) - stationary_part_true_param
+# optimize_stationary_likelihood(alt_strang_splitting_CIR, exp(2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0])),
+#                                stationary_part_true_param, actual_dt) - stationary_part_true_param
+
+# optimize_stationary_likelihood(likelihood_fun = strang_splitting_CIR,
+#                                data = 2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0]),
+#                                init_par = stationary_part_true_param,
+#                                delta = actual_dt, exp_sigma = FALSE) - stationary_part_true_param
+# 
+# dynamic_part_true_param <- c(tau, true_param[1])
+# optimize_dynamic_likelihood(likelihood_fun = CIR_dynamic_likelihood,
+#                             data = sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t > t_0],
+#                             init_par = dynamic_part_true_param,
+#                             delta = actual_dt,
+#                             alpha0 = stationary_part_true_param[1],
+#                             mu0 = stationary_part_true_param[2],
+#                             sigma = stationary_part_true_param[3]) - dynamic_part_true_param
 
 
 ## Linear noise model
