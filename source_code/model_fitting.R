@@ -51,7 +51,7 @@ OU_likelihood <- function(par, data, delta){
   N * (log(v_part)) + sum(m_part^2 / v_part) 
 }
 
-score_OU <- function(par, data, delta){
+OU_Score <- function(par, data, delta){
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   n <- length(x0)
@@ -103,10 +103,51 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma, pen = 0
   m_part      <- fh_half_inv - mu_h
   v_part    <- gamma2_seq * (1 - rho_seq^2)
   det_Dfh_half_inv <- 1 / (fh_half_tmp_upp-1)^2
+  
   # Negative log-likelihood
   sum(log(v_part)) + sum(m_part^2 / v_part) -
     2 * sum(log(det_Dfh_half_inv)) + pen * N * (1 / A - 1) * (A < exp(1))
 }
+
+OU_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
+  tau <- par[1]
+  A <- par[2]
+  m_tip <- mu0 - alpha0/(2 * A)
+  lambda0 <- -alpha0^2 / (4 * A)
+  
+  delta <- 1 / M
+  #time    <- delta * (1:(N-1))
+  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)
+  lam_mat <- t(matrix(rep(lam_seq, length.out = N * length(lam_seq)), nrow = length(lam_seq), ncol = N))
+  # Number of data points
+  numData <- length(data) - 1
+  
+  
+  dW <- array(dqrng::dqrnorm(N * M * numData, mean = 0, sd = sqrt(delta)), dim = c(M, N, numData))
+  # Initialize the process array
+  X <- array(NA, dim = c(M, N, numData))
+  
+  X[1, , ] <- rep(data[-length(data)], each = N)
+  for (m in 2:M){
+    X[m, , ] <- X[m - 1, , ] - (A * (X[m - 1, , ] - m_tip)^2 + lam_mat) * delta + sigma * dW[m - 1, , ]
+  }
+  
+  second_to_last_X <- t(X[M - 1, , ])
+  
+  sigma_t <- sigma * sqrt(delta)
+  
+  mu_t <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
+  
+  densities = dnorm(data[-1], mean = mu_t, sd = sigma_t, log = TRUE)
+
+  loglik = -mean(colMeans(densities))
+  if(is.na(loglik) | is.infinite(loglik)){
+    print("NA Likelihood")
+    return(1000000)
+  }
+  loglik
+}
+
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Implementation of methods that are based on the square-root noise term process
@@ -133,7 +174,7 @@ CIR_quadratic_martingale <- function(data, delta) {
   c(beta, mu, sqrt(sigma))
 }
 
-alt_strang_splitting_CIR <- function(par, data, delta) {
+CIR_alt_strang_splitting <- function(par, data, delta) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
@@ -161,7 +202,7 @@ alt_strang_splitting_CIR <- function(par, data, delta) {
   -sum(stats::dlnorm(inv_f, meanlog = mu_log, sdlog = sd_log, log = TRUE)) - sum(log(abs(df)))
 }
 
-strang_splitting_CIR <- function(par, data, delta) {
+CIR_strang_splitting <- function(par, data, delta) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
@@ -171,6 +212,7 @@ strang_splitting_CIR <- function(par, data, delta) {
   if((4 * beta * mu - sigma^2) < 0 | sigma < 0){return(100000)}
   diff_f <- function(t, y){beta * y / 2 + (4 * mu * beta - sigma^2) / (2 * y) + sqrt(beta * (4 * beta * mu - sigma^2))}
   
+  # Solution to ODE
   f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
   
   A <- - beta
@@ -179,14 +221,13 @@ strang_splitting_CIR <- function(par, data, delta) {
   mu_f <- exp(A * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
   
-  # Invers til løsning af ikke-lineær del
+  # Inverse of non-linear ODE
   inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
   
-  # Den inverses afledede.
+  # Derivative of inverse using Richardson Extrapolation.
   inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
   inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
-  
-  df <- (inv_f2 - inv_f3) / (2 * 0.01) # Richardson Extrapolation
+  df <- (inv_f2 - inv_f3) / (2 * 0.01)
   
   # Strang likelihood
   neg_loglik <- -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
@@ -226,13 +267,54 @@ CIR_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma, pen = 0
   
   sd.part <- sigma * sqrt(phi_dot)
   
-    #sqrt(delta) * sigma * sqrt(fh_half)
-  
   mu.part <- exp(-alpha_seq * delta) * (fh_half - mu_seq) + mu_seq
-    #fh_half - alpha_seq * (fh_half - mu_seq) * delta
   
   negloglik <- -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
   negloglik
+}
+
+CIR_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
+  tau <- par[1]
+  A <- par[2]
+  print(par)
+  m_tip <- mu0 - alpha0/(2 * A)
+  lambda0 <- -alpha0^2 / (4 * A)
+  
+  delta <- 1 / M
+  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)
+  lam_mat <- t(matrix(rep(lam_seq, length.out = N * length(lam_seq)), nrow = length(lam_seq), ncol = N))
+  numData <- length(data) - 1
+  
+  
+  dW <- array(dqrng::dqrnorm(N * M * numData, mean = 0, sd = sqrt(delta)), dim = c(M, N, numData))
+  # Initialize the process array
+  X <- array(NA, dim = c(M, N, numData))
+  
+  X[1, , ] <- rep(data[-length(data)], each = N)
+  for (m in 2:M){
+    if(any(X[m - 1, , ] < 0 | any(is.na(sqrt(X[m - 1, , ]))))){ 
+      return(50000 + runif(1))
+    }
+    
+    X[m, , ] <- X[m - 1, , ] - (A * (abs(X[m - 1, , ]) - m_tip)^2 + lam_mat) * delta + sigma * sqrt(abs(X[m - 1, , ])) * dW[m - 1, , ]
+  }
+  
+  second_to_last_X <- t(X[M - 1, , ])
+  
+  sigma_t <- sigma * sqrt(delta) * sqrt(second_to_last_X)
+  
+  mu_t <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
+  
+  densities = dnorm(data[-1], mean = mu_t, sd = sigma_t, log = TRUE)
+  
+  loglik = -mean(colMeans(densities))
+  
+  if(is.na(loglik) | is.infinite(loglik)){
+    print("NA Likelihood")
+    return(1000000)
+  }
+  
+  loglik
 }
 
 #-----------------------------------------------------------------------------------------------------------------------------#
@@ -315,18 +397,18 @@ mean_reverting_GMB_strang <- function(par, data, delta) {
   A <- - (sigma^2 + 2 * beta) / 2
   b <- - log((2 * beta + sigma^2) / (2 * beta * mu))
   
+  # Solution to non-linear ODE
   f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
   mu_f <- exp(A * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
   
-  # Invers til løsning af ikke-lineær del
+  # Inverse to non-linear ODE
   inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
   
-  # Den inverses afledede.
+  # Derivative of inverse using Richardson Extrapolation
   inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
   inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
-  
-  df <- (inv_f2 - inv_f3) / (2 * 0.01) # Richardson Extrapolation
+  df <- (inv_f2 - inv_f3) / (2 * 0.01) 
   
   # Strang likelihood
   -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
@@ -347,7 +429,7 @@ mean_reverting_GMB_dynamic_likelihood <- function(par, data, delta, alpha0, mu0,
   alpha_seq  <- 2 * sqrt(A * abs(lam_seq))
   mu_seq     <- m + sqrt(abs(lam_seq) / A)
   
-  # ## Calculating the Strang splitting scheme pseudo likelihood
+  # Calculating the Strang splitting scheme pseudo likelihood
   fh_half_tmp_low <-  A * delta * (Xlow - mu_seq) / 2
   fh_half_tmp_upp <-  A * delta * (Xupp - mu_seq) / 2
   
@@ -362,25 +444,61 @@ mean_reverting_GMB_dynamic_likelihood <- function(par, data, delta, alpha0, mu0,
       2 * mu_seq * sigma^2 / (alpha_seq - sigma^2) * (fh_half - mu_seq) * (1 - exp(-(sigma^2 - alpha_seq) * delta)) -
       mu_seq^2 * sigma^2 / (2 * alpha_seq - sigma^2) * (1 - exp(-(sigma^2 - 2*alpha_seq) * delta))
   )
-
-    #sqrt(delta) * sigma * fh_half
   
   mu.part <- exp(-alpha_seq * delta) * (fh_half - mu_seq) + mu_seq
-    #fh_half - alpha_seq * (fh_half - mu_seq) * delta
   
   negloglik <- -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
   negloglik
 }
 
-#-----------------------------------------------------------------------------------------------------------------------------#
-## General optimizers for stationary - and dynamic part of process
-optimize_OU <- function(data, init_par, delta){
-  res_optim <- optim(init_par, fn = OU_likelihood,
-                     method = "BFGS",
-                     data = data, delta = delta)
-  res_optim$par
+mean_reverting_GMB_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
+  tau <- par[1]
+  A <- par[2]
+  print(par)
+  m_tip <- mu0 - alpha0/(2 * A)
+  lambda0 <- -alpha0^2 / (4 * A)
+  
+  delta <- 1 / M
+  #time    <- delta * (1:(N-1))
+  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)
+  lam_mat <- t(matrix(rep(lam_seq, length.out = N * length(lam_seq)), nrow = length(lam_seq), ncol = N))
+  # Number of data points
+  numData <- length(data) - 1
+  
+  
+  dW <- array(dqrng::dqrnorm(N * M * numData, mean = 0, sd = sqrt(delta)), dim = c(M, N, numData))
+  # Initialize the process array
+  X <- array(NA, dim = c(M, N, numData))
+  
+  X[1, , ] <- rep(data[-length(data)], each = N)
+  for (m in 2:M){
+    if(any(X[m - 1, , ] < 0 | any(is.na(X[m - 1, , ])))){ 
+      return(50000 + runif(1))
+    }
+    X[m, , ] <- X[m - 1, , ] - (A * (X[m - 1, , ] - m_tip)^2 + lam_mat) * delta +
+      sigma * X[m - 1, , ] * dW[m - 1, , ]
+  }
+  
+  second_to_last_X <- t(X[M - 1, , ])
+  
+  sigma_t <- sigma * sqrt(delta) * second_to_last_X
+  
+  mu_t <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
+  
+  densities <- dnorm(data[-1], mean = mu_t, sd = sigma_t, log = TRUE)
+  
+  # Compute the mean log likelihood for each time point
+  loglik <- -mean(colMeans(densities))
+  print(loglik)
+  if(is.na(loglik) | is.infinite(loglik)){
+    print("NA Likelihood")
+    return(1000000)
+  }
+  loglik
 }
 
+#-----------------------------------------------------------------------------------------------------------------------------#
+## General optimizers for stationary - and dynamic part of process
 optimize_stationary_likelihood <- function(likelihood_fun, data, init_par, delta, exp_sigma = TRUE){
   res_optim <- optim(init_par, fn = likelihood_fun,
                      method = "BFGS",
@@ -403,12 +521,23 @@ optimize_dynamic_likelihood <- function(likelihood_fun, data,
   res_optim$par
 }
 
+optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, M, N,
+                                                    init_par, alpha0, mu0, sigma, t_0){
+  res_optim <- optim(par = init_par, fn = likelihood_fun,
+        method = "L-BFGS-B", data = data,
+        times = times, M = M, N = N,
+        alpha0 = alpha0, mu0 = mu0,
+        sigma = sigma, t_0 = t_0,
+        lower = c(0, 0), upper = c(Inf, Inf))$par
+  res_optim
+}
+
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Example usage
 # source("tipping_simulations.R")
-# 
-# ## Additive noise model
-# 
+
+## Additive noise model
+
 # true_param <- c(0.87, -1.51, -2.69, 0.3)
 # actual_dt <- 0.001
 # tau <- 100
@@ -421,12 +550,12 @@ optimize_dynamic_likelihood <- function(likelihood_fun, data,
 # alpha0 <- 2 * sqrt(true_param[1] * abs(true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
-# optimize_OU(data = sim_res_add$X_weak_2.0[sim_res_add$t < t_0],
-#                                init_par =  stationary_part_true_param,
-#                                delta = actual_dt) - stationary_part_true_param
+# optimize_stationary_likelihood(likelihood_fun = OU_likelihood, data = sim_res_add$X_weak_2.0[sim_res_add$t < t_0],
+#                                init_par = stationary_part_true_param,
+#                                delta = actual_dt, exp_sigma = FALSE) - stationary_part_true_param
 # 
 # nleqslv::nleqslv(x = stationary_part_true_param,
-#                  fn = score_OU,
+#                  fn = OU_score,
 #                  data = sim_res_add$X_weak_2.0[sim_res_add$t < t_0],
 #                  delta = actual_dt)$x - stationary_part_true_param
 # 
@@ -454,10 +583,10 @@ optimize_dynamic_likelihood <- function(likelihood_fun, data,
 # alpha0 <- 2 * sqrt(true_param[1] * abs(true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # CIR_quadratic_martingale(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0], actual_dt) - stationary_part_true_param
-# optimize_stationary_likelihood(alt_strang_splitting_CIR, exp(2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0])),
+# optimize_stationary_likelihood(CIR_alt_strang_splitting, exp(2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0])),
 #                                stationary_part_true_param, actual_dt) - stationary_part_true_param
 
-# test_res <- optimize_stationary_likelihood(likelihood_fun = strang_splitting_CIR,
+# test_res <- optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
 #                                data = 2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0]),
 #                                init_par = stationary_part_true_param,
 #                                delta = actual_dt, exp_sigma = FALSE) #- stationary_part_true_param
