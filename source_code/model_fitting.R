@@ -1,6 +1,6 @@
 # Title: Model fitting of Stochastic Differential Equations with tipping points.
 # Author: Anders Gantzhorn Kristensen (University of Copenhagen, andersgantzhorn@gmail.com)
-# Date: 2024-02-22 (Last Updated: 2024-02-28)
+# Date: 2024-02-22 (Last Updated: 2024-03-04)
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Project: Tipping Point Estimation in Ecological Systems using Stochastic Differential Equations
 # Description: This script implements optimizers, estimation methods and negative log-likelihood functions for estimation
@@ -112,9 +112,9 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma, pen = 0
 OU_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
   tau <- par[1]
   A <- par[2]
+  
   m_tip <- mu0 - alpha0/(2 * A)
   lambda0 <- -alpha0^2 / (4 * A)
-  
   delta <- 1 / M
   #time    <- delta * (1:(N-1))
   lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)
@@ -511,13 +511,15 @@ optimize_stationary_likelihood <- function(likelihood_fun, data, init_par, delta
 
 optimize_dynamic_likelihood <- function(likelihood_fun, data,
                                         init_par, delta,
-                                        alpha0, mu0, sigma, pen = 0){
+                                        alpha0, mu0, sigma, pen = 0, exp_sigma = TRUE){
 
   res_optim <- stats::optim(init_par, fn = likelihood_fun,
                             method = "Nelder-Mead",
                             data = data, delta = delta,
                             alpha0 = alpha0 , mu0 = mu0, sigma = sigma, pen = pen)
+  if(exp_sigma){
   res_optim$par[2] <- exp(res_optim$par[2])
+  }
   res_optim$par
 }
 
