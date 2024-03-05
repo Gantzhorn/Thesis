@@ -7,14 +7,15 @@ source("source_code/model_fitting.R")
 # Additive noise model
 true_param <- c(0.87, -1.51, -2.69, 0.2)
 actual_dt <- 1/12
-tau <- 100
+tau <- 50
 t_0 <- 25
 
 # For numerical likelihood
-M <- 3
-N <- 5
+M <- 1 / actual_dt
+N <- 10
 
-sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
+sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0, beyond_tipping = -5)
+#sim_res_add <- filter(sim_res_add, t < t_0 + tau / 2)
 
 ## Parameters for stationary part
 mu0 = true_param[2] + sqrt(abs(true_param[3]) / true_param[1])
@@ -35,7 +36,7 @@ dynamicPart_Likelihood_Sim <- matrix(NA, nrow = numSim, ncol = 2)
 
 for (i in 1:numSim){
   cat("Grinding", i, "\n")
-  sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
+  sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0, beyond_tipping = -15)
   # Stationary part
   stationaryPart_Likelihood_Optimization[i, ] <- (optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
                                                   data = sim_res_add$X_weak_2.0[sim_res_add$t < t_0],

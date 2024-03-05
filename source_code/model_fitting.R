@@ -536,7 +536,7 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Example usage
-# source("tipping_simulations.R")
+# source("source_code/tipping_simulations.R")
 
 ## Additive noise model
 
@@ -588,12 +588,11 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 # optimize_stationary_likelihood(CIR_alt_strang_splitting, exp(2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0])),
 #                                stationary_part_true_param, actual_dt) - stationary_part_true_param
 
-# test_res <- optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
+# optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
 #                                data = 2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0]),
 #                                init_par = stationary_part_true_param,
-#                                delta = actual_dt, exp_sigma = FALSE) #- stationary_part_true_param
+#                                delta = actual_dt, exp_sigma = FALSE) - stationary_part_true_param
 # 
-# resid_strang(test_res, 2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0]), actual_dt)
 ## Dynamic part
 
 # dynamic_part_true_param <- c(tau, true_param[1])
