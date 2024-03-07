@@ -42,6 +42,8 @@ running_autocorrelation <- function(data, width = NA){
 ## Example usage
 ## Take methods from tipping_simulations.R
 # source("tipping_simulations.R")
+
+# Additive noise example
 # true_param <- c(0.87, -1.51, -2.69, sqrt(0.3))
 # actual_dt <- 1/12
 # tau <- 100
@@ -52,12 +54,52 @@ running_autocorrelation <- function(data, width = NA){
 #   ggplot2::geom_vline(xintercept = t_0)
 # run_var <- running_variance(sim_res_add$X_weak_2.0)
 # 
-# tibble::tibble(running_variance = run_var, t = sim_res_add$t) |> 
-#   ggplot2::ggplot(ggplot2::aes(x = t, y = running_variance)) + ggplot2::geom_line() + 
+# tibble::tibble(running_variance = run_var, t = sim_res_add$t) |>
+#   ggplot2::ggplot(ggplot2::aes(x = t, y = running_variance)) + ggplot2::geom_line() +
 #   ggplot2::geom_smooth(se = F, method = "lm")
 # 
 # 
 # run_acf <- running_autocorrelation(sim_res_add$X_weak_2.0)
-# tibble::tibble(running_autocorrelation = run_acf, t = sim_res_add$t) |> 
-#   ggplot2::ggplot(ggplot2::aes(x = t, y = running_autocorrelation)) + ggplot2::geom_line() + 
+# tibble::tibble(running_autocorrelation = run_acf, t = sim_res_add$t) |>
+#   ggplot2::ggplot(ggplot2::aes(x = t, y = running_autocorrelation)) + ggplot2::geom_line() +
+#   ggplot2::geom_smooth(se = F, method = "lm")
+
+## Square-root noise example
+# true_param <- c(0.5, 1.5, -2.69, 0.3)
+# actual_dt <- 1/12
+# tau <- 100
+# t_0 <- 50
+# sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param, tau, t_0)
+# sim_res_sqrt |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
+#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
+#   ggplot2::geom_vline(xintercept = t_0)
+# 
+# run_var <- running_variance(sim_res_sqrt$X_weak_2.0)
+# 
+# tibble::tibble(running_variance = run_var, t = sim_res_sqrt$t) |>
+#   ggplot2::ggplot(ggplot2::aes(x = t, y = running_variance)) + ggplot2::geom_line() +
+#   ggplot2::geom_smooth(se = F, method = "lm")
+# 
+# run_acf <- running_autocorrelation(sim_res_sqrt$X_weak_2.0)
+# tibble::tibble(running_autocorrelation = run_acf, t = sim_res_sqrt$t) |>
+#   ggplot2::ggplot(ggplot2::aes(x = t, y = running_autocorrelation)) + ggplot2::geom_line() +
+#   ggplot2::geom_smooth(se = F, method = "lm")
+
+## Linear noise example
+# true_param <- c(0.1, 1.5, -3, 0.05)
+# actual_dt <- 1/96
+# tau <- 100
+# t_0 <- 50
+# sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
+# 
+# run_var <- running_variance(sim_res_linear$X_weak_2.0,
+#                             width = round(length(sim_res_linear$X_weak_2.0)/5))
+# 
+# tibble::tibble(running_variance = run_var, t = sim_res_linear$t) |>
+#   ggplot2::ggplot(ggplot2::aes(x = t, y = running_variance)) + ggplot2::geom_line() +
+#   ggplot2::geom_smooth(se = F, method = "lm")
+# 
+# run_acf <- running_autocorrelation(sim_res_linear$X_weak_2.0)
+# tibble::tibble(running_autocorrelation = run_acf, t = sim_res_linear$t) |>
+#   ggplot2::ggplot(ggplot2::aes(x = t, y = running_autocorrelation)) + ggplot2::geom_line() +
 #   ggplot2::geom_smooth(se = F, method = "lm")
