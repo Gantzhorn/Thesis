@@ -1,6 +1,6 @@
 # Title: Model fitting of Stochastic Differential Equations with tipping points.
 # Author: Anders Gantzhorn Kristensen (University of Copenhagen, andersgantzhorn@gmail.com)
-# Date: 2024-02-22 (Last Updated: 2024-03-04)
+# Date: 2024-02-22 (Last Updated: 2024-03-10)
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Project: Tipping Point Estimation in Ecological Systems using Stochastic Differential Equations
 # Description: This script implements optimizers, estimation methods and negative log-likelihood functions for estimation
@@ -36,9 +36,9 @@ runge_kutta <- function(y0, h, f, n = 1) {
 # Implementation of methods that are based on the additive noise term process
 OU_likelihood <- function(par, data, delta){
   alpha0 <- par[1]
-  mu0 <- par[2]
-  sigma <- par[3]
-  N <- length(data)
+  mu0    <- par[2]
+  sigma  <- par[3]
+  N      <- length(data)
   
   Xupp <- data[2:N]
   Xlow <- data[1:(N - 1)]
@@ -58,38 +58,40 @@ OU_likelihood <- function(par, data, delta){
 OU_Score <- function(par, data, delta){
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
-  n <- length(x0)
-  beta <- par[1]
-  mu <-  par[2]
+  N  <- length(x0)
+  
+  beta  <- par[1]
+  mu    <-  par[2]
   sigma <- par[3]
   
   gamma_square <- sigma^2 / (2 * beta)
-  rho <- exp(- beta * delta)
+  rho          <- exp(- beta * delta)
   
   eq1 <- (1 - rho) / (gamma_square * (1 - rho^2)) * sum(x1 - x0 * rho - mu * (1 - rho))
   
-  eq2 <- n * rho / (1 - rho^2) + 
+  eq2 <- N * rho / (1 - rho^2) + 
     sum((x1 - x0 * rho - mu * (1 - rho)) * (x0 - mu)) / (gamma_square * (1 - rho^2)) - 
     rho * sum((x1 - x0 * rho - mu * (1 - rho))^2) / (gamma_square * (1 - rho^2)^2)
   
-  eq3 <- - n / (2 * gamma_square) + sum((x1 - x0 * rho - mu * (1 - rho))^2) / (2 * gamma_square^2 * (1 - rho^2))
+  eq3 <- - N / (2 * gamma_square) + sum((x1 - x0 * rho - mu * (1 - rho))^2) / (2 * gamma_square^2 * (1 - rho^2))
   
   c(eq1, eq2, eq3)
 }
 
 
-OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma, pen = 0){
+OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma){
   tau     <- par[1]
   A       <- exp(par[2])
-
+  nu      <- if(length(par) == 3) par[3] else 1
+  
   N       <- length(data)
   Xupp    <- data[2:N]
   Xlow    <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
-  m       <- mu0 - alpha0/(2 * A)
-  lambda0 <- -alpha0^2 / (4 * A)
-  lam_seq <- lambda0 * (1 - time / tau)
+  m          <- mu0 - alpha0/(2 * A)
+  lambda0    <- -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
   alpha_seq  <- 2 * sqrt(A * abs(lam_seq))
   gamma2_seq <- sigma^2 / (2 * alpha_seq)
   rho_seq    <- exp(-alpha_seq * delta)
@@ -107,7 +109,7 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma, pen = 0
   
   #m_part      <- fh_half_inv - mu_h
   
-  v_part    <- gamma2_seq * (1 - rho_seq^2)
+  v_part           <- gamma2_seq * (1 - rho_seq^2)
   det_Dfh_half_inv <- 1 / (fh_half_tmp_upp-1)^2
   
   # Negative log-likelihood
@@ -119,13 +121,14 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma, pen = 0
 
 OU_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
   tau <- par[1]
-  A <- par[2]
+  A   <- par[2]
+  nu  <- if(length(par) == 3) par[3] else 1
   
-  m_tip <- mu0 - alpha0/(2 * A)
+  m_tip   <- mu0 - alpha0/(2 * A)
   lambda0 <- -alpha0^2 / (4 * A)
-  delta <- 1 / M
-  #time    <- delta * (1:(N-1))
-  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)
+  delta   <- 1 / M
+  #time   <- delta * (1:(N-1))
+  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)^nu
   lam_mat <- t(matrix(rep(lam_seq, length.out = N * length(lam_seq)), nrow = length(lam_seq), ncol = N))
   # Number of data points
   numData <- length(data) - 1
@@ -133,7 +136,7 @@ OU_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0
   
   dW <- array(dqrng::dqrnorm(N * M * numData, mean = 0, sd = sqrt(delta)), dim = c(M, N, numData))
   # Initialize the process array
-  X <- array(NA, dim = c(M, N, numData))
+  X  <- array(NA, dim = c(M, N, numData))
   
   X[1, , ] <- rep(data[-length(data)], each = N)
   for (m in 2:M){
@@ -142,13 +145,13 @@ OU_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0
   
   second_to_last_X <- t(X[M - 1, , ])
   
-  sigma_t <- sigma * sqrt(delta)
+  sigma_t   <- sigma * sqrt(delta)
   
-  mu_t <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
+  mu_t      <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
   
-  densities = dnorm(data[-1], mean = mu_t, sd = sigma_t, log = TRUE)
+  densities <- dnorm(data[-1], mean = mu_t, sd = sigma_t, log = TRUE)
 
-  loglik = -mean(colMeans(densities))
+  loglik    <- -mean(colMeans(densities))
   if(is.na(loglik) | is.infinite(loglik)){
     print("NA Likelihood")
     return(1000000)
@@ -161,16 +164,17 @@ OU_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0
 # Implementation of methods that are based on the square-root noise term process
 
 CIR_quadratic_martingale <- function(data, delta) {
-
   N <- length(data)
   M <- N - 1
+  
   Xlow <- data[1:M]
   Xupp <- data[2:N]
-  S1 <- sum(Xupp)
-  S2 <- sum(1 / Xlow)
-  S3 <- sum(Xupp / Xlow)
+  
+  S1    <- sum(Xupp)
+  S2    <- sum(1 / Xlow)
+  S3    <- sum(Xupp / Xlow)
   ebdel <- (M * S3 - S1 * S2) / (M^2 - S1 * S2)
-  beta <- -log(ebdel) / delta
+  beta  <- -log(ebdel) / delta
   
   mu <- (S3 - M * ebdel) / ((1 - ebdel) * S2)
   
@@ -186,8 +190,8 @@ CIR_alt_strang_splitting <- function(par, data, delta) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
-  beta <- par[1]
-  mu <- par[2]
+  beta  <- par[1]
+  mu    <- par[2]
   sigma <- exp(par[3])
   
   if(4 * beta * mu - sigma^2 < 0){return(100000)}
@@ -200,7 +204,7 @@ CIR_alt_strang_splitting <- function(par, data, delta) {
 
   sd_log <- sigma * sqrt(delta)
   
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f)
+  inv_f  <- runge_kutta(x1, -delta / 2, diff_f)
   
   inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f)
   inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f)
@@ -214,9 +218,10 @@ CIR_strang_splitting <- function(par, data, delta) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
-  beta <- par[1]
-  mu <- par[2]
+  beta  <- par[1]
+  mu    <- par[2]
   sigma <- par[3]
+  
   if((4 * beta * mu - sigma^2) < 0 | sigma < 0){return(100000)}
   diff_f <- function(t, y){beta * y / 2 + (4 * mu * beta - sigma^2) / (2 * y) + sqrt(beta * (4 * beta * mu - sigma^2))}
   
@@ -235,27 +240,26 @@ CIR_strang_splitting <- function(par, data, delta) {
   # Derivative of inverse using Richardson Extrapolation.
   inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
   inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
-  df <- (inv_f2 - inv_f3) / (2 * 0.01)
+  df     <- (inv_f2 - inv_f3) / (2 * 0.01)
   
   # Strang likelihood
-  neg_loglik <- -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
-
-  neg_loglik
+  -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
 }
 
 
-CIR_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma, pen = 0){
+CIR_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  exp(par[2])
-
+  nu      <- if(length(par) == 3) par[3] else 1
+  
   N       <- length(data)
   Xupp    <- data[2:N]
   Xlow    <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
-  m       <-  mu0 - alpha0 / (2 * A)
-  lambda0 <-  -alpha0^2 / (4 * A)
-  lam_seq    <- lambda0 * (1 - time / tau)
+  m          <- mu0 - alpha0 / (2 * A)
+  lambda0    <- -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
   alpha_seq  <- 2 * sqrt(A * abs(lam_seq))
   mu_seq     <- m + sqrt(abs(lam_seq) / A)
   
@@ -263,9 +267,9 @@ CIR_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma, pen = 0
   fh_half_tmp_low <-  A * delta * (Xlow - mu_seq) / 2
   fh_half_tmp_upp <-  A * delta * (Xupp - mu_seq) / 2
   
-  fh_half     <-  (mu_seq * fh_half_tmp_low + Xlow) / (fh_half_tmp_low+1)
+  fh_half     <- (mu_seq * fh_half_tmp_low + Xlow) / (fh_half_tmp_low+1)
   
-  fh_half_inv <-  (mu_seq * fh_half_tmp_upp - Xupp) / (fh_half_tmp_upp-1)
+  fh_half_inv <- (mu_seq * fh_half_tmp_upp - Xupp) / (fh_half_tmp_upp-1)
   
   det_Dfh_half_inv <- 1 / (fh_half_tmp_upp-1)^2
   phi_dot <- fh_half / alpha_seq * (exp(-alpha_seq * delta) - exp(-2 * alpha_seq * delta)) +
@@ -273,23 +277,23 @@ CIR_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma, pen = 0
 
   if(any(phi_dot < 0) | any(is.na(phi_dot))){return(100000)}
   
-  sd.part <- sigma * sqrt(phi_dot)
+  sd.part  <- sigma * sqrt(phi_dot)
   
-  mu.part <- exp(-alpha_seq * delta) * (fh_half - mu_seq) + mu_seq
+  mu.part  <- exp(-alpha_seq * delta) * (fh_half - mu_seq) + mu_seq
   
-  negloglik <- -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
-  negloglik
+  -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
 }
 
 CIR_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
   tau <- par[1]
-  A <- par[2]
-  print(par)
-  m_tip <- mu0 - alpha0/(2 * A)
+  A   <- par[2]
+  nu  <- if(length(par) == 3) par[3] else 1
+  
+  m_tip   <- mu0 - alpha0/(2 * A)
   lambda0 <- -alpha0^2 / (4 * A)
   
-  delta <- 1 / M
-  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)
+  delta   <- 1 / M
+  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)^nu
   lam_mat <- t(matrix(rep(lam_seq, length.out = N * length(lam_seq)), nrow = length(lam_seq), ncol = N))
   numData <- length(data) - 1
   
@@ -309,13 +313,13 @@ CIR_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu
   
   second_to_last_X <- t(X[M - 1, , ])
   
-  sigma_t <- sigma * sqrt(delta) * sqrt(second_to_last_X)
+  sigma_t   <- sigma * sqrt(delta) * sqrt(second_to_last_X)
   
-  mu_t <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
+  mu_t      <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
   
-  densities = dnorm(data[-1], mean = mu_t, sd = sigma_t, log = TRUE)
+  densities <- dnorm(data[-1], mean = mu_t, sd = sigma_t, log = TRUE)
   
-  loglik = -mean(colMeans(densities))
+  loglik    <- -mean(colMeans(densities))
   
   if(is.na(loglik) | is.infinite(loglik)){
     print("NA Likelihood")
@@ -328,8 +332,8 @@ CIR_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Implementation of methods that are based on the linear noise term process
 mean_reverting_GMB_EM_likelihood <- function(par, data, delta){
-  beta <- par[1]
-  mu <- par[2]
+  beta  <- par[1]
+  mu    <- par[2]
   sigma <- exp(par[3])
   
   N <- length(data)
@@ -344,8 +348,8 @@ mean_reverting_GMB_EM_likelihood <- function(par, data, delta){
 }
 
 mean_reverting_GMB_Kessler_likelihood <- function(par, data, delta){
-  beta <- par[1]
-  mu <- par[2]
+  beta  <- par[1]
+  mu    <- par[2]
   sigma <- exp(par[3])
   
   N <- length(data)
@@ -353,14 +357,15 @@ mean_reverting_GMB_Kessler_likelihood <- function(par, data, delta){
   Xupp <- data[2:N]
   Xlow <- data[1:(N - 1)]
   
-  mu_ks <- exp(-beta * delta) * (Xlow - mu) + mu
   
+  
+  mu_ks  <- exp(-beta * delta) * (Xlow - mu) + mu
   
   var_ks <- ((Xlow-mu)^2  * (1 - exp(-sigma^2 * delta)) -
                2 * mu * sigma^2 / (beta - sigma^2) * (Xlow - mu) * (1 - exp(-(sigma^2 - beta) * delta)) - 
                mu^2 * sigma^2 / (2 * beta - sigma^2) * (1 - exp(-(sigma^2 - 2 * beta) * delta))) * exp(-(2 * beta - sigma^2) * delta)
   
-  sd_ks <- sqrt(var_ks)
+  sd_ks  <- sqrt(var_ks)
   
   -sum(dnorm(Xupp, mean = mu_ks, sd = sd_ks, log = TRUE)) 
 }
@@ -369,11 +374,11 @@ mean_reverting_GMB_martingale <- function(par, data, delta){
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
-  beta <- par[1]
-  mu <-  par[2]
+  beta  <- par[1]
+  mu    <-  par[2]
   sigma <- par[3]
   
-  F_i <- exp(-beta * delta) * (x0 - mu) + mu
+  F_i   <- exp(-beta * delta) * (x0 - mu) + mu
   
   phi_i <- exp(-(2 * beta - sigma^2) * delta) * (
     (x0 - mu)^2 * (1 - exp(-sigma^2 * delta)) - 
@@ -392,8 +397,8 @@ mean_reverting_GMB_strang <- function(par, data, delta) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
-  beta <- par[1]
-  mu <-  par[2]
+  beta  <- par[1]
+  mu    <-  par[2]
   sigma <- exp(par[3])
   
   if((sigma^2 + 2 * beta) / (2 * beta * mu) < 0 | (2 * beta + sigma^2) / (2 * beta * mu) < 0){return(50000)}
@@ -401,39 +406,40 @@ mean_reverting_GMB_strang <- function(par, data, delta) {
   diff_f <- function(t, y){-beta + beta * mu * exp(-y) - sigma^2 / 2 + (sigma^2 + 2 * beta) / 2 * y +
       (sigma^2 + 2 * beta) / 2 * log((sigma^2 + 2 * beta) / (2 * beta * mu))}
   
-  
   A <- - (sigma^2 + 2 * beta) / 2
   b <- - log((2 * beta + sigma^2) / (2 * beta * mu))
   
   # Solution to non-linear ODE
-  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
-  mu_f <- exp(A * delta) * (f_h - b) + b
-  sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
+  f_h    <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  mu_f   <- exp(A * delta) * (f_h - b) + b
+  sd_f   <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
   
   # Inverse to non-linear ODE
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  inv_f  <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
   
   # Derivative of inverse using Richardson Extrapolation
   inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
   inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
-  df <- (inv_f2 - inv_f3) / (2 * 0.01) 
+  df     <- (inv_f2 - inv_f3) / (2 * 0.01) 
   
   # Strang likelihood
   -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
 }
 
-mean_reverting_GMB_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma, pen = 0){
+mean_reverting_GMB_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  exp(par[2])
+  nu      <- if(length(par) == 3) par[3] else 1
   
   N       <- length(data)
   Xupp    <- data[2:N]
   Xlow    <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
-  m       <-  mu0 - alpha0 / (2 * A)
-  lambda0 <-  -alpha0^2 / (4 * A)
-  lam_seq    <- lambda0 * (1 - time / tau)
+  
+  m          <-  mu0 - alpha0 / (2 * A)
+  lambda0    <-  -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
   alpha_seq  <- 2 * sqrt(A * abs(lam_seq))
   mu_seq     <- m + sqrt(abs(lam_seq) / A)
   
@@ -441,34 +447,33 @@ mean_reverting_GMB_dynamic_likelihood <- function(par, data, delta, alpha0, mu0,
   fh_half_tmp_low <-  A * delta * (Xlow - mu_seq) / 2
   fh_half_tmp_upp <-  A * delta * (Xupp - mu_seq) / 2
   
-  fh_half     <-  (mu_seq * fh_half_tmp_low + Xlow)/(fh_half_tmp_low+1)
+  fh_half          <- (mu_seq * fh_half_tmp_low + Xlow)/(fh_half_tmp_low+1)
   
-  fh_half_inv <-  (mu_seq * fh_half_tmp_upp - Xupp)/(fh_half_tmp_upp-1)
+  fh_half_inv      <- (mu_seq * fh_half_tmp_upp - Xupp)/(fh_half_tmp_upp-1)
   
-  det_Dfh_half_inv <-  1/(fh_half_tmp_upp-1)^2
+  det_Dfh_half_inv <- 1/(fh_half_tmp_upp-1)^2
   
-  sd.part <-  exp(-(alpha_seq - sigma^2) * delta) * sqrt(
+  sd.part          <- exp(-(alpha_seq - sigma^2) * delta) * sqrt(
     (fh_half - mu_seq)^2 * (1 - exp(-sigma^2 * delta)) - 
       2 * mu_seq * sigma^2 / (alpha_seq - sigma^2) * (fh_half - mu_seq) * (1 - exp(-(sigma^2 - alpha_seq) * delta)) -
       mu_seq^2 * sigma^2 / (2 * alpha_seq - sigma^2) * (1 - exp(-(sigma^2 - 2*alpha_seq) * delta))
   )
   
-  mu.part <- exp(-alpha_seq * delta) * (fh_half - mu_seq) + mu_seq
+  mu.part          <- exp(-alpha_seq * delta) * (fh_half - mu_seq) + mu_seq
   
-  negloglik <- -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
-  negloglik
+  -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
 }
 
 mean_reverting_GMB_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
   tau <- par[1]
-  A <- par[2]
-  print(par)
-  m_tip <- mu0 - alpha0/(2 * A)
-  lambda0 <- -alpha0^2 / (4 * A)
+  A  <- par[2]
+  nu <- if(length(par) == 3) par[3] else 1
   
-  delta <- 1 / M
-  #time    <- delta * (1:(N-1))
-  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)
+  m_tip   <- mu0 - alpha0/(2 * A)
+  lambda0 <- -alpha0^2 / (4 * A)
+  delta   <- 1 / M
+
+  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)^nu
   lam_mat <- t(matrix(rep(lam_seq, length.out = N * length(lam_seq)), nrow = length(lam_seq), ncol = N))
   # Number of data points
   numData <- length(data) - 1
@@ -489,9 +494,9 @@ mean_reverting_GMB_dynamic_simulation_likelihood <- function(par, data, times, M
   
   second_to_last_X <- t(X[M - 1, , ])
   
-  sigma_t <- sigma * sqrt(delta) * second_to_last_X
+  sigma_t   <- sigma * sqrt(delta) * second_to_last_X
   
-  mu_t <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
+  mu_t      <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
   
   densities <- dnorm(data[-1], mean = mu_t, sd = sigma_t, log = TRUE)
   
@@ -519,12 +524,12 @@ optimize_stationary_likelihood <- function(likelihood_fun, data, init_par, delta
 
 optimize_dynamic_likelihood <- function(likelihood_fun, data,
                                         init_par, delta,
-                                        alpha0, mu0, sigma, pen = 0, exp_sigma = TRUE){
+                                        alpha0, mu0, sigma, exp_sigma = TRUE){
 
   res_optim <- stats::optim(init_par, fn = likelihood_fun,
                             method = "Nelder-Mead",
                             data = data, delta = delta,
-                            alpha0 = alpha0 , mu0 = mu0, sigma = sigma, pen = pen)
+                            alpha0 = alpha0 , mu0 = mu0, sigma = sigma)
   if(exp_sigma){
   res_optim$par[2] <- exp(res_optim$par[2])
   }
@@ -538,7 +543,8 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
         times = times, M = M, N = N,
         alpha0 = alpha0, mu0 = mu0,
         sigma = sigma, t_0 = t_0,
-        lower = c(0, 0), upper = c(Inf, Inf))$par
+        lower = rep(0, length(init_par)),
+        upper = rep(Inf, length(init_par)))$par
   res_optim
 }
 
@@ -614,32 +620,33 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 
 
 ## Linear noise model
-# true_param <- c(0.1, 1.5, -1, 0.15)
-# actual_dt <- 0.025
-# tau <- 150
-# t_0 <- 50
-# sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sim_res_linear |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
-# 
-# # ## Stationary part
-# # ## Parameters for stationary part
-# mu0 = true_param[2] + sqrt(abs(true_param[3]) / true_param[1])
-# alpha0 <- 2 * sqrt(true_param[1] * abs(true_param[3]))
-# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-# 
-# nleqslv::nleqslv(x = stationary_part_true_param, fn = mean_reverting_GMB_martingale,
-#                  data = sim_res_linear$X_weak_2.0[sim_res_linear$t < t_0],
-#                  delta = actual_dt)$x - stationary_part_true_param
-# optimize_stationary_likelihood(mean_reverting_GMB_strang, log(sim_res_linear$X_weak_2.0[sim_res_linear$t<t_0]),
-#                                init_par = stationary_part_true_param, delta = actual_dt,
-#                                exp_sigma = TRUE) - stationary_part_true_param
-# 
-# ## Dynamic part
-# dynamic_part_true_param <- c(tau, true_param[1])
-# optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GMB_dynamic_likelihood,
-#                             data = sim_res_linear$X_weak_2.0[sim_res_linear$t > t_0],
-#                             init_par = dynamic_part_true_param,
-#                             delta = actual_dt,
-#                             alpha0 = stationary_part_true_param[1],
-#                             mu0 = stationary_part_true_param[2],
-#                             sigma = stationary_part_true_param[3]) - dynamic_part_true_param
+true_param <- c(0.1, 1.5, -1, 0.15)
+actual_dt <- 0.025
+tau <- 150
+t_0 <- 50
+sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
+sim_res_linear |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
+
+# ## Stationary part
+# ## Parameters for stationary part
+mu0 = true_param[2] + sqrt(abs(true_param[3]) / true_param[1])
+alpha0 <- 2 * sqrt(true_param[1] * abs(true_param[3]))
+stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+
+nleqslv::nleqslv(x = stationary_part_true_param, fn = mean_reverting_GMB_martingale,
+                 data = sim_res_linear$X_weak_2.0[sim_res_linear$t < t_0],
+                 delta = actual_dt)$x - stationary_part_true_param
+optimize_stationary_likelihood(mean_reverting_GMB_strang, log(sim_res_linear$X_weak_2.0[sim_res_linear$t<t_0]),
+                               init_par = stationary_part_true_param, delta = actual_dt,
+                               exp_sigma = TRUE) - stationary_part_true_param
+
+## Dynamic part
+dynamic_part_true_param <- c(tau, true_param[1], 1)
+optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GMB_dynamic_likelihood,
+                            data = sim_res_linear$X_weak_2.0[sim_res_linear$t > t_0],
+                            init_par = dynamic_part_true_param,
+                            delta = actual_dt,
+                            alpha0 = stationary_part_true_param[1],
+                            mu0 = stationary_part_true_param[2],
+                            sigma = stationary_part_true_param[3]) #- dynamic_part_true_param
+
