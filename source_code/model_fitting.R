@@ -620,33 +620,33 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 
 
 ## Linear noise model
-true_param <- c(0.1, 1.5, -1, 0.15)
-actual_dt <- 0.025
-tau <- 150
-t_0 <- 50
-sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
-sim_res_linear |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
-
-# ## Stationary part
-# ## Parameters for stationary part
-mu0 = true_param[2] + sqrt(abs(true_param[3]) / true_param[1])
-alpha0 <- 2 * sqrt(true_param[1] * abs(true_param[3]))
-stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-
-nleqslv::nleqslv(x = stationary_part_true_param, fn = mean_reverting_GMB_martingale,
-                 data = sim_res_linear$X_weak_2.0[sim_res_linear$t < t_0],
-                 delta = actual_dt)$x - stationary_part_true_param
-optimize_stationary_likelihood(mean_reverting_GMB_strang, log(sim_res_linear$X_weak_2.0[sim_res_linear$t<t_0]),
-                               init_par = stationary_part_true_param, delta = actual_dt,
-                               exp_sigma = TRUE) - stationary_part_true_param
-
-## Dynamic part
-dynamic_part_true_param <- c(tau, true_param[1], 1)
-optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GMB_dynamic_likelihood,
-                            data = sim_res_linear$X_weak_2.0[sim_res_linear$t > t_0],
-                            init_par = dynamic_part_true_param,
-                            delta = actual_dt,
-                            alpha0 = stationary_part_true_param[1],
-                            mu0 = stationary_part_true_param[2],
-                            sigma = stationary_part_true_param[3]) #- dynamic_part_true_param
+# true_param <- c(0.1, 1.5, -1, 0.15)
+# actual_dt <- 0.025
+# tau <- 150
+# t_0 <- 50
+# sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
+# sim_res_linear |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
+# 
+# # ## Stationary part
+# # ## Parameters for stationary part
+# mu0 = true_param[2] + sqrt(abs(true_param[3]) / true_param[1])
+# alpha0 <- 2 * sqrt(true_param[1] * abs(true_param[3]))
+# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+# 
+# nleqslv::nleqslv(x = stationary_part_true_param, fn = mean_reverting_GMB_martingale,
+#                  data = sim_res_linear$X_weak_2.0[sim_res_linear$t < t_0],
+#                  delta = actual_dt)$x - stationary_part_true_param
+# optimize_stationary_likelihood(mean_reverting_GMB_strang, log(sim_res_linear$X_weak_2.0[sim_res_linear$t<t_0]),
+#                                init_par = stationary_part_true_param, delta = actual_dt,
+#                                exp_sigma = TRUE) - stationary_part_true_param
+# 
+# ## Dynamic part
+# dynamic_part_true_param <- c(tau, true_param[1], 1)
+# optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GMB_dynamic_likelihood,
+#                             data = sim_res_linear$X_weak_2.0[sim_res_linear$t > t_0],
+#                             init_par = dynamic_part_true_param,
+#                             delta = actual_dt,
+#                             alpha0 = stationary_part_true_param[1],
+#                             mu0 = stationary_part_true_param[2],
+#                             sigma = stationary_part_true_param[3]) #- dynamic_part_true_param
 
