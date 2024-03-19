@@ -37,20 +37,22 @@ OU_likelihood_resid <- function(par, data, delta){
 
 OU_dynamic_likelihood_resid <-  function(par, data, delta, alpha0, mu0, sigma){
   tau     <- par[1]
-  A       <- exp(par[2])
+  A       <- par[2]
+  nu      <- if(length(par) == 3) par[3] else 1
+  
   
   N       <- length(data)
   Xupp    <- data[2:N]
   Xlow    <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
-  m       <- mu0 - alpha0/(2 * A)
-  lambda0 <- -alpha0^2 / (4 * A)
-  lam_seq <- lambda0 * (1 - time / tau)
-  alpha_seq  <- 2 * sqrt(A * abs(lam_seq))
+  m          <- mu0 - alpha0 / (2 * A)
+  lambda0    <- -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
+  alpha_seq  <- 2 * sqrt(abs(A * lam_seq))
   gamma2_seq <- sigma^2 / (2 * alpha_seq)
   rho_seq    <- exp(-alpha_seq * delta)
-  mu_seq     <- m + sqrt(abs(lam_seq) / A)
+  mu_seq     <- m + ifelse(A >= 0, 1, -1) * sqrt(abs(lam_seq / A))
   
   ## Calculating the Strang splitting scheme pseudo likelihood
   fh_half_tmp_low <- A * delta * (Xlow - mu_seq) / 2
@@ -110,18 +112,19 @@ CIR_strang_splitting_resid <- function(par, data, delta) {
 
 CIR_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma, pen = 0){
   tau     <-  par[1]
-  A       <-  exp(par[2])
+  A       <-  par[2]
+  nu      <- if(length(par) == 3) par[3] else 1
   
   N       <- length(data)
   Xupp    <- data[2:N]
   Xlow    <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
-  m       <-  mu0 - alpha0 / (2 * A)
-  lambda0 <-  -alpha0^2 / (4 * A)
-  lam_seq    <- lambda0 * (1 - time / tau)
-  alpha_seq  <- 2 * sqrt(A * abs(lam_seq))
-  mu_seq     <- m + sqrt(abs(lam_seq) / A)
+  m          <- mu0 - alpha0 / (2 * A)
+  lambda0    <- -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
+  alpha_seq  <- 2 * sqrt(abs(A * lam_seq))
+  mu_seq     <- m + ifelse(A >= 0, 1, -1) * sqrt(abs(lam_seq / A))
   
   # ## Calculating the Strang splitting scheme pseudo likelihood
   fh_half_tmp_low <-  A * delta * (Xlow - mu_seq) / 2
@@ -171,18 +174,20 @@ mean_reverting_GMB_Kessler_likelihood_resid <- function(par, data, delta){
 
 mean_reverting_GMB_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma){
   tau     <-  par[1]
-  A       <-  exp(par[2])
+  A       <-  par[2]
+  nu      <- if(length(par) == 3) par[3] else 1
+  
   
   N       <- length(data)
   Xupp    <- data[2:N]
   Xlow    <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
-  m       <-  mu0 - alpha0 / (2 * A)
-  lambda0 <-  -alpha0^2 / (4 * A)
-  lam_seq    <- lambda0 * (1 - time / tau)
-  alpha_seq  <- 2 * sqrt(A * abs(lam_seq))
-  mu_seq     <- m + sqrt(abs(lam_seq) / A)
+  m          <- mu0 - alpha0 / (2 * A)
+  lambda0    <- -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
+  alpha_seq  <- 2 * sqrt(abs(A * lam_seq))
+  mu_seq     <- m + ifelse(A >= 0, 1, -1) * sqrt(abs(lam_seq / A))
   
   # Calculating the Strang splitting scheme pseudo likelihood
   fh_half_tmp_low <-  A * delta * (Xlow - mu_seq) / 2
@@ -214,38 +219,39 @@ mean_reverting_GMB_dynamic_likelihood_resid <- function(par, data, delta, alpha0
 
 # Additive noise model
 
-# true_param <- c(0.87, -1.51, -2.69, 0.3)
+# true_param <- c(-0.87, -1.51, 2.69, 0.3)
 # actual_dt <- 0.001
 # tau <- 100
 # t_0 <- 50
 # sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
-
-## Stationary part
-## Parameters for stationary part
-# mu0 = true_param[2] + sqrt(abs(true_param[3]) / true_param[1])
-# alpha0 <- 2 * sqrt(true_param[1] * abs(true_param[3]))
+# sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
+# ## Stationary part
+# ## Parameters for stationary part
+# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
 # OU_par <- optimize_stationary_likelihood(likelihood_fun = OU_likelihood, data = sim_res_add$X_weak_2.0[sim_res_add$t < t_0],
 #                                init_par = stationary_part_true_param,
 #                                delta = actual_dt, exp_sigma = FALSE)# - stationary_part_true_param
 # 
-# tibble::tibble(obsSample = OU_likelihood_resid(par = OU_par, 
+# tibble::tibble(obsSample = OU_likelihood_resid(par = OU_par,
 #          data = sim_res_add$X_weak_2.0[sim_res_add$t < t_0],
 #          delta = actual_dt)) |> ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #     ggplot2::geom_qq() + ggplot2::geom_qq_line()
 # 
-# # Dynamic part
+# # # Dynamic part
 # dynamic_part_true_param <- c(tau, true_param[1])
-# OU__dynamic_par <- optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
+# OU_dynamic_par <- optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
 #                             data = sim_res_add$X_weak_2.0[sim_res_add$t > t_0],
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
 #                             alpha0 = OU_par[1],
 #                             mu0 = OU_par[2],
-#                             sigma = OU_par[3])# - dynamic_part_true_param
-# 
-# tibble::tibble(obsSample = OU_dynamic_likelihood_resid(OU__dynamic_par, 
+#                             sigma = OU_par[3],
+#                             exp_sigma = FALSE)# - dynamic_part_true_param
+# #
+# tibble::tibble(obsSample = OU_dynamic_likelihood_resid(OU_dynamic_par,
 #                             data = sim_res_add$X_weak_2.0[sim_res_add$t > t_0],
 #                             delta = actual_dt,
 #                             alpha0 =  OU_par[1],
@@ -255,26 +261,27 @@ mean_reverting_GMB_dynamic_likelihood_resid <- function(par, data, delta, alpha0
 #   ggplot2::geom_qq() + ggplot2::geom_qq_line()
 
 # # Square-root noise model
-# true_param <- c(1, 3, -3, 0.3)
-# actual_dt <- 0.01
+# true_param <- c(-1, 3, 2, 0.15)
+# actual_dt <- 0.005
 # tau <- 100
 # t_0 <- 50
 # sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# # 
-# # # Stationary part
-# # # Parameters for stationary part
-# mu0 = true_param[2] + sqrt(abs(true_param[3]) / true_param[1])
-# alpha0 <- 2 * sqrt(true_param[1] * abs(true_param[3]))
+# sample_n(sim_res_sqrt, min(nrow(sim_res_sqrt), 10000)) |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
+#
+# # Stationary part
+# # Parameters for stationary part
+# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-# CIR_stationary_part_estimated_param_martingale <- CIR_quadratic_martingale(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0],
-#                                                                            actual_dt)
+# 
+# CIR_stationary_part_estimated_param_martingale <- 
+#   CIR_quadratic_martingale(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0],actual_dt)
+# 
 # tibble::tibble(obsSample = CIR_quadratic_martingale_resid(CIR_stationary_part_estimated_param_martingale,
 #                                data = sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0],
 #                                delta = actual_dt)) |> ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #   ggplot2::geom_qq() + ggplot2::geom_qq_line()
-# 
-# 
-# 
+
 # CIR_stationary_part_estimated_param_strang <- optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
 #                                data = 2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0]),
 #                                init_par = stationary_part_true_param,
@@ -285,64 +292,67 @@ mean_reverting_GMB_dynamic_likelihood_resid <- function(par, data, delta, alpha0
 #                            actual_dt)) |> ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #   ggplot2::geom_qq() + ggplot2::geom_qq_line()
 # 
-# # Dynamic part
+# Dynamic part
 # 
 # dynamic_part_true_param <- c(tau, true_param[1])
 # CIR_dynamic_part_estimated_param_strang <- optimize_dynamic_likelihood(likelihood_fun = CIR_dynamic_likelihood,
 #                             data = sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t > t_0],
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
-#                             alpha0 = CIR_stationary_part_estimated_param_strang[1],
-#                             mu0 = CIR_stationary_part_estimated_param_strang[2],
-#                             sigma = CIR_stationary_part_estimated_param_strang[3])
-# 
+#                             alpha0 = CIR_stationary_part_estimated_param_martingale[1],
+#                             mu0 = CIR_stationary_part_estimated_param_martingale[2],
+#                             sigma = CIR_stationary_part_estimated_param_martingale[3],
+#                             exp_sigma = FALSE)
+# # 
 # tibble::tibble(obsSample = CIR_dynamic_likelihood_resid(CIR_dynamic_part_estimated_param_strang,
 #                              data = sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t > t_0],
 #                              delta = actual_dt,
-#                              alpha0 = CIR_stationary_part_estimated_param_strang[1],
-#                              mu0 = CIR_stationary_part_estimated_param_strang[2],
-#                              sigma = CIR_stationary_part_estimated_param_strang[3])) |>
+#                              alpha0 = CIR_stationary_part_estimated_param_martingale[1],
+#                              mu0 = CIR_stationary_part_estimated_param_martingale[2],
+#                              sigma = CIR_stationary_part_estimated_param_martingale[3])) |>
 #     ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #     ggplot2::geom_qq() + ggplot2::geom_qq_line()
 
 # # Linear noise model
-# true_param <- c(0.1, 1.5, -1, 0.15)
+# true_param <- c(-0.05, 100, 2, 0.01, 0.65)
 # actual_dt <- 0.001
 # tau <- 150
 # t_0 <- 50
 # sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sim_res_linear |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) + ggplot2::geom_step()
-# 
-# # ## Stationary part
-# # ## Parameters for stationary part
-# mu0 = true_param[2] + sqrt(abs(true_param[3]) / true_param[1])
-# alpha0 <- 2 * sqrt(true_param[1] * abs(true_param[3]))
+# sample_n(sim_res_linear, min(nrow(sim_res_linear), 10000)) |>
+#   ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) + ggplot2::geom_step()
+# # 
+# # Stationary part
+# # Parameters for stationary part
+# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
 # GBM_stationary_part_estimated_param_martingale <- nleqslv::nleqslv(x = stationary_part_true_param,
 #                                                                    fn = mean_reverting_GMB_martingale,
 #                  data = sim_res_linear$X_weak_2.0[sim_res_linear$t < t_0],
 #                  delta = actual_dt)$x #- stationary_part_true_param
-# 
-# tibble::tibble(obsSample = 
+# # 
+# tibble::tibble(obsSample =
 #                  mean_reverting_GMB_Kessler_likelihood_resid(GBM_stationary_part_estimated_param_martingale,
 #                  data = sim_res_linear$X_weak_2.0[sim_res_linear$t < t_0],
-#                  delta = actual_dt)) |> 
+#                  delta = actual_dt)) |>
 #                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
-#   
-# 
-# ## Dynamic part
+# #   
+# # 
+# # ## Dynamic part
 # dynamic_part_true_param <- c(tau, true_param[1])
-# 
+# # 
 # GBM_dynamic_part_estimated_param_strang <- optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GMB_dynamic_likelihood,
 #                             data = sim_res_linear$X_weak_2.0[sim_res_linear$t > t_0],
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
 #                             alpha0 = GBM_stationary_part_estimated_param_martingale[1],
 #                             mu0 = GBM_stationary_part_estimated_param_martingale[2],
-#                             sigma = GBM_stationary_part_estimated_param_martingale[3]) #- dynamic_part_true_param
-# 
+#                             sigma = GBM_stationary_part_estimated_param_martingale[3],
+#                             exp_sigma = FALSE) #- dynamic_part_true_param
+# # 
 # 
 # tibble::tibble(obsSample =
 #                  mean_reverting_GMB_dynamic_likelihood_resid(GBM_dynamic_part_estimated_param_strang,

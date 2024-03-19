@@ -1,0 +1,48 @@
+\section{Source code}
+The source code used in the project is available under the MIT-license on \href{https://github.com/Gantzhorn/Thesis}{Github}
+\section{Derivations of estimators}
+\subsection{Square-root process}\label{subsec:squareroot}
+\subsubsection{Stationary part}\label{subsubsec:squarerootStationary}
+\subsubsection{Dynamic part}\label{subsubsec:squarerootDynamic}
+In its dynamic part the process is governed by the stochastic differential equation
+\begin{align}
+    \mathrm{d}X_t &= -\left(A\left(X_t - m\right) + \lambda_t\right) + \sigma \sqrt{X_t} \mathrm{d}W_t,\\
+    \lambda_t &= \lambda_0\left(1 - \frac{t - t_0}{\tau_c}\right)^\nu,
+\end{align}
+and we assume that we already estimations from the stationary part i.e. that $\lambda_0, \sigma, m$ are estimated or can be computed directly from estimated parameters. In other words, our objective is to estimate $A, \tau_c, \nu$, where $\tau_c$ obviously is our parameter of interest. The drift term is the same as in \cite{Ditlevsen2023}, thus in complete analogy to \cite[(S9, S10)]{DitlevsenSupplementary} we split the system into
+\begin{align}
+    \mathrm{d}X_t^{[1]} &= -\alpha(\lambda)\left(X_t^{[1]} - \mu(\lambda)\right)  \mathrm{d}t + \sigma \sqrt{X_t^{[1]}} \mathrm{d}W_t, \label{eq:squareRootSplit1} \\
+    \mathrm{d}X_t^{[2]} &= - A \left(X_t^{[2]} - \mu(\lambda)\right)^2 \mathrm{d}t, \label{eq:squareRootSplit2}
+\end{align}
+with $\alpha(\lambda) = 2\sqrt{\abs{A\lambda_t}}$ and $\mu(\lambda) = m + \sqrt{\abs{\frac{\lambda_t}{A}}}$.
+This particular choice of splitting is done by letting the square-root process part be the linearization around the fixed point of the process. This splitting is originally motivated in \cite[section 2.3 and 2.5]{SplittingSchemes}. It is evident that equation (\ref{eq:squareRootSplit2}) is identical to equation \cite[(S10)]{DitlevsenSupplementary}. However, the square-root dependency highlighted in (\ref{eq:squareRootSplit1}) yields a flow that is different to the flow of \cite[(S9)]{DitlevsenSupplementary}. To address this, we adopt the approach developed by Kessler \cite{Kessler1997} to (\ref{eq:squareRootSplit1}). This method approximates the transition density by a gaussian density qua the true mean and variance, which we from \ref{subsubsec:squarerootStationary} have readily available. Denoting the flow with steplength, $\Delta t$, of \ref{eq:squareRootSplit1} and \ref{eq:squareRootSplit2} $\varphi_{\Delta t}^{(1)}, \varphi_{\Delta t}^{(2)}$ respectively the Strang based flow is 
+\begin{align}
+    \left(X_{t_n + \Delta t} | X_{t_n} = x\right) = \left(\varphi_{\Delta t/2}^{(2)} \circ \varphi_{\Delta t}^{(1)} \circ \varphi_{\Delta t/2}^{(2)}\right)(x),
+\end{align} 
+which gives rise to a pseudo-likelihood similar to \cite[(14)]{SplittingSchemes}. The maximizer of this is the Strang-based estimator.
+\subsection{Mean-reverting Geometric Brownian Motion}
+\subsubsection{Stationary part}
+\subsubsection{Dynamic part}
+\section{Benchmark}
+In this section we show the results of a few benchmarks using the \code{microbenchmark} package \cite{microbenchmark}. The code was run on a machine with the following hardware and software.
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{@{}ll@{}}
+    \toprule
+    Specification      & Details                              \\ \midrule
+    CPU Model          & Intel i7-4800MQ                 \\
+    CPU Speed          & 800 MHz (min) / 3700 MHz (Max)     \\
+    Number of Cores/Threads & 8 cores / 8 threads              \\
+    RAM Capacity       & 16 GB                                \\
+    RAM Type and Speed & DDR3, 1600 MT/s                      \\
+    Storage Type       & SSD                                  \\
+    Storage Capacity   & 512 GB                               \\
+    GPU Model          & NVIDIA GeForce GT 730M              \\
+    Operating System   & Linux Mint 21.3 x86\_64                   \\
+    Kernel Version     & 5.15.0-100-generic                    \\
+    R Version          & 4.3.3                                \\
+    \bottomrule
+    \end{tabular}
+    \caption{Hardware specifications}
+    \label{tab:specs}
+    \end{table}
