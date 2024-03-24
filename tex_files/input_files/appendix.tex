@@ -1,15 +1,144 @@
 \section{Source code}
-The source code used in the project is available under the MIT-license on \href{https://github.com/Gantzhorn/Thesis}{Github}
-\section{Derivations of estimators}
+The source code for this project, licensed under the MIT License, is hosted on \href{https://github.com/Gantzhorn/Thesis}{Github}.
+\section{Development of Simulation Methods}
+This section focuses on constructing the simulation schemes that support the analytical work presented in this thesis. The final choice was 
+the Scalar weak order 2.0 Itô–Taylor method \cite[algorithm 8.5]{Srkk2019}. In the general setup we simulate $X_{t_0},X_{t_1},\dots, X_{t_N}$ according to the schemes by sampling $N$ random variables $\Delta W_{t_k}\sim\mathcal{N}\left(0, \Delta t_k\right)$. For notational sake, we let $\zeta_k = \frac{1}{2}\Delta W_k\Delta t_k$. \\
+
+\noindent \textbf{Additive noise}\\
+Invoking \cite[algorithm 8.5]{Srkk2019} we get the scheme
+\begin{align}
+    X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma \Delta W_{k} - 2 A \left(X_{t_k} - m\right)\sigma \zeta_{k} \nonumber \\
+    & + \frac{1}{2}\left(2A\left(X_{t_k} - m\right)\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right) - A \sigma^2\right)\left(\Delta t_k\right)^2
+\end{align}
+\\
+\textbf{Square-root noise}\\
+For the square-root based process the algorithm gives 
+\begin{align}
+    X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma \sqrt{X_t} \Delta W_{k} + \frac{1}{4}\sigma^2 \left(\Delta W_k^2 - \Delta t_k\right) - \nonumber\\
+    & 2\left(A\left(X_{t_k} - m\right)\right)\sigma \sqrt{X_{t_k}} \zeta_k +\nonumber\\
+    &\left(\left(A\left(X_{t_k} - m\right)\right)\cdot \left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right) + \frac{A}{2}\sigma^2 X_{t_k}\right)\Delta t_k^2 -\nonumber\\
+    &\frac{1}{2}\left(\frac{\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k} + \frac{1}{4}\sigma^2\right)}{\sqrt{X_{t_k}}}\right) \zeta_k
+\end{align}
+\\
+\textbf{Linear noise}\\
+With linear noise we get the simulation scheme
+\begin{align}
+    X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma X_t \Delta W_{k} + \frac{1}{2}\sigma^2 X_{t_k}\left(\Delta W_{k}^2 - \Delta t_k\right) \nonumber \\
+    &-2A(X_{t_k} - m)\sigma X_{t_k} \Delta \zeta_k + \frac{1}{2}\left(2A\left(X_{t_k} - m\right)\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right) - A\sigma^2X_{t_k}\right)(\Delta t_k)^2 \nonumber \\
+    &- \left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right)\left(\Delta W_{k}\Delta t_k - \Delta \zeta_k\right).
+\end{align}
+\section{Formulation of Estimators}
+Here, we formulate the estimators that have been employed throughout this study deriving them by means of classic- and novel methods.
+
 \subsection{Square-root process}\label{subsec:squareroot}
 \subsubsection{Stationary part}\label{subsubsec:squarerootStationary}
+In the stationary part we assume the process can be modelled by the square-root process
+\begin{align}
+    \mathrm{d}X_t &= -\alpha_0\left(X_t - \mu_0\right) + \sigma \sqrt{X_t} \mathrm{d}W_t. \label{eq:squarerootAppendix}
+\end{align}
+\textbf{The Strang-based Estimator}\\
+To obtain the strang estimator, we need additive noise. The lamperti transformation of (\ref{eq:squarerootAppendix}) is $Y_t := 2\sqrt{X_t}$. By Itô's formula
+\begin{align}
+    \mathrm{d}Y_t = - \frac{1}{Y_t}\left(\alpha_0 \frac{Y_t^2}{2} - 2 \alpha_0 \mu_0 + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma \mathrm{d}W_t. \label{eq:lampertiSquarerootAppendix}
+\end{align}
+Using the heuristic from \cite[section 2.3 and 2.5]{SplittingSchemes} we let the Ornstein-Uhlenbeck part be the linearization around the fixed point of the drift.
+\begin{align}
+    \mathrm{d}Y_t^{[1]} &= -\alpha_0 \left(Y_t^{[1]} + \sqrt{\frac{4\alpha_0 \mu_0 - \sigma^2}{\alpha_0}}\right) + \sigma \mathrm{d}W_t , \label{eq:squarerootStationarySplit1} \\
+    \mathrm{d}Y_t^{[2]} &= \frac{\alpha_0 Y_t^{[2]}}{2} + \frac{4\alpha_0 \mu_0 - \sigma^2}{2 Y_t} + \sqrt{\alpha_0\left(4\alpha_0\mu_0 - \sigma^2\right)}. \label{eq:squarerootStationarySplit2}
+\end{align}
+Due to the nature of the lamperti-transformation giving us non-negative values, we only consider the positive branch of the two fixed points of \ref{eq:lampertiSquarerootAppendix}. The deterministic ODE in (\ref{eq:squarerootStationarySplit2}) is the residual of (\ref{eq:lampertiSquarerootAppendix}) and (\ref{eq:squarerootStationarySplit1}).
+Equation (\ref{eq:squarerootStationarySplit1}) represents an Ornstein-Uhlenbeck process, which with stepsize, $\Delta t$, has a gaussian flow with mean 
+\begin{align}
+    \mu_{\Delta t}(x) = \exp\left(-\alpha_0 \Delta t\right) \left(x + \sqrt{\frac{4\alpha_0\mu_0 - \sigma^2}{\alpha_0}}\right) - \sqrt{\frac{4\alpha_0\mu_0 - \sigma^2}{\alpha_0}}
+\end{align}
+and variance
+\begin{align}
+     \Omega_{\Delta t} = \frac{\sigma^2\left(1 - \exp\left(-2\alpha_0 \Delta t\right)\right)}{2\alpha_0}
+\end{align}
+\cite[(5), (6)]{SplittingSchemes}. On the other hand, we did not find an analytical solution to (\ref{eq:squarerootStationarySplit2}), but we will instead rely on the classical Fourth-Order Runge-Kutta Method \cite[p. 541]{numericalAnalysis} to find the flow. Nevertheless, we can denote these two flows $\varphi_{\Delta t}^{[1]}, \varphi_{\Delta t}^{[2]}$ respectively and the Strang splitting scheme is then the composition
+\begin{align}
+    X_{t_{k + 1}} = \left(\varphi_{\Delta t}^{[2]} \circ \varphi_{\Delta t}^{[1]} \circ \varphi_{\Delta t}^{[2]}\right)\left(X_{t_k}\right).
+\end{align}
+That gives us our psuedo-likelihood; a non-linear transformation of a gaussian random variable. The maximizer of this function is then our estimator. \\
+
+
+\noindent \textbf{Approximate Quadratic Martingale Estimating Equation}\\
+We start by deriving the expressions for the one-step ahead conditional mean and variances for the square-root process. The generator for our process is
+\begin{align}
+    \mathcal{L}(f) = \frac{1}{2}\sigma^2x\frac{\mathrm{d}}{\mathrm{d}x^2}f -\beta\left(x - \mu\right)\frac{\mathrm{d}}{\mathrm{d}x}f.
+\end{align}
+we say that $\varphi$, $\lambda$ are eigen functions and -values for the process if
+\begin{align}
+    \mathcal{L}\varphi = - \lambda \varphi,
+\end{align}
+and under mild regulatory conditions \cite[theorem 1.16]{StatisticalMethodsForSDE} gives a method to derive the moments as
+\begin{align}
+    \mathbb{E}\left[\varphi(X_{t_k + 1}) \middle | X_{t_k}\right] = \exp\left(-\lambda t\right)\varphi \label{eq:momentConditions}
+\end{align}
+For typographical reasons, the dependence on the parameters have been suppresed in both $\varphi$ and $\lambda$. Additionally, Forman and Sorensen \cite{FormanSorensen2008} showed that for simple diffusions, such as the square-root process, the eigenfunctions are all polynomials. Since we only will be constructing a quadratic martingale estimation equation, we only need the first two eigen functions and -values. By direct computation one easily finds that 
+\begin{align}
+    \phi_1(x) &= x-\mu, &&\; \lambda_1 = \beta, \label{squarerooteigen1}\\
+    \phi_2(x) &= x^2 - \left(2\mu + \frac{\sigma^2}{\beta}\right)x + \mu^2 + \frac{\sigma^2\mu}{2\beta}, &&\; \lambda_2 = 2\beta. \label{squarerooteigen2}
+\end{align}
+Alternatively, we can also verify these results by inserting into the definition
+\begin{align}
+    \mathcal{L}\phi_1(x) = -\beta\left(x - \mu\right)\cdot 1 + \frac{1}{2}\sigma^2 x \cdot 0 = -\beta\left(x - \mu\right) = -\lambda_1\phi_1(x).
+\end{align}
+Additionally,
+\begin{align}
+    \mathcal{L}\phi_2(x) &= -\beta\left(x - \mu\right)\cdot \left(2x -2\mu - \frac{\sigma^2}{\beta}\right) + \sigma^2x\\
+    =& -2\beta\left(x^2-x\mu - x\mu + \mu^2 -\frac{\sigma^2}{2\beta}x + \frac{\sigma^2}{2\beta}\mu - \frac{\sigma^2}{2\beta}x \right)\\
+    &= -2\beta \left(x^2 -\left(2\mu+\frac{\sigma^2}{\beta}\right)x + \mu^2 + \frac{\sigma^2\mu}{2\beta}\right) = -\lambda_2\phi_2(x).\\
+\end{align}
+Now using (\ref{eq:momentConditions}) the conditional mean can be calculated as
+\begin{align}
+    E\left[X_\Delta - \mu \middle| X = x\right] &= \exp\left(-\beta\Delta\right)\left(x-\mu\right),\\
+    E\left[X_\Delta \middle| X = x\right] &= \exp\left(-\beta\Delta\right)\left(x-\mu\right) + \mu. \label{squarerootCondMean}
+\end{align}
+Similarly, the conditional one-step ahead second moment is found
+\begin{align}
+    &\mathbb{E}\left[X_\Delta^2 - \left(2\mu + \frac{\sigma^2}{\beta}\right)X_\Delta + \mu^2 + \frac{\sigma^2\mu}{2\beta} \middle| X = x \right] \nonumber \\
+    &= \exp\left(-2\beta \Delta\right)\left(x^2 - \left(2\mu + \frac{\sigma^2}{\beta}\right)x + \mu^2 + \frac{\sigma^2 \mu}{2\beta}\right),\\
+    \mathbb{E}\left[X_\Delta^2 \middle| X = x\right] &= \exp\left(-2\beta \Delta\right)\left(x^2 - \left(2\mu + \frac{\sigma^2}{\beta}\right)x + \mu^2 + \frac{\sigma^2 \mu}{2\beta}\right)  \nonumber  \\
+     &+ \left(2\mu + \frac{\sigma^2}{\beta}\right) \left(\exp\left(-\beta\Delta\right)\left(x-\mu\right) + \mu\right) - \left(\mu^2 + \frac{\sigma^2\mu}{2\beta}\right). \label{squarerootCondsecondMoment}
+\end{align}
+By definition of conditional variance and combining (\ref{squarerootCondsecondMoment}) and (\ref{squarerootCondMean}), one easily gets
+\begin{align}
+    \mathrm{Var}\left(X_\Delta \middle| X = x \right) = \frac{\sigma^2}{\beta}\left(\exp\left(-2\beta\Delta\right)\left(\frac{\mu}{2} - x   \right) - \exp\left(-\beta\Delta \right)\left(\mu - x\right) + \frac{\mu}{2}\right).
+\end{align}
+Invoking the result from \cite[Example 1.11]{StatisticalMethodsForSDE} and denoting the conditional mean and -variance, $F_i, \Phi_i$, respectively we get an approximate quadratic martingale estimation equation
+\begin{align}
+        G_N^{sq} = \begin{bmatrix}
+            \sum_{i = 1}^N \frac{\beta}{\sigma^2 X_{t_{i-1}}}\left(X_{t_i} - F_{t_i}\right)\\
+            \sum_{i = 1}^N \frac{-1}{\sigma^2}\left(X_{t_i} - F_{t_i}\right)\\
+            \sum_{i = 1}^N \frac{1}{\sigma^3 X_{t_{i-1}}}\left(\left(X_{t_i} - F_{t_i}\right)^2 - \Phi_{t_i}\right) \label{eq:squarerootMartingaleEquation}
+        \end{bmatrix}.
+\end{align}
+Setting $G_N^{sq} = 0$ we get the following results
+\begin{align}
+    \exp\left(-\hat{\beta}_N\Delta\right) &= \frac{N\sum_{i=1}^{N}X_{t_i} / X_{t_{i - 1}} - \left(\sum_{i = 1}^{N}X_{t_i}\right)\left(\sum_{i}^{N}1/X_{t_{i - 1}}\right)}{N^2 - \left(\sum_{i = 1}^{n}X_{t_i}\right)\left(1/X_{t_{i - 1}}\right)},\\
+    \hat{\mu}_N &= \frac{\sum_{i = 1}^{N}X_{t_i} / X_{t_{i - 1}} - N \exp\left(-\hat{\beta}_N\Delta\right)}{\left(1-\exp\left(-\hat{\beta}_N\Delta\right)\right)\sum_{i = 1}^{N}1/X_{t_{i - 1}}}.
+\end{align}
+For the two parameters related to the drift of the process. Define
+\begin{align}
+    \Phi^*(\Delta, x; \theta) := \left(\frac{x}{\beta}\left(\exp\left(-\beta\Delta - \exp\left(-2\beta \Delta\right)\right)\right) + \frac{\mu}{2\beta}\left(1-\exp\left(-\beta\Delta\right)\right)^2\right).
+\end{align}
+Then the third equation in (\ref{eq:squarerootMartingaleEquation}) yields the explicit equation for third noise-parameter
+\begin{align}
+    \hat{\sigma}^2_N = \frac{\sum_{i = 1}^{N}\frac{1}{X_{t_{i - 1}}}\left(X_{t_i} - F_i\right)^2}{\sum_{i = 1}^{N}\frac{1}{X_{t_{i - 1}}}\Phi^*(\Delta, x; \theta)}
+\end{align}
 \subsubsection{Dynamic part}\label{subsubsec:squarerootDynamic}
 In its dynamic part the process is governed by the stochastic differential equation
 \begin{align}
     \mathrm{d}X_t &= -\left(A\left(X_t - m\right) + \lambda_t\right) + \sigma \sqrt{X_t} \mathrm{d}W_t,\\
     \lambda_t &= \lambda_0\left(1 - \frac{t - t_0}{\tau_c}\right)^\nu,
 \end{align}
-and we assume that we already estimations from the stationary part i.e. that $\lambda_0, \sigma, m$ are estimated or can be computed directly from estimated parameters. In other words, our objective is to estimate $A, \tau_c, \nu$, where $\tau_c$ obviously is our parameter of interest. The drift term is the same as in \cite{Ditlevsen2023}, thus in complete analogy to \cite[(S9, S10)]{DitlevsenSupplementary} we split the system into
+and we assume that we already estimations from the stationary part i.e. that $\lambda_0, \sigma, m$ are estimated or can be computed directly from other parameters. That is from \ref{subsubsec:squarerootStationary} we have the estimates $\alpha_0, \mu_0, \sigma$ and we can compute
+\begin{align}
+    m &= \mu_0 - \frac{\alpha_0}{2A},\\
+    \lambda_0 &= - \frac{\alpha_0^2}{4A}.
+\end{align}
+In other words, our objective is to estimate $A, \tau_c, \nu$, where $\tau_c$ obviously is our parameter of interest. The drift term is the same as in \cite{Ditlevsen2023}, thus in complete analogy to \cite[(S9, S10)]{DitlevsenSupplementary} we split the system into
 \begin{align}
     \mathrm{d}X_t^{[1]} &= -\alpha(\lambda)\left(X_t^{[1]} - \mu(\lambda)\right)  \mathrm{d}t + \sigma \sqrt{X_t^{[1]}} \mathrm{d}W_t, \label{eq:squareRootSplit1} \\
     \mathrm{d}X_t^{[2]} &= - A \left(X_t^{[2]} - \mu(\lambda)\right)^2 \mathrm{d}t, \label{eq:squareRootSplit2}
@@ -19,10 +148,106 @@ This particular choice of splitting is done by letting the square-root process p
 \begin{align}
     \left(X_{t_n + \Delta t} | X_{t_n} = x\right) = \left(\varphi_{\Delta t/2}^{(2)} \circ \varphi_{\Delta t}^{(1)} \circ \varphi_{\Delta t/2}^{(2)}\right)(x),
 \end{align} 
-which gives rise to a pseudo-likelihood similar to \cite[(14)]{SplittingSchemes}. The maximizer of this is the Strang-based estimator.
-\subsection{Mean-reverting Geometric Brownian Motion}
-\subsubsection{Stationary part}
-\subsubsection{Dynamic part}
+which gives rise to a pseudo-likelihood similar to \cite[(14)]{SplittingSchemes}. The maximizer of the pseudo-likelihood is the Strang-based estimator.
+\subsection{Mean-reverting Geometric Brownian Motion}\label{subsec:meanrevertingGBM}
+\subsubsection{Stationary part}\label{subsubsec:meanrevertingGBMStationary}
+In the stationary part we assume the process can be modelled by the mean-reverting Geometric Brownian Motion.
+\begin{align}
+    \mathrm{d}X_t &= -\alpha_0\left(X_t - \mu_0\right) + \sigma X_t \mathrm{d}W_t
+\end{align}
+For this process we present three estimation methods in total.\\
+\noindent \textbf{Strang splitting estimators}\\
+Here we present two estimators based on different splitting philosophies. First we consider a naïve splitting. That is, we split the mean-reverting GBM into
+\begin{align}
+    \mathrm{d}X_t^{[1]} = \sigma X_t^{[1]}\mathrm{d}W_t \label{meanrevertingGBMSplit1}\\
+    \mathrm{d}X_t^{[2]} = -\beta\left(X_t^{[2]} - \mu\right)\mathrm{d}t \label{meanrevertingGBMSplit2}
+\end{align}
+According to \cite[example 4.7]{Srkk2019} (\ref{meanrevertingGBMSplit1}) has solution 
+\begin{align}
+    X_t = \exp\left(\log(x_0) -\frac{\sigma^2}{2}t + \sigma W_t\right),
+\end{align}
+which is log-normal with parameters $\log(x_0) -\frac{\sigma^2}{2}t$ and $\sigma$ respectively.
+Using $X_0 = x_0$ we get that the solution to the ODE (\ref{meanrevertingGBMSplit2}) is
+\begin{align}
+    f_{\Delta t}(x_0) &= (x_0 - \mu)\exp(-\beta\Delta) + \mu\\
+    f_{\Delta t}^{-1}(x_1) &=  (x_1 - \mu)\exp(\beta\Delta) + \mu\\
+    D_x f_{\Delta t}^{-1}(x_1) &= \exp\left(\beta\Delta t\right),
+\end{align}
+thus giving the Strang based negative log-likelihood
+\begin{align}
+    l_S(\beta, \mu, \sigma) = \sum_{i = 1}^{N} g(f_{\Delta t}^{-1}(x_i); \beta,\mu, \sigma) - \frac{\beta\Delta t(N - 1)}{2},
+\end{align}
+where $g$ is minus the logarithm of the log-normal density and $N$ the number of samples.
+Conversely, we can use the lamperti transformation of the mean-reverting GBM and the familiar Strang likelihood. The lamperti transform is $Y_t = \log(X_t)$ and by Itôs formula the resulting SDE is
+\begin{align}
+    \mathrm{d}Y_t = -\left(\beta\left(1 - \mu\exp(-Y_t)\right) + \frac{1}{2}\sigma^2\right)\mathrm{d}t + \sigma \mathrm{d}W_t.
+\end{align}
+Again, using the heuristic from \cite{SplittingSchemes} and linearizing around the fixed-point we get the splitting
+\begin{align}
+    \mathrm{d}Y_t^{[1]} &= - \frac{\sigma^2 + 2\beta}{2}\left(Y_t^{[1]} + \log\left(\frac{\sigma^2 + 2\beta}{2\beta \mu}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t\\
+    \mathrm{d}Y_t^{[2]} &= \left(-\beta + \beta\mu\exp(-Y_t) - \frac{\sigma^2}{2} + \frac{\sigma^2+2\beta}{2}Y_t^{[2]} + \frac{\sigma^2+2\beta}{2}\log\left(\frac{\sigma^2+2\beta}{2\beta\mu}\right)\right)\mathrm{d}t,
+\end{align}
+which we solve using the linear SDE and a fourth order Runge-kutta respectively.\\
+
+\noindent \textbf{Approximate Quadratic Martingale Estimating Equation}\\
+\noindent Starting once more with deriving the one-step ahead conditional mean and - variance. The generator is
+\begin{align}
+    \mathcal{L}\varphi = -\beta\left(x - \mu\right)\frac{\mathrm{d}}{\mathrm{d}x}\varphi + \frac{1}{2}\sigma^2 x^2 \frac{\mathrm{d}^2}{\mathrm{d}x^2}\varphi,
+\end{align}
+whence we get the eigen functions and -values.
+\begin{align}
+    \varphi_1(x) &= x - \mu, \qquad &&\lambda_1 = \beta, \label{GBMeigen1} \\
+    \varphi_2(x) &= x^2 - \frac{2\beta\mu}{\beta - \sigma^2}x + \frac{2\mu^2\beta^2}{\left(\beta - \sigma^2\right)\left(2\beta - \sigma^2\right)}, \qquad &&\lambda_2 = 2\beta - \sigma^2 \label{GBMeigen2}.
+\end{align}
+Evidently, the verification done on (\ref{squarerooteigen1}) can be done completely analagously on (\ref{GBMeigen1}). Instead, we verify that (\ref{GBMeigen2}) contains the second eigen function and -value
+\begin{align}
+    \mathcal{L}\varphi_2 & = -\beta\left(x-\mu\right)\left(2x - \frac{2\beta\mu}{\beta-\sigma^2}\right) + \sigma^2x^2,\\
+    &=-\left(2\beta - \sigma^2\right)x^2 + \frac{2\beta\mu\left(2\beta-\sigma^2\right)}{\beta - \sigma^2}x - \frac{2\beta^2\mu^2}{\beta - \sigma^2}, \\
+    &= -\left(2\beta -\sigma^2\right)\left(x^2 - \frac{2\beta\mu}{\beta-\sigma^2} + \frac{2\beta^2\mu^2}{\left(\beta-\sigma^2\right)\left(2\beta-\sigma^2\right)}\right),\\
+    &= - \lambda_2 \varphi_2.
+\end{align}
+Since it has the same first eigen function the mean-reverting GBM has the sam one-step ahead conditional mean as (\ref{squarerootCondMean}). In fact, it is not difficult to see that this result generalizes to any pearson diffusion. Conversely, we can calculate the one-step ahead conditional second moment by realizing
+\begin{align}
+    \mathbb{E}\left[\varphi_2(X_\Delta)\middle|X = x\right] &= \exp\left(-\left(2\beta - \sigma^2\right)\right)\varphi_2(x),
+\end{align}
+and thus
+\begin{align}
+    \mathbb{E}\left[X_\Delta^2 \middle| X = x\right] &= \exp\left(-\left(2\beta - \sigma^2\right)\right)\varphi_2(x) + \frac{2\beta\mu}{\beta-\sigma^2} \mathbb{E}\left[X_\Delta\middle|X=x\right] \nonumber \\
+    &\quad - \frac{2\beta^2\mu^2}{\left(\beta-\sigma^2\right)\left(2\beta-\sigma^2\right)}
+\end{align}
+Now since 
+\begin{align}
+    \left(\mathbb{E}\left[X_\Delta\middle|X=x\right]\right)^2 &= \left(\exp\left(-\beta\Delta\right)\left(x-\mu\right) + \mu\right)^2 \\
+    &= \exp\left(-2\beta\Delta\right)\left(x-\mu\right)^2 + \mu^2 + 2\mu\exp\left(-\beta\Delta\right)\left(x-\mu\right).
+\end{align}
+Combining these and using the definition of conditional variance, we get the desired result
+\begin{align}
+    \mathrm{Var}\left(X_\Delta \middle| X = x\right) &= \exp\left(-\left(2\beta - \sigma^2\right)\Delta\right)\left(x^2 - \frac{2\beta\mu}{\beta-\sigma^2}x + \frac{2\beta^2 \mu^2}{\left(\beta-\sigma^2\right)\left(2\beta - \sigma^2\right)}\right) \nonumber \\
+    &+ \frac{2\beta\mu}{\beta-\sigma^2}\left(\exp\left(-\beta\Delta\right)\left(x-\mu\right) + \mu\right) - \frac{2\beta^2\mu^2}{\left(\beta-\sigma^2\right)\left(2\beta - \sigma^2\right)} \nonumber\\
+    &- \exp\left(-2\beta\Delta\right)\left(\left(x-\mu\right)^2 - \mu^2 - 2\mu\exp\left(-\beta\Delta\right)\left(x-\mu\right)\right)
+\end{align} 
+Denote the one-step ahead conditional mean and -variance $F_i, \Phi_i$ respectively. Now, utilizing the method given in \cite[example 1.11]{StatisticalMethodsForSDE} we have approximate quadratic martingale estimation equations given by
+\begin{align}
+    G_N^{GBM} = \begin{bmatrix}
+        \sum_{i = 1}^N \frac{\beta}{\sigma^2 X_{t_{i-1}}^2}\left(X_{t_i} - F_{t_i}\right)\\
+        \sum_{i = 1}^N \frac{-1}{\sigma^2 X_{t_{i-1}}}\left(X_{t_i} - F_{t_i}\right)\\
+        \sum_{i = 1}^N \frac{1}{\sigma^3 X_{t_{i-1}}^2}\left(\left(X_{t_i} - F_{t_i}\right)^2 - \Phi_{t_i}\right)
+    \end{bmatrix}.
+\end{align}
+Solving the equation $G_N^{GBM} = 0$ then yields the approximate quadratic marginale estimator. This we do numerically using the \code{nleqslv}-method from the package of the same name \cite{nleqslv}.
+\subsubsection{Dynamic part}\label{subsubsec:meanrevertingGBMDynamic}
+In its dynamic part the stochastic differential equation for the process can be written as
+\begin{align}
+    \mathrm{d}X_t &= -\left(A\left(X_t - m\right) + \lambda_t\right) + \sigma X_t \mathrm{d}W_t,\\
+    \lambda_t &= \lambda_0\left(1 - \frac{t - t_0}{\tau_c}\right)^\nu,
+\end{align}
+and as before we assume that $\lambda_0, \sigma, m$ can estimated or can be computed from other parameters in the same manner. The choice of splitting is the same as in \ref{subsubsec:squarerootDynamic}
+\begin{align}
+    \mathrm{d}X_t^{[1]} &= -\alpha(\lambda)\left(X_t^{[1]} - \mu(\lambda)\right)  \mathrm{d}t + \sigma X_t^{[1]} \mathrm{d}W_t, \label{eq:GBMSplit1} \\
+    \mathrm{d}X_t^{[2]} &= - A \left(X_t^{[2]} - \mu(\lambda)\right)^2 \mathrm{d}t, \label{eq:GBMSplit2}
+\end{align}
+with $\alpha(\lambda) = 2\sqrt{\abs{A\lambda_t}}$ and $\mu(\lambda) = m + \sqrt{\abs{\frac{\lambda_t}{A}}}$.
+Again, this splitting is obtained by letting the mean-reverting GBM be the linearization around the fixed point of the process. To get the Strang estimator we simply use kessler's method on the mean-reverting GBM in (\ref{eq:GBMSplit1}) and the same flow for (\ref{eq:GBMSplit2}) as in (\ref{eq:squareRootSplit2}) in composition. Then, the maximizer of the resulting pseudo-likelihood is once again the Strang-based estimator.
 \section{Benchmark}
 In this section we show the results of a few benchmarks using the \code{microbenchmark} package \cite{microbenchmark}. The code was run on a machine with the following hardware and software.
 \begin{table}[ht]

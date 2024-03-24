@@ -382,11 +382,19 @@ mean_reverting_GMB_martingale <- function(par, data, delta){
   
   F_i   <- exp(-beta * delta) * (x0 - mu) + mu
   
-  phi_i <- exp(-(2 * beta - sigma^2) * delta) * (
-    (x0 - mu)^2 * (1 - exp(-sigma^2 * delta)) - 
-      2 * mu * sigma^2 / (beta - sigma^2) * (x0 - mu) * (1 - exp(-(sigma^2 - beta) * delta)) -
-      mu^2 * sigma^2 / (2 * beta - sigma^2) * (1 - exp(-(sigma^2 - 2*beta) * delta))
-  )
+  # phi_i <- exp(-(2 * beta - sigma^2) * delta) * (
+  #   (x0 - mu)^2 * (1 - exp(-sigma^2 * delta)) - 
+  #     2 * mu * sigma^2 / (beta - sigma^2) * (x0 - mu) * (1 - exp(-(sigma^2 - beta) * delta)) -
+  #     mu^2 * sigma^2 / (2 * beta - sigma^2) * (1 - exp(-(sigma^2 - 2*beta) * delta))
+  # )
+  # 
+  phi_i <- exp(-(2 * beta - sigma^2) * delta) *
+    (x0^2 - (2 * beta * mu)/(beta - sigma^2) * x0 + 2 * beta^2 * mu^2/ ((beta - sigma^2) * (2 * beta - sigma^2))) + 
+    2 * beta * mu / (beta - sigma^2) * (exp(-beta * delta) * (x0 - mu) + mu) - 
+    2 * beta^2 * mu^2 / ((beta - sigma^2) * (2 * beta - sigma^2)) - 
+    exp(-2 * beta * delta) * (x0 - mu)^2 - mu^2 - 2 * mu * exp(-beta * delta) * (x0 - mu)
+  
+  browser()
   
   eq1 <- beta / sigma^2 * sum(1 / x0 * (x1 - F_i))
   eq2 <- - 1 / sigma^2 * sum(1 / x0 * (x1 - F_i))
@@ -552,7 +560,7 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Example usage
-# source("source_code/tipping_simulations.R")
+source("source_code/tipping_simulations.R")
 # 
 # ## Additive noise model
 # true_param <- c(-0.87, -1.51, 2, 0.2)
@@ -628,18 +636,18 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 
 
 ## Linear noise model
-# true_param <- c(-0.05, 100, 2, 0.01, 0.65)
-# actual_dt <- 0.001
-# tau <- 150
-# t_0 <- 50
-# sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sample_n(sim_res_linear, min(nrow(sim_res_linear), 10000)) |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
+true_param <- c(-0.05, 100, 2, 0.01, 0.65)
+actual_dt <- 0.001
+tau <- 150
+t_0 <- 50
+sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
+sample_n(sim_res_linear, min(nrow(sim_res_linear), 10000)) |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
 # 
 # # ## Stationary part
 # # ## Parameters for stationary part
-# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
-# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
-# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
 # nleqslv::nleqslv(x = stationary_part_true_param, fn = mean_reverting_GMB_martingale,
 #                  data = sim_res_linear$X_weak_2.0[sim_res_linear$t < t_0],
