@@ -1,6 +1,6 @@
 # Title: Model fitting of Stochastic Differential Equations with tipping points.
 # Author: Anders Gantzhorn Kristensen (University of Copenhagen, andersgantzhorn@gmail.com)
-# Date: 2024-02-22 (Last Updated: 2024-03-28)
+# Date: 2024-02-22 (Last Updated: 2024-03-29)
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Project: Tipping Point Estimation in Ecological Systems using Stochastic Differential Equations
 # Description: This script implements optimizers, estimation methods and negative log-likelihood functions for estimation
@@ -29,6 +29,10 @@ runge_kutta <- function(y0, h, f, n = 1) {
     y0 <- y0 + h * (k1 + 2 * k2 + 2 * k3 + k4) / 6
   }
   y0
+}
+
+arcsinh <- function(x){
+  log(x + sqrt(x^2 + 1))
 }
 
 #-----------------------------------------------------------------------------------------------------------------------------#
@@ -284,6 +288,50 @@ CIR_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
   mu.part  <- exp(-alpha_seq * delta) * (fh_half - mu_seq) + mu_seq
   
   -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
+}
+
+CIR_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
+  tau     <-  par[1]
+  A       <-  par[2]
+  nu      <- if(length(par) == 3) par[3] else 1
+  
+  N       <- length(data)
+  x1    <- data[2:N]
+  x0    <- data[1:(N-1)]
+  time    <- delta * (1:(N-1))
+  
+  m          <- mu0 - alpha0 / (2 * A)
+  lambda0    <- -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
+  
+  if(any((-A*(sigma^2 + 4 * lam_seq))<0)){return(50000)}
+  
+  A_linear_part <- 1 / (2 * m + sqrt(-A*(sigma^2 + 4 * lam_seq))) * 
+    (lam_seq * (1 - 4 * A^2) + sigma^2 * (1 / 4 - A^2)) - A * sqrt(-A*(sigma^2 + 4 * lam_seq))
+  
+  b <- sqrt(4 * m + 2 * sqrt(-A*(sigma^2 + 4 * lam_seq)))
+  
+  diff_f <- function(t, y){-2 / y * (A * (y^2 / 4 - m)^2 + lam_seq + sigma^2 / 4) - 
+      A_linear_part * (y - b)}
+  
+  # Solution to ODE
+  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  
+  mu_f <- exp(A_linear_part * delta) * (f_h - b) + b
+  sd_f <- sigma * sqrt(expm1(2 * A_linear_part * delta) / (2 * A_linear_part))
+  
+  # Inverse of non-linear ODE
+  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  
+  # Derivative of inverse using Richardson Extrapolation.
+  inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
+  inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
+  df     <- (inv_f2 - inv_f3) / (2 * 0.01)
+  
+  # Strang likelihood
+  loglik <- -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
+  if(is.nan(loglik)){return(50000)}
+  loglik
 }
 
 CIR_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
@@ -626,6 +674,51 @@ t_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
   -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
 }
 
+t_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
+  tau     <-  par[1]
+  A       <-  par[2]
+  nu      <- if(length(par) == 3) par[3] else 1
+  
+  N       <- length(data)
+  x1    <- data[2:N]
+  x0    <- data[1:(N-1)]
+  time    <- delta * (1:(N-1))
+  
+  m          <- mu0 - alpha0 / (2 * A)
+  lambda0    <- -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
+  
+  if(any((sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) < 0)){return(50000)}
+  
+  fix_points <- arcsinh((sqrt(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) + 4 * A * m - sigma^2) /
+                          (4 * A))
+  
+  A_linear_part <- - sigma^2 + sqrt(sigma^4 / 4 - 2 * A * (2 * lam_seq + m * sigma^2))
+  b <- fix_points
+  
+  diff_f <- function(t, y){-1 / cosh(y) * (A * (sinh(y) - m)^2 + lam_seq + sigma^2 / 2 * sinh(y)) -
+      A_linear_part * (y - b)}
+  
+  # Solution to ODE
+  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  
+  mu_f <- exp(A_linear_part * delta) * (f_h - b) + b
+  sd_f <- sigma * sqrt(expm1(2 * A_linear_part * delta) / (2 * A_linear_part))
+  
+  # Inverse of non-linear ODE
+  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  
+  # Derivative of inverse using Richardson Extrapolation.
+  inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
+  inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
+  df     <- (inv_f2 - inv_f3) / (2 * 0.01)
+  
+  # Strang likelihood
+  loglik <- -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
+  if(is.nan(loglik)){return(50000)}
+  loglik
+}
+
 #-----------------------------------------------------------------------------------------------------------------------------#
 ## General optimizers for stationary - and dynamic part of process
 optimize_stationary_likelihood <- function(likelihood_fun, data, init_par, delta, exp_sigma = TRUE){
@@ -640,12 +733,15 @@ optimize_stationary_likelihood <- function(likelihood_fun, data, init_par, delta
 
 optimize_dynamic_likelihood <- function(likelihood_fun, data,
                                         init_par, delta,
-                                        alpha0, mu0, sigma, exp_sigma = FALSE){
+                                        alpha0, mu0, sigma, exp_sigma = FALSE, 
+                                        method = "Nelder-Mead"){
 
   res_optim <- stats::optim(init_par, fn = likelihood_fun,
-                            method = "Nelder-Mead",
+                            method = method,
                             data = data, delta = delta,
                             alpha0 = alpha0 , mu0 = mu0, sigma = sigma)
+  print(res_optim)
+
   if(exp_sigma){
   res_optim$par[2] <- exp(res_optim$par[2])
   }
@@ -666,7 +762,7 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Example usage
-source("source_code/tipping_simulations.R")
+# source("source_code/tipping_simulations.R")
 # 
 # ## Additive noise model
 # true_param <- c(-0.87, -1.51, 2, 0.2)
@@ -713,9 +809,9 @@ source("source_code/tipping_simulations.R")
 # t_0 <- 50
 # sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param, tau, t_0)
 # sample_n(sim_res_sqrt, min(nrow(sim_res_sqrt), 10000)) |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
-# # 
-# ## Stationary part
-# ## Parameters for stationary part
+# # # 
+# # ## Stationary part
+# # ## Parameters for stationary part
 # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
@@ -723,14 +819,14 @@ source("source_code/tipping_simulations.R")
 # CIR_quadratic_martingale(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0], actual_dt) - stationary_part_true_param
 # optimize_stationary_likelihood(CIR_alt_strang_splitting, exp(2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0])),
 #                                stationary_part_true_param, actual_dt) - stationary_part_true_param
-
+# 
 # optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
 #                                data = 2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0]),
 #                                init_par = stationary_part_true_param,
 #                                delta = actual_dt, exp_sigma = FALSE) - stationary_part_true_param
-
-## Dynamic part
-
+# 
+# ## Dynamic part
+# 
 # dynamic_part_true_param <- c(tau, true_param[1])
 # optimize_dynamic_likelihood(likelihood_fun = CIR_dynamic_likelihood,
 #                             data = sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t > t_0],
@@ -740,47 +836,56 @@ source("source_code/tipping_simulations.R")
 #                             mu0 = stationary_part_true_param[2],
 #                             sigma = stationary_part_true_param[3],
 #                             exp_sigma = FALSE) - dynamic_part_true_param
-
-#-----------------------------------------------------------------------------------------------------------------------------#
-
-## Linear noise model
-# true_param <- c(-0.05, 100, 2, 0.01, 0.65)
-# actual_dt <- 0.001
-# tau <- 150
-# t_0 <- 50
-# sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sample_n(sim_res_linear, min(nrow(sim_res_linear), 10000)) |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
-#
-## Stationary part
-## Parameters for stationary part
-# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
-# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
-# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
-# nleqslv::nleqslv(x = stationary_part_true_param, fn = mean_reverting_GMB_martingale,
-#                  data = sim_res_linear$X_weak_2.0[sim_res_linear$t < t_0],
-#                  delta = actual_dt)$x - stationary_part_true_param
-
-# optimize_stationary_likelihood(mean_reverting_GMB_strang, log(sim_res_linear$X_weak_2.0[sim_res_linear$t<t_0]),
-#                                init_par = stationary_part_true_param, delta = actual_dt,
-#                                exp_sigma = TRUE) - stationary_part_true_param
-# 
-## Dynamic part
-# dynamic_part_true_param <- c(tau, true_param[1], true_param[5])
-# optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GMB_dynamic_likelihood,
-#                             data = sim_res_linear$X_weak_2.0[sim_res_linear$t > t_0],
+# optimize_dynamic_likelihood(likelihood_fun = CIR_transform_dynamic_likelihood,
+#                             data = 2 * sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t > t_0]),
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
 #                             alpha0 = stationary_part_true_param[1],
 #                             mu0 = stationary_part_true_param[2],
-#                             sigma = stationary_part_true_param[3], 
-#                             exp_sigma = FALSE) - dynamic_part_true_param
+#                             sigma = stationary_part_true_param[3],
+#                             exp_sigma = FALSE)
+
+#-----------------------------------------------------------------------------------------------------------------------------#
+
+## Linear noise model
+# # true_param <- c(-0.05, 100, 2, 0.01, 0.65)
+# # actual_dt <- 0.001
+# # tau <- 150
+# # t_0 <- 50
+# # sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
+# # sample_n(sim_res_linear, min(nrow(sim_res_linear), 10000)) |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
+# #
+# ## Stationary part
+# ## Parameters for stationary part
+# # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+# # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+# # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+# # 
+# # nleqslv::nleqslv(x = stationary_part_true_param, fn = mean_reverting_GMB_martingale,
+# #                  data = sim_res_linear$X_weak_2.0[sim_res_linear$t < t_0],
+# #                  delta = actual_dt)$x - stationary_part_true_param
+# 
+# # optimize_stationary_likelihood(mean_reverting_GMB_strang, log(sim_res_linear$X_weak_2.0[sim_res_linear$t<t_0]),
+# #                                init_par = stationary_part_true_param, delta = actual_dt,
+# #                                exp_sigma = TRUE) - stationary_part_true_param
+# # 
+# ## Dynamic part
+# # dynamic_part_true_param <- c(tau, true_param[1], true_param[5])
+# # optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GMB_dynamic_likelihood,
+# #                             data = sim_res_linear$X_weak_2.0[sim_res_linear$t > t_0],
+# #                             init_par = dynamic_part_true_param,
+# #                             delta = actual_dt,
+# #                             alpha0 = stationary_part_true_param[1],
+# #                             mu0 = stationary_part_true_param[2],
+# #                             sigma = stationary_part_true_param[3], 
+# #                             exp_sigma = FALSE) - dynamic_part_true_param
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 ## t-distributed stationary distribution model
-
-# true_param <- c(0.5, -2, -3, 0.1)
+# 
+# true_param <- c(0.1, -2, -3, 0.1)
 # actual_dt <- 0.005
 # tau <- 100
 # t_0 <- 50
@@ -788,22 +893,21 @@ source("source_code/tipping_simulations.R")
 # sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = t_0)
-
-## Stationary part
-# Parameters for stationary part
+# 
+# ## Stationary part
+# # Parameters for stationary part
 # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
 # optimize_stationary_likelihood(
 #               likelihood_fun = t_diffusion_strang_splitting,
-#               data = log(sim_res_t_distribution$X_weak_2.0[sim_res_t_distribution$t < t_0] + 
-#                      sqrt(sim_res_t_distribution$X_weak_2.0[sim_res_t_distribution$t < t_0]^2 + 1)),
+#               data = arcsinh(sim_res_t_distribution$X_weak_2.0[sim_res_t_distribution$t < t_0]),
 #               init_par = stationary_part_true_param,
 #               delta = actual_dt,
 #               exp_sigma = TRUE)
-
-## Dynamic part
+# 
+# ## Dynamic part
 # dynamic_part_true_param <- c(tau, true_param[1])
 # optimize_dynamic_likelihood(likelihood_fun = t_dynamic_likelihood,
 #                             data = sim_res_t_distribution$X_weak_2.0[sim_res_t_distribution$t > t_0],
@@ -812,4 +916,14 @@ source("source_code/tipping_simulations.R")
 #                             alpha0 = stationary_part_true_param[1],
 #                             mu0 = stationary_part_true_param[2],
 #                             sigma = stationary_part_true_param[3],
-#                             exp_sigma = FALSE)
+#                             exp_sigma = FALSE, method = "BFGS")
+
+# optimize_dynamic_likelihood(likelihood_fun = t_transform_dynamic_likelihood,
+#                   data = arcsinh(sim_res_t_distribution$X_weak_2.0[sim_res_t_distribution$t > t_0]),
+#                   init_par = dynamic_part_true_param,
+#                   delta = actual_dt,
+#                   alpha0 = stationary_part_true_param[1],
+#                   mu0 = stationary_part_true_param[2],
+#                   sigma = stationary_part_true_param[3],
+#                   exp_sigma = FALSE, method = "BFGS")
+
