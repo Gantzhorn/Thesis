@@ -186,10 +186,10 @@ simulate_t_distribution_tipping_model <- function(step_length, par,
       sigma * sqrt(X_weak_2.0[i - 1]^2 + 1) * dW[i - 1] + 
       1 / 2 * sigma^2 * X_weak_2.0[i - 1] * (dW[i - 1]^2 - step_length) + 
       A * (X_weak_2.0[i - 1] - m) * sigma * sqrt(X_weak_2.0[i - 1]^2 + 1) * dW[i - 1] * step_length + 
-      1 / 2 * (((A * (X_weak_2.0[i - 1] - m)^2) + lambda_t[i - 1]) * (2 * A * (X_weak_2.0[i - 1] - m)) -
+      (((A * (X_weak_2.0[i - 1] - m)^2) + lambda_t[i - 1]) * (A * (X_weak_2.0[i - 1] - m)) -
                  A * sigma^2 * (X_weak_2.0[i - 1]^2 + 1)) * step_length^2 + 
-      (- (A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * sigma * X_weak_2.0[i - 1] / sqrt(X_weak_2.0[i - 1]^2 +1) + 
-         sigma^2 / 2 / sqrt(X_weak_2.0[i - 1]^2 + 1)) * (1/2 * dW[i - 1] * step_length)
+      (- (A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * sigma * X_weak_2.0[i - 1] + 
+         sigma^2 / 2) * (1/2 * dW[i - 1] * step_length) / sqrt(X_weak_2.0[i - 1]^2 + 1)
   }
   
   tibble::tibble(t = time,
