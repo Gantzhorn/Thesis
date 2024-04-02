@@ -1,6 +1,6 @@
 # Title: Simulation of Stochastic Differential Equations for Tipping Points Analysis
 # Author: Anders Gantzhorn Kristensen (University of Copenhagen, andersgantzhorn@gmail.com)
-# Date: 2024-01-31 (Last Updated: 2024-03-28)
+# Date: 2024-01-31 (Last Updated: 2024-04-02)
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Project: Tipping Point Estimation in Ecological Systems using Stochastic Differential Equations
 # Description: This script implements methods for simulating different types of Stochastic differential equation to model
@@ -90,11 +90,11 @@ simulate_squareroot_noise_tipping_model<- function(step_length, par,
     X_weak_2.0[i] <- X_weak_2.0[i - 1] - (A*(X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * step_length +
       sigma * sqrt(X_weak_2.0[i - 1]) * dW[i - 1] +
       1/4 * sigma^2 * (dW[i - 1]^2 - step_length) -
-      2 * (A * (X_weak_2.0[i - 1] - m)) * sigma * sqrt(X_weak_2.0[i - 1]) * (1/2 * dW[i - 1] * step_length) +
-      ((A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * (A * (X_weak_2.0[i - 1] - m)) +
+      2 * A * (X_weak_2.0[i - 1] - m) * sigma * sqrt(X_weak_2.0[i - 1]) * (1/2 * dW[i - 1] * step_length) +
+      ((A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * (A * (X_weak_2.0[i - 1] - m)) -
          1/2 * A * sigma^2 * X_weak_2.0[i - 1]) * (step_length)^2 -
-      1/2 * ((A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * 1/sqrt(X_weak_2.0[i - 1]) +
-               sigma^2/(4 * sqrt(X_weak_2.0[i - 1]))) * (1/2 * dW[i - 1] * step_length)
+      1 / (4 * sqrt(X_weak_2.0[i - 1])) * ((A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) + sigma^3 / 4) *
+      (dW[i - 1] * step_length)
   }
   tibble::tibble(t = time,
          X_weak_2.0,
@@ -139,8 +139,10 @@ simulate_linear_noise_tipping_model<- function(step_length, par,
       sigma * X_weak_2.0[i - 1] * dW[i - 1] +
       1/2 * sigma^2 * X_weak_2.0[i - 1] * (dW[i - 1]^2 - step_length) -
       2 * A * (X_weak_2.0[i - 1] - m) * sigma * X_weak_2.0[i - 1] * (1/2 * dW[i - 1] * step_length) +
-      1/2 * (2 * A * (X_weak_2.0[i - 1] - m) * (A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) - A * sigma^2 * X_weak_2.0[i - 1]) * step_length^2 +
-      (-(A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * sigma) * (dW[i - 1] * step_length - (1/2 * dW[i - 1] * step_length))
+      1/2 * (2 * A * (X_weak_2.0[i - 1] - m) * (A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) -
+               A * sigma^2 * X_weak_2.0[i - 1]^2) * step_length^2 -
+      ((A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * sigma) *
+      (1/2 * dW[i - 1] * step_length)
     
     
   }
@@ -184,12 +186,60 @@ simulate_t_distribution_tipping_model <- function(step_length, par,
   for(i in (2:(N+1))){
     X_weak_2.0[i] <- X_weak_2.0[i - 1] - (A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * step_length + 
       sigma * sqrt(X_weak_2.0[i - 1]^2 + 1) * dW[i - 1] + 
-      1 / 2 * sigma^2 * X_weak_2.0[i - 1] * (dW[i - 1]^2 - step_length) + 
+      1 / 2 * sigma^2 * X_weak_2.0[i - 1] * (dW[i - 1]^2 - step_length) - 
       A * (X_weak_2.0[i - 1] - m) * sigma * sqrt(X_weak_2.0[i - 1]^2 + 1) * dW[i - 1] * step_length + 
       (((A * (X_weak_2.0[i - 1] - m)^2) + lambda_t[i - 1]) * (A * (X_weak_2.0[i - 1] - m)) -
-                 A * sigma^2 * (X_weak_2.0[i - 1]^2 + 1)) * step_length^2 + 
+                 1 / 2 * A * sigma^2 * (X_weak_2.0[i - 1]^2 + 1)) * step_length^2 + 
       (- (A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * sigma * X_weak_2.0[i - 1] + 
-         sigma^2 / 2) * (1/2 * dW[i - 1] * step_length) / sqrt(X_weak_2.0[i - 1]^2 + 1)
+         sigma^3 / 2) * (dW[i - 1] * step_length) / (2 * sqrt(X_weak_2.0[i - 1]^2 + 1))
+  }
+  
+  tibble::tibble(t = time,
+                 X_weak_2.0,
+                 lambda_t,
+                 alpha_t,
+                 mu_t)
+}
+
+#-----------------------------------------------------------------------------------------------------------------------------#
+# Implementation for model with F-distributed stationary distribution
+
+simulate_F_distribution_tipping_model <- function(step_length, par, tau = 100, t_0 = 10, X_0 = NA, beyond_tipping = 0){
+  A        <- par[1]
+  m        <- par[2]
+  lambda_0 <- par[3]
+  sigma    <- par[4]
+  nu       <- if(length(par) == 5) par[5] else 1
+  
+  if(is.na(X_0)){
+    X_0 <- m + ifelse(A >=0, 1, -1) * sqrt(abs(lambda_0 / A))
+  }
+  
+  #Tipping point with added time if specified
+  total_time <- tau + t_0 + beyond_tipping 
+  N          <- as.integer((total_time) / step_length) 
+  
+  # Initialize the process
+  X_weak_2.0    <- numeric(N + 1) # N + 1 to include the initial point
+  X_weak_2.0[1] <- X_0
+  
+  dW            <- rnorm(N, mean = 0, sd = sqrt(step_length))
+  time          <- step_length * 0:N
+  lambda_t      <- numeric(N + 1)
+  lambda_t      <- lambda_0 * (1 - (time >= t_0) * (time - t_0) / tau)^nu
+  alpha_t       <- 2 * sqrt(abs(A * lambda_t))
+  mu_t          <- m + sqrt(abs(lambda_t/A))
+  
+  for(i in (2:(N+1))){
+    X_weak_2.0[i] <- X_weak_2.0[i - 1] - (A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * step_length + 
+      sigma * sqrt(X_weak_2.0[i - 1]^2 + X_weak_2.0[i - 1]) * dW[i - 1] + 
+      1 / 4 * sigma^2 * (2 * X_weak_2.0[i - 1] + 1) * (dW[i - 1]^2 - step_length) -
+      A * (X_weak_2.0[i - 1] - m) * sigma * sqrt(X_weak_2.0[i - 1] * (X_weak_2.0[i - 1] + 1)) * dW[i - 1] * step_length +
+      ((A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * A * (X_weak_2.0[i - 1] - m) - 
+         sigma^2 * A / 2 * (X_weak_2.0[i - 1] * (X_weak_2.0[i - 1] + 1))) * step_length^2 -
+      1 / (4 * sqrt(X_weak_2.0[i - 1] * (X_weak_2.0[i - 1] + 1))) *
+      ((A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * sigma +
+      sigma^3 * X_weak_2.0[i - 1] * (X_weak_2.0[i - 1] + 1) / 4) * step_length * dW[i - 1]
   }
   
   tibble::tibble(t = time,
@@ -202,6 +252,7 @@ simulate_t_distribution_tipping_model <- function(step_length, par,
 #-----------------------------------------------------------------------------------------------------------------------------#
 ## Example usage of each of the methods
 # ggplot2::theme_set(ggthemes::theme_base())
+
 # # Additive noise example
 # true_param <- c(0.87, -1.51, -2.69, 0.3, 1)
 # actual_dt <- 0.001
@@ -249,7 +300,7 @@ simulate_t_distribution_tipping_model <- function(step_length, par,
 #   ggplot2::geom_vline(xintercept = c(t_0, tau + t_0))
 
 ## t-distributed example
-# true_param <- c(0.5, -2, -3, 0.1, 1.5)
+# true_param <- c(0.5, -2, -3, 0.1, 2)
 # actual_dt <- 0.005
 # tau <- 100
 # t_0 <- 50
@@ -261,6 +312,38 @@ simulate_t_distribution_tipping_model <- function(step_length, par,
 # sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = lambda_t)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = c(t_0, tau + t_0))
+
+## F-distributed example
+# true_param <- c(0.5, 3, -3, 0.1)
+# actual_dt <- 0.005
+# tau <- 100
+# t_0 <- 50
+# sim_res_t_distribution <- simulate_F_distribution_tipping_model(actual_dt, true_param, tau, t_0)
+# sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
+#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
+#   ggplot2::geom_vline(xintercept = t_0)
+# 
+# sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = lambda_t)) +
+#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
+#   ggplot2::geom_vline(xintercept = c(t_0, tau + t_0))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # # Implementation for model with additive noise structure
 # simulate_additive_noise_tipping_model_reverse <- function(step_length, par,
