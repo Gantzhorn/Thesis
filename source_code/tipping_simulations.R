@@ -238,12 +238,68 @@ simulate_F_distribution_tipping_model <- function(step_length, par, tau = 100, t
       ((A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * A * (X_weak_2.0[i - 1] - m) - 
          sigma^2 * A / 2 * (X_weak_2.0[i - 1] * (X_weak_2.0[i - 1] + 1))) * step_length^2 -
       1 / (4 * sqrt(X_weak_2.0[i - 1] * (X_weak_2.0[i - 1] + 1))) *
-      ((A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * sigma +
-      sigma^3 * X_weak_2.0[i - 1] * (X_weak_2.0[i - 1] + 1) / 4) * step_length * dW[i - 1]
+      ((A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * sigma * (2 * X_weak_2.0[i - 1] + 1) +
+      sigma^3 / 4) * step_length * dW[i - 1]
   }
   
   tibble::tibble(t = time,
                  X_weak_2.0,
+                 lambda_t,
+                 alpha_t,
+                 mu_t)
+}
+
+#-----------------------------------------------------------------------------------------------------------------------------#
+# Implementation for model based on the jacobi diffusion
+
+simulate_jacobi_diffusion_tipping_model <- function(step_length, par, tau = 100, t_0 = 10, X_0 = NA, beyond_tipping = 0){
+  A        <- par[1]
+  m        <- par[2]
+  lambda_0 <- par[3]
+  sigma    <- par[4]
+  nu       <- if(length(par) == 5) par[5] else 1
+  
+  if(is.na(X_0)){
+    X_0 <- m + ifelse(A >=0, 1, -1) * sqrt(abs(lambda_0 / A))
+  }
+  
+  #Tipping point with added time if specified
+  total_time <- tau + t_0 + beyond_tipping 
+  N          <- as.integer((total_time) / step_length) 
+  
+  # Initialize the process
+  X_weak_2.0    <- numeric(N + 1) # N + 1 to include the initial point
+  X_weak_2.0[1] <- X_0
+  X_ito <- numeric(N + 1)
+  X_ito[1] <- 2 * asin(sqrt(X_0))
+  
+  dW            <- rnorm(N, mean = 0, sd = sqrt(step_length))
+  time          <- step_length * 0:N
+  lambda_t      <- numeric(N + 1)
+  lambda_t      <- lambda_0 * (1 - (time >= t_0) * (time - t_0) / tau)^nu
+  alpha_t       <- 2 * sqrt(abs(A * lambda_t))
+  mu_t          <- m + sqrt(abs(lambda_t/A))
+  
+  for(i in (2:(N+1))){
+    X_weak_2.0[i] <- X_weak_2.0[i - 1] - (A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * step_length + 
+      sigma * sqrt(X_weak_2.0[i - 1] * (1 - X_weak_2.0[i - 1])) * dW[i - 1] +
+      sigma^2 / 4 * (1 - 2 * X_weak_2.0[i - 1]) * (dW[i - 1] - step_length) -
+      A * (X_weak_2.0[i - 1] - m) * sigma * sqrt(X_weak_2.0[i - 1] * (1 - X_weak_2.0[i - 1])) * dW[i - 1] * step_length +
+      ((A * (X_weak_2.0[i - 1] - m)^2 + lambda_t[i - 1]) * (A * (X_weak_2.0[i - 1] - m)) -
+         sigma^2 * A / 2 * (X_weak_2.0[i - 1] * (1 - X_weak_2.0[i - 1]))) * step_length^2 - 
+      ((A * (X_weak_2.0[i - 1] - m) + lambda_t[i - 1]) * sigma * (1 - 2 * X_weak_2.0[i - 1]) + sigma^3 / 2) *
+      dW[i - 1] * step_length / (4 * sqrt(X_weak_2.0[i - 1] * (1 - X_weak_2.0[i - 1])))
+    
+    X_ito[i] <- X_ito[i - 1] - 1 / sin(X_ito[i - 1]) * (A * (1 / 2 + 2 * m^2 - 2 * m) + 2 * lambda_t[i - 1] +
+                                                          A / 2 * cos(X_ito[i - 1])^2 +
+                                                          (sigma^2 / 2 + 2 * A * m - A) * cos(X_ito[i - 1])) *
+      step_length + sigma * dW[i - 1]
+    
+  }
+  tibble::tibble(t = time,
+                 X_weak_2.0,
+                 X_manual = 2 * asin(sqrt(X_weak_2.0)),
+                 X_ito,
                  lambda_t,
                  alpha_t,
                  mu_t)
@@ -262,7 +318,7 @@ simulate_F_distribution_tipping_model <- function(step_length, par, tau = 100, t
 # sim_res_add |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = t_0)
-
+# 
 # sim_res_add |> ggplot2::ggplot(ggplot2::aes(x = t, y = lambda_t)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = c(t_0, tau + t_0))
@@ -285,12 +341,13 @@ simulate_F_distribution_tipping_model <- function(step_length, par, tau = 100, t
 
 
 ## Linear noise example
-# true_param <- c(-0.15, 4.5, 1, 0.15, 0.75)
+# true_param <- c(0.15, 4.5, -1, 0.05)
 # 
 # actual_dt <- 0.005
 # tau <- 100
 # t_0 <- 50
 # sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
+# 
 # sim_res_linear |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = t_0)
@@ -300,7 +357,7 @@ simulate_F_distribution_tipping_model <- function(step_length, par, tau = 100, t
 #   ggplot2::geom_vline(xintercept = c(t_0, tau + t_0))
 
 ## t-distributed example
-# true_param <- c(0.5, -2, -3, 0.1, 2)
+# true_param <- c(-0.5, -2, 3, 0.1)
 # actual_dt <- 0.005
 # tau <- 100
 # t_0 <- 50
@@ -313,24 +370,37 @@ simulate_F_distribution_tipping_model <- function(step_length, par, tau = 100, t
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = c(t_0, tau + t_0))
 
+
 ## F-distributed example
-# true_param <- c(0.5, 3, -3, 0.1)
+# true_param <- c(-0.5, 3, 3, 0.1)
 # actual_dt <- 0.005
 # tau <- 100
 # t_0 <- 50
-# sim_res_t_distribution <- simulate_F_distribution_tipping_model(actual_dt, true_param, tau, t_0)
-# sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
+# sim_res_F_distribution <- simulate_F_distribution_tipping_model(actual_dt, true_param, tau, t_0)
+# sim_res_F_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = t_0)
 # 
-# sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = lambda_t)) +
+# sim_res_F_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = lambda_t)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = c(t_0, tau + t_0))
 
 
-
-
-
+## Jacobi diffusion 
+# true_param <- c(20, 0.3, -1.35, 0.01)
+# actual_dt <- 0.01
+# tau <- 100
+# t_0 <- 50
+# 
+# sim_res_jacobi <- simulate_jacobi_diffusion_tipping_model(actual_dt, true_param, tau, t_0)
+# 
+# sim_res_jacobi |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_manual - X_ito)) +
+#   ggplot2::geom_step()# + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
+#   # ggplot2::geom_vline(xintercept = t_0)
+# 
+# sim_res_jacobi |> ggplot2::ggplot(ggplot2::aes(x = t, y = lambda_t)) +
+#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
+#   ggplot2::geom_vline(xintercept = c(t_0, tau + t_0))
 
 
 

@@ -12,8 +12,7 @@ Invoking \cite[algorithm 8.5]{Srkk2019} we get the scheme
 \textbf{Square-root noise}\\
 For the square-root based process the algorithm gives 
 \begin{align}
-    X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma \sqrt{X_t} \Delta W_{k} + \frac{1}{4}\sigma^2 \left(\Delta W_k^2 - \Delta t_k\right)\nonumber\\
-    &- A\left(X_{t_k} - m\right)\sigma \sqrt{X_{t_k}} W_k \Delta t_k
+    X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma \sqrt{X_t} \Delta W_{k}\nonumber\\ &+ \frac{1}{4}\sigma^2 \left(\Delta W_k^2 - \Delta t_k\right)     - A\left(X_{t_k} - m\right)\sigma \sqrt{X_{t_k}} W_k \Delta t_k
     \nonumber\\
      &+ \left(A\left(X_{t_k} - m\right)\cdot \left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right) - \frac{A\sigma^2 X_{t_k}}{2}\right)(\Delta t_k)^2 \nonumber\\
     &- \frac{1}{4\sqrt{X_{t_k}}}\left(\sigma\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right) + \frac{1}{4}\sigma^3\right) \left(\Delta W_k \Delta t_k\right)
@@ -22,8 +21,8 @@ For the square-root based process the algorithm gives
 \textbf{Linear noise}\\
 With linear noise we get the simulation scheme
 \begin{align}
-    X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma X_t \Delta W_{k} + \frac{1}{2}\sigma^2 X_{t_k}\left(\Delta W_{k}^2 - \Delta t_k\right) \nonumber \\
-    &-A(X_{t_k} - m)\sigma X_{t_k} \Delta W_k\Delta t_k \nonumber\\
+    X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma X_t \Delta W_{k} \nonumber \\ &
+    + \frac{1}{2}\sigma^2 X_{t_k}\left(\Delta W_{k}^2 - \Delta t_k\right) -A(X_{t_k} - m)\sigma X_{t_k} \Delta W_k\Delta t_k \nonumber\\
     & + \left(A\left(X_{t_k} - m\right)\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right) - \frac{A\sigma^2X_{t_k}^2}{2}\right)(\Delta t_k)^2 \nonumber \\
     &- \frac{\sigma}{2}\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right)\left(\Delta W_{k}\Delta t_k\right).
 \end{align}
@@ -43,7 +42,16 @@ The model with the F-distribution as the stationary distribution in the non-dyna
     X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma\sqrt{X_{t_k}\left(X_{t_k} + 1\right)}\Delta W_k \nonumber \\
     &+ \frac{\sigma^2}{4}\left(2X_{t_k} + 1\right)\left(\Delta W_k^2 - \Delta t_k\right) - A \left(X_{t_k} - m\right)\sigma \sqrt{X_{t_k}\left(X_{t_k} + 1\right)}\Delta W_k \Delta t_k \nonumber \\
     &+ \left(\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right)\left(A\left(X_{t_k} - m\right)\right) - \frac{\sigma^2A}{2}\left(X_{t_k}\left(X_{t_k} + 1\right)\right)  \right)\left(\Delta t_k\right)^2 \nonumber \\
-    &- \left(\sigma\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right) + \frac{\sigma^3X_{t_k}\left(X_{t_k} + 1\right)}{4}\right)\frac{\Delta W_k \Delta t_k}{4\sqrt{X_{t_k}\left(X_{t_k} + 1\right)}}
+    &- \left(\sigma\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right)\left(2 X_{t_k} + 1\right) + \frac{\sigma^3}{4}\right)\frac{\Delta W_k \Delta t_k}{4\sqrt{X_{t_k}\left(X_{t_k} + 1\right)}}
+\end{align}
+\\
+\textbf{Jacobi-diffusion}\\
+Basing the modelling on the jacobi diffusion yields a scheme
+\begin{align}
+    X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma \sqrt{X_{t_k}\left(1-X_{t_k}\right)} \Delta W_{k} \nonumber\\
+    &+ \frac{\sigma^2}{4}\left(1 - 2X_{t_k}\right)\left(\Delta W_k^2 - \Delta t_k\right) - A\left(X_{t_k} - m\right)\sigma \sqrt{X_{t_k}\left(1 - X_{t_k}\right)}\Delta W_k\Delta t_k \nonumber \\
+    &+ \left(\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right)\left(A\left(X_{t_k} - m\right)\right) - \frac{\sigma^2A}{2}\left(X_{t_k}\left(1 - X_{t_k}\right)\right)\right)\left(\Delta t_k\right)^2 \nonumber \\
+    &- \left(\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right)\sigma\left(1 - 2X_{t_k}\right) + \frac{\sigma^3}{2}\right)\frac{\Delta W_k \Delta t_k}{4\sqrt{X_{t_k}\left(1 - X_{t_k}\right)}}
 \end{align}
 \section{Derivation of Estimators}
 Here, we formulate the estimators that have been employed throughout this study deriving them by means of classic- and novel methods.
