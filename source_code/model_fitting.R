@@ -909,7 +909,7 @@ jacobi_diffusion_transform_dynamic_likelihood <- function(par, data, delta, alph
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
   sqrt_arg <- sigma^4 / 4 - sigma^2 * A - 2 * sigma^2 * A * m - 2 * A * lam_seq
-  zeta <- (A - sigma^2 / 2 - 2 * A) + sqrt(sqrt_arg)
+  zeta <- (A - sigma^2 / 2 - 2 * A) + sqrt(max(sqrt_arg, 0.01))
   
   
   if(any(sqrt_arg < 0)){return(50000)}
@@ -919,8 +919,10 @@ jacobi_diffusion_transform_dynamic_likelihood <- function(par, data, delta, alph
   A_linear_part <- zeta + sigma^2 / 2 - 2 * A * m - A
   b <- fix_points
   
-  diff_f <- function(t, y){-1 / sin(y) * (A / 2 * cos(y)^2 + (sigma^2 / 2 + 2 * A * m - A) * cos(y) +
-                                            A * (1 / 2 +2 * m^2 - 2 * m) + lam_seq) - A_linear_part * (y - b)}
+  diff_f <- function(t, y){-1 / sin(y) * 
+      (A / 2 * cos(y)^2 + (sigma^2 / 2 + 2 * A * m - A) * cos(y) +
+       A * (1 / 2 + 2 * m^2 - 2 * m) + 2 * lam_seq) -
+      A_linear_part * (y - b)}
   
   # Solution to ODE
   f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
@@ -945,7 +947,11 @@ jacobi_diffusion_transform_dynamic_likelihood <- function(par, data, delta, alph
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 ## General optimizers for stationary - and dynamic part of process
-optimize_stationary_likelihood <- function(likelihood_fun, data, init_par, delta, exp_sigma = TRUE){
+optimize_stationary_likelihood <- function(likelihood_fun,
+                                           data,
+                                           init_par, 
+                                           delta,
+                                           exp_sigma = TRUE){
   res_optim <- optim(init_par, fn = likelihood_fun,
                      method = "BFGS",
                      data = data, delta = delta)
@@ -957,7 +963,8 @@ optimize_stationary_likelihood <- function(likelihood_fun, data, init_par, delta
 
 optimize_dynamic_likelihood <- function(likelihood_fun, data,
                                         init_par, delta,
-                                        alpha0, mu0, sigma, exp_sigma = FALSE, 
+                                        alpha0, mu0, sigma, 
+                                        exp_sigma = FALSE, 
                                         method = "Nelder-Mead"){
 
   res_optim <- stats::optim(init_par, fn = likelihood_fun,
@@ -1167,7 +1174,7 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 # actual_dt <- 0.001
 # t_0 <- 50
 # tau <- 100
-# true_param <- c(0.01, 2, -4, 0.05)
+# true_param <- c(0.03, 2, -4, 0.05)
 # true_param[2] + sqrt(abs(true_param[3] / true_param[1]))
 # F_sim_dynamic <- simulate_F_distribution_tipping_model(actual_dt, true_param, t_0 = t_0, tau = tau)
 # 
@@ -1200,36 +1207,36 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 ## Jacobi diffusion 
-true_param <- c(0.1, 0.1, -0.05, 0.05)
-actual_dt <- 0.001
-tau <- 100
-t_0 <- 50
-
-sim_res_jacobi <- simulate_jacobi_diffusion_tipping_model(actual_dt, true_param, tau, t_0)
-sim_res_jacobi |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
-  ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
-  ggplot2::geom_vline(xintercept = t_0)
+# true_param <- c(0.7, 0.1, -0.05, 0.075)
+# actual_dt <- 0.005
+# tau <- 100
+# t_0 <- 50
 # 
-# # ## Stationary part
-# # # Parameters for stationary part
-mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
-alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
-stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-
-optimize_stationary_likelihood(
-  likelihood_fun = jacobi_diffusion_strang_splitting,
-  data = 2 * asin(sqrt(sim_res_jacobi$X_weak_2.0[sim_res_jacobi$t<t_0])),
-  init_par = stationary_part_true_param,
-  delta = actual_dt,
-  exp_sigma = TRUE)
-
-dynamic_part_true_param <- c(tau, true_param[1])
-optimize_dynamic_likelihood(likelihood_fun = jacobi_diffusion_transform_dynamic_likelihood,
-                            data = 2 * asin(sqrt(sim_res_jacobi$X_weak_2.0[sim_res_jacobi$t>t_0])),
-                            init_par = dynamic_part_true_param,
-                            delta = actual_dt,
-                            alpha0 = stationary_part_true_param[1],
-                            mu0 = stationary_part_true_param[2],
-                            sigma = stationary_part_true_param[3],
-                            exp_sigma = FALSE)
+# sim_res_jacobi <- simulate_jacobi_diffusion_tipping_model(actual_dt, true_param, tau, t_0)
+# sim_res_jacobi |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
+#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
+#   ggplot2::geom_vline(xintercept = t_0)
+#
+## Stationary part
+## Parameters for stationary part
+# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+# 
+# optimize_stationary_likelihood(
+#   likelihood_fun = jacobi_diffusion_strang_splitting,
+#   data = 2 * asin(sqrt(sim_res_jacobi$X_weak_2.0[sim_res_jacobi$t<t_0])),
+#   init_par = stationary_part_true_param,
+#   delta = actual_dt,
+#   exp_sigma = TRUE)
+# 
+# dynamic_part_true_param <- c(tau, true_param[1])
+# optimize_dynamic_likelihood(likelihood_fun = jacobi_diffusion_transform_dynamic_likelihood,
+#                             data = 2 * asin(sqrt(sim_res_jacobi$X_weak_2.0[sim_res_jacobi$t>t_0])),
+#                             init_par = dynamic_part_true_param,
+#                             delta = actual_dt,
+#                             alpha0 = stationary_part_true_param[1],
+#                             mu0 = stationary_part_true_param[2],
+#                             sigma = stationary_part_true_param[3],
+#                             exp_sigma = FALSE)
 

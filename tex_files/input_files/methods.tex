@@ -1,3 +1,6 @@
-\subsection{Estimating the tipping point}
+\subsection{Pearson diffusions}
+\subsection{Estimation of tipping points}
 
 \subsection{Optimization in \code{R}}
+For each part of the process, we optimize a bit differently. However, in both cases the optimization is done with \code{stats::optim} \cite{Rlang} and our optimization methods are built as a wrapper around this function. To match the optimization done in \cite{Ditlevsen2023}, we use the Nelder-Mead algorithm in the dynamic part. In the stationary part, on the other hand, we use the BFGS-algorithm for its robustness. The wrapper is implemented such that it is possible to supply any of the likelihood functions to it. For the dynamic part, we also have to provide the values for $\alpha_0, \mu_0, \sigma$. We do this in the form of the estimated values for these from the stationary part of the processes. This part also dynamically choices to estimate the $\nu$-parameter dependending on the dimension of the initial values given to the optimizer. If the dimension is two then we assume $\nu = 1$, while a dimension of three allows the optimizer estimate it.
+\subsection{Model validation}
