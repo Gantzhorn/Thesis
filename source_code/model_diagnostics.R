@@ -296,35 +296,34 @@ t_diffusion_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
 # tau <- 100
 # t_0 <- 50
 # sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
+# sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
 # ## Stationary part
 # ## Parameters for stationary part
 # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
-# OU_par <- optimize_stationary_likelihood(likelihood_fun = OU_likelihood, data = sim_res_add$X_weak_2.0[sim_res_add$t < t_0],
+# OU_par <- optimize_stationary_likelihood(likelihood_fun = OU_likelihood, data = sim_res_add$X_t[sim_res_add$t < t_0],
 #                                init_par = stationary_part_true_param,
 #                                delta = actual_dt, exp_sigma = FALSE)# - stationary_part_true_param
 # 
 # tibble::tibble(obsSample = OU_likelihood_resid(par = OU_par,
-#          data = sim_res_add$X_weak_2.0[sim_res_add$t < t_0],
+#          data = sim_res_add$X_t[sim_res_add$t < t_0],
 #          delta = actual_dt)) |> ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #     ggplot2::geom_qq() + ggplot2::geom_qq_line()
 # 
 # # # Dynamic part
 # dynamic_part_true_param <- c(tau, true_param[1])
 # OU_dynamic_par <- optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
-#                             data = sim_res_add$X_weak_2.0[sim_res_add$t > t_0],
+#                             data = sim_res_add$X_t[sim_res_add$t > t_0],
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
 #                             alpha0 = OU_par[1],
 #                             mu0 = OU_par[2],
-#                             sigma = OU_par[3],
-#                             exp_sigma = FALSE)# - dynamic_part_true_param
+#                             sigma = OU_par[3])# - dynamic_part_true_param
 # #
 # tibble::tibble(obsSample = OU_dynamic_likelihood_resid(OU_dynamic_par,
-#                             data = sim_res_add$X_weak_2.0[sim_res_add$t > t_0],
+#                             data = sim_res_add$X_t[sim_res_add$t > t_0],
 #                             delta = actual_dt,
 #                             alpha0 =  OU_par[1],
 #                             mu0 = OU_par[2],
@@ -338,7 +337,7 @@ t_diffusion_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
 # tau <- 100
 # t_0 <- 50
 # sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sample_n(sim_res_sqrt, min(nrow(sim_res_sqrt), 10000)) |> ggplot(aes(x = t, y = X_weak_2.0)) + geom_step()
+# sample_n(sim_res_sqrt, min(nrow(sim_res_sqrt), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
 #
 # # Stationary part
 # # Parameters for stationary part
@@ -347,20 +346,20 @@ t_diffusion_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
 # CIR_stationary_part_estimated_param_martingale <- 
-#   CIR_quadratic_martingale(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0],actual_dt)
+#   CIR_quadratic_martingale(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0],actual_dt)
 # 
 # tibble::tibble(obsSample = CIR_quadratic_martingale_resid(CIR_stationary_part_estimated_param_martingale,
-#                                data = sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0],
+#                                data = sim_res_sqrt$X_t[sim_res_sqrt$t < t_0],
 #                                delta = actual_dt)) |> ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #   ggplot2::geom_qq() + ggplot2::geom_qq_line()
 
 # CIR_stationary_part_estimated_param_strang <- optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
-#                                data = 2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0]),
+#                                data = 2*sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
 #                                init_par = stationary_part_true_param,
 #                                delta = actual_dt, exp_sigma = FALSE)
 # 
 # tibble::tibble(obsSample = CIR_strang_splitting_resid(CIR_stationary_part_estimated_param_strang,
-#                            2*sqrt(sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t < t_0]),
+#                            2*sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
 #                            actual_dt)) |> ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #   ggplot2::geom_qq() + ggplot2::geom_qq_line()
 # 
@@ -368,16 +367,15 @@ t_diffusion_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
 # 
 # dynamic_part_true_param <- c(tau, true_param[1])
 # CIR_dynamic_part_estimated_param_strang <- optimize_dynamic_likelihood(likelihood_fun = CIR_dynamic_likelihood,
-#                             data = sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t > t_0],
+#                             data = sim_res_sqrt$X_t[sim_res_sqrt$t > t_0],
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
 #                             alpha0 = CIR_stationary_part_estimated_param_martingale[1],
 #                             mu0 = CIR_stationary_part_estimated_param_martingale[2],
-#                             sigma = CIR_stationary_part_estimated_param_martingale[3],
-#                             exp_sigma = FALSE)
+#                             sigma = CIR_stationary_part_estimated_param_martingale[3])
 # # 
 # tibble::tibble(obsSample = CIR_dynamic_likelihood_resid(CIR_dynamic_part_estimated_param_strang,
-#                              data = sim_res_sqrt$X_weak_2.0[sim_res_sqrt$t > t_0],
+#                              data = sim_res_sqrt$X_t[sim_res_sqrt$t > t_0],
 #                              delta = actual_dt,
 #                              alpha0 = CIR_stationary_part_estimated_param_martingale[1],
 #                              mu0 = CIR_stationary_part_estimated_param_martingale[2],
@@ -392,7 +390,7 @@ t_diffusion_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
 # t_0 <- 50
 # sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
 # sample_n(sim_res_linear, min(nrow(sim_res_linear), 10000)) |>
-#   ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) + ggplot2::geom_step()
+#   ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) + ggplot2::geom_step()
 # # 
 # # Stationary part
 # # Parameters for stationary part
@@ -402,12 +400,12 @@ t_diffusion_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
 # 
 # GBM_stationary_part_estimated_param_martingale <- nleqslv::nleqslv(x = stationary_part_true_param,
 #                                                                    fn = mean_reverting_GMB_martingale,
-#                  data = sim_res_linear$X_weak_2.0[sim_res_linear$t < t_0],
+#                  data = sim_res_linear$X_t[sim_res_linear$t < t_0],
 #                  delta = actual_dt)$x #- stationary_part_true_param
 # # 
 # tibble::tibble(obsSample =
 #                  mean_reverting_GMB_Kessler_likelihood_resid(GBM_stationary_part_estimated_param_martingale,
-#                  data = sim_res_linear$X_weak_2.0[sim_res_linear$t < t_0],
+#                  data = sim_res_linear$X_t[sim_res_linear$t < t_0],
 #                  delta = actual_dt)) |>
 #                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
@@ -417,18 +415,17 @@ t_diffusion_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
 # dynamic_part_true_param <- c(tau, true_param[1])
 # # 
 # GBM_dynamic_part_estimated_param_strang <- optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GMB_dynamic_likelihood,
-#                             data = sim_res_linear$X_weak_2.0[sim_res_linear$t > t_0],
+#                             data = sim_res_linear$X_t[sim_res_linear$t > t_0],
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
 #                             alpha0 = GBM_stationary_part_estimated_param_martingale[1],
 #                             mu0 = GBM_stationary_part_estimated_param_martingale[2],
-#                             sigma = GBM_stationary_part_estimated_param_martingale[3],
-#                             exp_sigma = FALSE) #- dynamic_part_true_param
+#                             sigma = GBM_stationary_part_estimated_param_martingale[3])
 # # 
 # 
 # tibble::tibble(obsSample =
 #                  mean_reverting_GMB_dynamic_likelihood_resid(GBM_dynamic_part_estimated_param_strang,
-#                  data= sim_res_linear$X_weak_2.0[sim_res_linear$t > t_0],
+#                  data= sim_res_linear$X_t[sim_res_linear$t > t_0],
 #                  delta = actual_dt,
 #                  alpha0 = GBM_stationary_part_estimated_param_martingale[1],
 #                  mu0 = GBM_stationary_part_estimated_param_martingale[2],
@@ -438,58 +435,57 @@ t_diffusion_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
 #                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
 
 ## t-distribute stationary process
-true_param <- c(0.5, -2, -3, 0.1)
-actual_dt <- 0.001
-tau <- 100
-t_0 <- 50
-sim_res_t_distribution <- simulate_t_distribution_tipping_model(actual_dt, true_param, tau, t_0)
-sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_weak_2.0)) +
-  ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
-  ggplot2::geom_vline(xintercept = t_0)
-
-## Stationary part
-# Parameters for stationary part
-mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
-alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
-stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-
-t_stationary_part_estimated_param <- optimize_stationary_likelihood(
-              likelihood_fun = t_diffusion_strang_splitting,
-              data = log(sim_res_t_distribution$X_weak_2.0[sim_res_t_distribution$t < t_0] +
-                     sqrt(sim_res_t_distribution$X_weak_2.0[sim_res_t_distribution$t < t_0]^2 + 1)),
-              init_par = stationary_part_true_param,
-              delta = actual_dt,
-              exp_sigma = TRUE)
-# # 
-tibble::tibble(obsSample =
-                 t_diffusion_strang_splitting_resid(t_stationary_part_estimated_param,
-                 data = sim_res_t_distribution$X_weak_2.0[sim_res_t_distribution$t < t_0],
-                 delta = actual_dt)) |>
-                 ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
-                 ggplot2::geom_qq() + ggplot2::geom_qq_line()
-
-## Dynamic part
-dynamic_part_true_param <- c(tau, true_param[1])
-
-t_dynamic_part_estimated_param <- optimize_dynamic_likelihood(likelihood_fun =                                                                          t_dynamic_likelihood,
-                            data = sim_res_t_distribution$X_weak_2.0[sim_res_t_distribution$t > t_0],
-                            init_par = dynamic_part_true_param,
-                            delta = actual_dt,
-                            alpha0 = t_stationary_part_estimated_param[1],
-                            mu0 = t_stationary_part_estimated_param[2],
-                            sigma = t_stationary_part_estimated_param[3],
-                            exp_sigma = FALSE) 
-
-
-tibble::tibble(obsSample =
-                 t_diffusion_dynamic_likelihood_resid(
-                 par = t_dynamic_part_estimated_param,
-                 data= sim_res_t_distribution$X_weak_2.0[sim_res_t_distribution$t > t_0],
-                 delta = actual_dt,
-                 alpha0 = t_stationary_part_estimated_param[1],
-                 mu0 = t_stationary_part_estimated_param[2],
-                 sigma = t_stationary_part_estimated_param[3])) |>
-                 ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
-                 ggplot2::geom_qq() + ggplot2::geom_qq_line()
+# true_param <- c(0.5, -2, -3, 0.1)
+# actual_dt <- 0.001
+# tau <- 100
+# t_0 <- 50
+# sim_res_t_distribution <- simulate_t_distribution_tipping_model(actual_dt, true_param, tau, t_0)
+# sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) +
+#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
+#   ggplot2::geom_vline(xintercept = t_0)
+# 
+# ## Stationary part
+# # Parameters for stationary part
+# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+# 
+# t_stationary_part_estimated_param <- optimize_stationary_likelihood(
+#               likelihood_fun = t_diffusion_strang_splitting,
+#               data = log(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0] +
+#                      sqrt(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]^2 + 1)),
+#               init_par = stationary_part_true_param,
+#               delta = actual_dt,
+#               exp_sigma = TRUE)
+# # # 
+# tibble::tibble(obsSample =
+#                  t_diffusion_strang_splitting_resid(t_stationary_part_estimated_param,
+#                  data = sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0],
+#                  delta = actual_dt)) |>
+#                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
+#                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
+# 
+# ## Dynamic part
+# dynamic_part_true_param <- c(tau, true_param[1])
+# 
+# t_dynamic_part_estimated_param <- optimize_dynamic_likelihood(likelihood_fun =                                                                          t_dynamic_likelihood,
+#                             data = sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0],
+#                             init_par = dynamic_part_true_param,
+#                             delta = actual_dt,
+#                             alpha0 = t_stationary_part_estimated_param[1],
+#                             mu0 = t_stationary_part_estimated_param[2],
+#                             sigma = t_stationary_part_estimated_param[3]) 
+# 
+# 
+# tibble::tibble(obsSample =
+#                  t_diffusion_dynamic_likelihood_resid(
+#                  par = t_dynamic_part_estimated_param,
+#                  data= sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0],
+#                  delta = actual_dt,
+#                  alpha0 = t_stationary_part_estimated_param[1],
+#                  mu0 = t_stationary_part_estimated_param[2],
+#                  sigma = t_stationary_part_estimated_param[3])) |>
+#                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
+#                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
 
 

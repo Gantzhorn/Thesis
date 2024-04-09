@@ -1,6 +1,18 @@
 \subsection{Pearson diffusions}
+A pearson diffusion is a solution to a stochastic differential equation on the form
+\begin{align}
+    \mathrm{d}X_t = -\beta \left(X_t - \mu\right)\mathrm{d}t + \sqrt{2\beta\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, \: \beta > 0.
+\end{align}
+These diffusions are a well-studied class of stochastic differential equations. Note that we only consider cases in which $a\geq 0$ and the eigenfunctions are square-integrable. One can show that this reduces the number of possibilities to six special diffusions. \cite[p.36]{StatisticalMethodsForSDE}. We study the lamperti transform of these processes
+\begin{align}
+    \psi\left(X_t, t\right) := \int_{\xi}^{X_t} \frac{\mathrm{d}x}{\sqrt{2\beta\left(ax^2 + bx + c\right)}}.
+\end{align}
+By Itô's formula
+\begin{align}
+    \mathrm{d}\psi\left(X_t, t\right) = - \frac{1}{\sqrt{2\beta\left(aX_t^2 + bX_t + c\right)}}\left(\beta\left(X_t - \mu\right) + \frac{1}{2}\beta\left(2aX_t + b\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t.
+\end{align}
 \subsection{Estimation of tipping points}
 
 \subsection{Optimization in \code{R}}
-For each part of the process, we optimize a bit differently. However, in both cases the optimization is done with \code{stats::optim} \cite{Rlang} and our optimization methods are built as a wrapper around this function. To match the optimization done in \cite{Ditlevsen2023}, we use the Nelder-Mead algorithm in the dynamic part. In the stationary part, on the other hand, we use the BFGS-algorithm for its robustness. The wrapper is implemented such that it is possible to supply any of the likelihood functions to it. For the dynamic part, we also have to provide the values for $\alpha_0, \mu_0, \sigma$. We do this in the form of the estimated values for these from the stationary part of the processes. This part also dynamically choices to estimate the $\nu$-parameter dependending on the dimension of the initial values given to the optimizer. If the dimension is two then we assume $\nu = 1$, while a dimension of three allows the optimizer estimate it.
+For each part of the process, we optimize a bit differently. However, in both cases the optimization is done with \code{stats::optim} \cite{Rlang} and our optimization methods are built as a wrapper around this function. To match the optimization done in \cite{Ditlevsen2023}, we use the Nelder-Mead algorithm in the dynamic part. In the stationary part, on the other hand, we use the BFGS-algorithm for its robustness. The wrapper is implemented such that it is possible to supply any of the likelihood functions to it. In addition, one can specify any other optimization algorithm that is implemented in \code{optim}. For the dynamic part, we also have to provide the values for $\alpha_0, \mu_0, \sigma$. We do this in the form of the estimated values for these from the stationary part of the processes. This part also dynamically chooses to estimate the $\nu$-parameter dependending on the dimension of the initial values given to the optimizer. If the dimension is two then we assume $\nu = 1$, while a dimension of three allows the optimizer estimate it.
 \subsection{Model validation}

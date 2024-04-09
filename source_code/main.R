@@ -39,20 +39,20 @@ for (i in 1:numSim){
   sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0, beyond_tipping = -15)
   # Stationary part
   stationaryPart_Likelihood_Optimization[i, ] <- (optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
-                                                  data = sim_res_add$X_weak_2.0[sim_res_add$t < t_0],
+                                                  data = sim_res_add$X_t[sim_res_add$t < t_0],
                                                   init_par = stationary_part_true_param,
                                                   delta = actual_dt, exp_sigma = FALSE) -
                                                     stationary_part_true_param) / stationary_part_true_param
 
   stationaryPart_Score_root[i, ] <- (nleqslv::nleqslv(x = stationary_part_true_param,
                  fn = OU_Score,
-                 data = sim_res_add$X_weak_2.0[sim_res_add$t < t_0],
+                 data = sim_res_add$X_t[sim_res_add$t < t_0],
                  delta = actual_dt)$x - stationary_part_true_param) / stationary_part_true_param
 
   ## Dynamic part
 
   dynamicPart_Likelihood_Strang[i, ] <- (optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
-                            data = sim_res_add$X_weak_2.0[sim_res_add$t > t_0],
+                            data = sim_res_add$X_t[sim_res_add$t > t_0],
                             init_par = dynamic_part_true_param,
                             delta = actual_dt,
                             alpha0 = stationary_part_true_param[1],
@@ -61,7 +61,7 @@ for (i in 1:numSim){
                             dynamic_part_true_param) / dynamic_part_true_param
 
   dynamicPart_Likelihood_Sim[i, ] <- (optimize_dynamic_simulation_likelihood(likelihood_fun = OU_dynamic_simulation_likelihood,
-                                       data = sim_res_add$X_weak_2.0[sim_res_add$t > t_0],
+                                       data = sim_res_add$X_t[sim_res_add$t > t_0],
                                        times = sim_res_add$t[sim_res_add$t > t_0],
                                        M = M, N = N, init_par = dynamic_part_true_param,
                                        alpha0 = stationary_part_true_param[1],
@@ -104,3 +104,85 @@ bind_rows(dynamicPart_Strang_tibble, dynamicPart_Simulation_tibble) |>
     axis.ticks.x  = element_blank(),
     axis.text.x = element_blank()
   )
+
+# Precision of estimator as a function of how early we have information up to.
+# Try t-distribution
+true_param <- c(0.3, -2, -3, 0.1)
+actual_dt <- 0.1
+tau <- 100
+t_0 <- 50
+mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+dynamic_part_true_param <- c(tau, true_param[1])
+
+numSim <- 10
+
+time_to_tipping <- seq(-50, 0, by = 5)
+
+results <- list()
+nu_param_values <- c(0.6, 0.8, 1, 1.2, 1.4)
+
+for (nu in nu_param_values){
+  true_param <- c(0.3, -2, -3, 0.1, nu)
+  mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+  alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+  stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+  dynamic_part_true_param <- c(tau, true_param[1], nu)
+  
+  
+  
+  for (i in seq_along(time_to_tipping)){
+    print(time_to_tipping[i])
+    for (j in 1:numSim){
+      if(j%%5 == 0 | j == 1){print(j)}
+      sim_res_t_distribution <- simulate_t_distribution_tipping_model(
+        actual_dt, true_param, tau,
+        t_0, beyond_tipping = time_to_tipping[i])
+      
+    # Stationary part
+    
+      t_dist_estim_param <- optimize_stationary_likelihood(
+        likelihood_fun = t_diffusion_strang_splitting,
+        data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
+        init_par = stationary_part_true_param,
+        delta = actual_dt,
+        exp_sigma = TRUE)
+    
+    # Dynamic part
+    
+    accuracy_tau[j, i] <- (optimize_dynamic_likelihood(likelihood_fun = t_transform_dynamic_likelihood,
+                                data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0]),
+                                init_par = dynamic_part_true_param,
+                                delta = actual_dt,
+                                alpha0 = t_dist_estim_param[1],
+                                mu0 = t_dist_estim_param[2],
+                                sigma = t_dist_estim_param[3])[1] - tau) / tau
+    }
+  }
+  # Calculate means and quantiles
+  column_wise_means <- colMeans(accuracy_tau)
+  column_wise_lower_quantiles <- apply(accuracy_tau, 2, function(x) quantile(x, probs = 0.1))
+  column_wise_upper_quantiles <- apply(accuracy_tau, 2, function(x) quantile(x, probs = 0.9))
+  
+  # Store results
+  results[[as.character(nu)]] <- tibble(
+    x = time_to_tipping,
+    mean = column_wise_means,
+    lower = column_wise_lower_quantiles,
+    upper = column_wise_upper_quantiles,
+    nu = nu
+  )
+}
+
+combined_data <- bind_rows(results, .id = "nu_label")
+
+combined_data$nu <- as.factor(combined_data$nu)
+
+ggplot(combined_data, aes(x = x, y = mean)) +
+  geom_line(linewidth = 1) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5) + 
+  geom_hline(yintercept = 0, linetype = "dashed") + 
+  facet_wrap(~nu, scales = "free_y") + 
+  xlab("Observations until time") + ylab("Relative deviation from tipping time") +
+  ggtitle("Relative deviation from tipping time by fifth parameter value")
