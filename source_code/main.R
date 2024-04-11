@@ -186,3 +186,22 @@ ggplot(combined_data, aes(x = x, y = mean)) +
   facet_wrap(~nu, scales = "free_y") + 
   xlab("Observations until time") + ylab("Relative deviation from tipping time") +
   ggtitle("Relative deviation from tipping time by fifth parameter value")
+
+### Plots for sample paths
+true_param_t <- c(0.7, -2, -3, 0.15)
+actual_dt <- 0.1
+tau <- 100
+t_0 <- 50
+sim_res_t_distribution <- simulate_t_distribution_tipping_model(actual_dt, true_param_t, tau, t_0)
+sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) +
+  ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param_t[2], linetype = "dashed") +
+  ggplot2::geom_vline(xintercept = t_0)
+
+true_param_sqrt <- c(0.7, 2, -3, 0.15)
+
+sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param_sqrt, tau, t_0)
+sim_res_sqrt |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) +
+  ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param_sqrt[2], linetype = "dashed") +
+  ggplot2::geom_vline(xintercept = t_0)
+
+

@@ -1,18 +1,76 @@
 \subsection{Pearson diffusions}
 A pearson diffusion is a solution to a stochastic differential equation on the form
 \begin{align}
-    \mathrm{d}X_t = -\beta \left(X_t - \mu\right)\mathrm{d}t + \sqrt{2\beta\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, \: \beta > 0.
+    \mathrm{d}X_t = -\beta \left(X_t - \mu\right)\mathrm{d}t + \sigma\sqrt{\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, \: \beta, \sigma > 0.
 \end{align}
-These diffusions are a well-studied class of stochastic differential equations. Note that we only consider cases in which $a\geq 0$ and the eigenfunctions are square-integrable. One can show that this reduces the number of possibilities to six special diffusions. \cite[p.36]{StatisticalMethodsForSDE}. We study the lamperti transform of these processes
+For appropriate choices of $a, b, c$ making the square-root well-defined in the state space of $X_t$. These diffusions are a well-studied class of stochastic differential equations. In this thesis we focus on the ergodic pearson diffusions. One can show that this is class of six special diffusions \cite[p.36]{StatisticalMethodsForSDE}. Amongst other things, we consider the Lamperti-transform of these processes defined as
 \begin{align}
-    \psi\left(X_t, t\right) := \int_{\xi}^{X_t} \frac{\mathrm{d}x}{\sqrt{2\beta\left(ax^2 + bx + c\right)}}.
+    \psi\left(X_t, t\right) := \int_{\xi}^{X_t} \frac{\mathrm{d}x}{\sqrt{\left(ax^2 + bx + c\right)}}. \label{eq:lampertiDefinition}
 \end{align}
-By Itô's formula
+For some appropriate $\xi$ in the state space of the respective diffusions. Now by Itô's formula
 \begin{align}
-    \mathrm{d}\psi\left(X_t, t\right) = - \frac{1}{\sqrt{2\beta\left(aX_t^2 + bX_t + c\right)}}\left(\beta\left(X_t - \mu\right) + \frac{1}{2}\beta\left(2aX_t + b\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t.
+    \mathrm{d}\psi\left(X_t, t\right) = - \frac{1}{\sqrt{\left(aX_t^2 + bX_t + c\right)}}\left(\beta\left(X_t - \mu\right) + \frac{\sigma^2}{4}\left(2aX_t + b\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t.
 \end{align}
-\subsection{Estimation of tipping points}
+We define $Y_t := \psi\left(X_t, t\right)$. However, in order to commence, we need to invert $\psi\left(X_t, t\right)$ and this obviously has to be handled casewise. We sketch a quick overview of the processes
+\begin{table}[h!]
+    \begin{center}
+    \begin{tabular}{lllll}\hline
+    \textbf{Name} & \textbf{Diffusion term} & \textbf{Lamperti-transform} & \textbf{State space}\\ \hline
+    Ornstein-Uhlenbeck  & $\sigma$  & $X_t$ & $\mathbb{R}$ \\
+    Square-root process & $\sigma\sqrt{X_t}$  & $ 2\sqrt{X_t}$ & $\mathbb{R}_{>0}$ \\
+    Mean-reverting GBM  & $\sigma X_t $  & $ \log\left(X_t\right)$  & $\mathbb{R}_{>0}$ \\
+    Skew t-diffusion  & $\sigma\sqrt{X_t^2 + 1}$  & $ \sinh^{-1}(X_t)$ & $\mathbb{R}$\\
+    Scaled F-diffusion  & $\sigma\sqrt{X_t\left(X_t + 1\right)}$  & $ 2\sinh^{-1}\left(\sqrt{X_t}\right)$ & $\mathbb{R}_{>0}$ \\
+    Jacobi-diffusion  & $\sigma\sqrt{X_t\left(1 - X_t\right)}$  & $ 2\sin^{-1}\left(X_t\right)$ & $(0, 1)$ \\ \hline
+    \end{tabular}
+    \caption{Overview of the ergodic pearson diffusions}
+\end{center}
+\end{table}\\
+To see the expressions for $\mathrm{d}Y_t$ for each of the diffusions refer to appendix \ref{sec:AppendixEstim}. The lamperti-transformed process is instrumental to our later estimation as it per construction has additive noise, which we can exploit. Confer these concrete diffusion terms it is clear that \ref{eq:lampertiDefinition} is always well-defined; that is, the process is reducible.  We note that some of the diffusions are not ergodic for any choice of parameters. Whether there are any conditions for ergodicity and what these are depends on the diffusion in question; the condition is on the parameters. For instance, the Ornstein-Uhlenbeck is always ergodic and has invariant distribution $\mathcal{N}\left(\mu, \frac{\sigma^2}{2\beta}\right)$, whereas the square-root process is ergodic exactly when $2\beta\mu\geq \sigma^2$ and the invariant distribution here is $\Gamma\left(\frac{2\beta\mu}{\sigma^2}, \frac{2\beta}{\sigma^2}\right)$. \\
 
+Later, we also need to be able to calculate moments up to the second order. In order to do so, we introduce the so-called Infinitesemal generator of a stochastic process
+\begin{align}
+    \mathcal{L}\varphi(x) = b(x, t) \varphi' + \frac{1}{2}\sigma^2(X_t, t)\varphi'',
+\end{align}
+where the derivatives are taken with respect to $x$ and $\varphi$ is a suitably regular function. We say that $\varphi$, $\lambda$ are eigen functions and -values for the process respectively if
+\begin{align}
+    \mathcal{L}\varphi = - \lambda \varphi,
+\end{align}
+Under mild regulatory conditions \cite[theorem 1.16]{StatisticalMethodsForSDE} then gives a method to derive the moments as
+\begin{align}
+    \mathbb{E}\left[\varphi(X_{t_k + 1}) \middle | X_{t_k}\right] = \exp\left(-\lambda t\right)\varphi \label{eq:momentConditions}
+\end{align}
+For typographical reasons, the dependence on the parameters have been suppresed in both $\varphi$ and $\lambda$. Additionally, Forman and Sorensen \cite{FormanSorensen2008} showed that for our ergodic diffusions, the eigenfunctions are all polynomials. Because of this, it is possible to derive any conditional moment of these processes, in spite of the fact that  the transition densities themselves are unknown. It is later going to be evident that we only need the first two eigenfunctions and -values - that is the ones from the first- and second order polynomials.
+\subsection{Bifurcation tipping}
+
+\subsection{Inference for stochastic differential equations}
+Regardless of the method in question, inference about parameters in stochastic differential equations are quite often done by leveraging the markov property of Itô processes. This means that in order to estimate the parameter we need the transition density or approximations thereof.
+To this end, inference is traditionally done qua the Euler-maruyama scheme. In this thesis, we only used the estimator based on this scheme in the initial development; it is fairly easy to derive, implement and it is computationally quite efficient. Yet, the estimator is biased even for moderately large stepsizes, and quite notably so in non-linear models \cite{SplittingSchemes}. Instead, we consider two other means of estimation 
+\subsubsection{The Strang likelihood}
+The Strang based estimator is a method based on splitting schemes. Other similar methods exists. However, for one-step predictions of transition densities Strang is proven to be superior; compare \cite[Proposition 3.4 and 3.6]{SplittingSchemes}. For one dimensional diffusions with additive noise, splitting schemes work by splitting the process into a linear SDE and a non-linear ODE
+\begin{align}
+    \mathrm{d}X_t^{(1)} &= -\beta(\theta)\left(X_t^{(1)} - \mu(\theta)\right)\mathrm{d}t + \sigma \mathrm{d}W_t, &&X_t^{(1)} = x_0, \\
+    \mathrm{d}X_t^{(2)} &= N\left(X_t^{(2)}\right)\mathrm{d}t, &&X_t^{(2)} = x_0,
+\end{align}
+where $N$ is some non-linear function that also might depend on the parameters. Although the splitting is not unique and is irrelevant asymtotically, the choice might have an impact with finite samples. Additionally, one can imagine that some splittings are numerically more well-behaved. For the most part, we use the heuristic provided in \cite[section 2.3 and 2.5]{SplittingSchemes}. That is, we find the linear SDE be the linearization around the fix points of the drift; the ODE is then found as the residual of the original SDE and our linear SDE. In the one dimensional case, the solution with stepsize, $\Delta t$, to the linear SDE is given by the flow
+\begin{align}
+    \varphi_{\Delta t}^{(1)}(x) = \exp\left(-\beta\left(\theta\right) \Delta t\right)\left(x - \mu\left(\theta\right)\right) + \mu\left(\theta\right) + \xi_{\Delta t},
+\end{align}
+with $\xi_{\Delta t}\sim\mathcal{N}\left(0, \Omega_{\Delta t}\right)$. That is, the flow is gaussian with mean and variance
+\begin{align}
+    \mu_{\Delta t}(x; \theta) &= \exp\left(-\beta\left(\theta\right) \Delta t\right)\left(x - \mu\left(\theta\right)\right) + \mu\left(\theta\right)\\
+    \Omega_{\Delta t} &= \frac{\sigma^2}{2\beta}\left(1 - \exp\left(-2\beta\left(\theta\right)\Delta t\right)\right)
+\end{align}
+\subsubsection{Pearson diffusions}
+
+Furthermore, we estimate the parameters by means of the following approximately optimal martingale estimation functions \cite[Example 1.11]{StatisticalMethodsForSDE}.
+\begin{align}
+    G_N^{\circ} &= \sum_{i = 1}^N 
+    \left(
+        \frac{\partial_\theta\left(X_{t_{i-1}};\theta\right)}{\sigma^2\left(X_{t_{i-1};\theta}\right)}
+    \right) \left(X_{t_{i}} - \mathbb{E}\left[X_{t_{i}} \middle| X_{t_{i-1}} = x\right]\right) \nonumber \\
+    &+ \frac{\partial_\theta\sigma^2\left(X_{t_{i-1}}; \theta\right)}{2\sigma^4\left(X_{t_{i - 1}}\right)\Delta t}\left(\left(X_{t_{i}} - \mathbb{E}\left[X_{t_{i}} \middle| X_{t_{i-1}} = x\right]\right)^2 - \textrm{Var}\left[X_{t_{i}} \middle| X_{t_{i-1}} = x\right]\right) \label{eq:approximatelyOptimalMartingale}
+\end{align}
 \subsection{Optimization in \code{R}}
 For each part of the process, we optimize a bit differently. However, in both cases the optimization is done with \code{stats::optim} \cite{Rlang} and our optimization methods are built as a wrapper around this function. To match the optimization done in \cite{Ditlevsen2023}, we use the Nelder-Mead algorithm in the dynamic part. In the stationary part, on the other hand, we use the BFGS-algorithm for its robustness. The wrapper is implemented such that it is possible to supply any of the likelihood functions to it. In addition, one can specify any other optimization algorithm that is implemented in \code{optim}. For the dynamic part, we also have to provide the values for $\alpha_0, \mu_0, \sigma$. We do this in the form of the estimated values for these from the stationary part of the processes. This part also dynamically chooses to estimate the $\nu$-parameter dependending on the dimension of the initial values given to the optimizer. If the dimension is two then we assume $\nu = 1$, while a dimension of three allows the optimizer estimate it.
 \subsection{Model validation}

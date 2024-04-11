@@ -53,7 +53,7 @@ Basing the modelling on the jacobi diffusion yields a scheme
     &+ \left(\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right)\left(A\left(X_{t_k} - m\right)\right) - \frac{\sigma^2A}{2}\left(X_{t_k}\left(1 - X_{t_k}\right)\right)\right)\left(\Delta t_k\right)^2 \nonumber \\
     &- \left(\left(A\left(X_{t_k} - m\right)^2 + \lambda_{t_k}\right)\sigma\left(1 - 2X_{t_k}\right) + \frac{\sigma^3}{2}\right)\frac{\Delta W_k \Delta t_k}{4\sqrt{X_{t_k}\left(1 - X_{t_k}\right)}} \label{eq:jacobiDiffusion}
 \end{align}
-\section{Derivation of Estimators}
+\section{Derivation of Estimators}\label{sec:AppendixEstim}
 Here, we formulate the estimators that have been employed throughout this study deriving them by means of classic- and novel methods.
 \subsection{Ornstein-Uhlenbeck}\label{subsec:OUprocess}
 \subsubsection{Stationary part}\label{subsubsec:OUprocessStationary}
@@ -61,7 +61,7 @@ In the stationary part of the process we may assume that the process behaves lik
 \begin{align}
     \mathrm{d}X_t = -\alpha_0\left(X_t-\mu\right) \mathrm{d}t + \sigma \mathrm{d}W_t.
 \end{align}
-Let $\rho = \exp\left(-\alpha_0\Delta\right), \gamma^2 = \sigma^2/2\alpha_0$. This process has transition density 
+Let $\rho = \exp\left(-\alpha_0\Delta\right), \gamma^2 = \sigma^2/2\alpha_0$. This process has transition density \cite{DitlevsenSupplementary}
 \begin{align}
     p\left(\Delta, \mathbf{x};\theta\right) = \frac{1}{\sqrt{2\pi\gamma^2\left(1-\rho^2\right)}}\exp\left(-\frac{\left(x_i-x_{i-1}\rho - \mu\left(1-\rho\right)\right)^2}{2\gamma^2\left(1-\rho^2\right)}\right), \label{eq:OULikelihood}
 \end{align}
@@ -72,11 +72,33 @@ which is a gaussian density with conditional mean and -variance
 \end{align}
 Unfortunately, we cannot get closed form solution to all of the estimators from this. However, we can still maximize (\ref{eq:OULikelihood}) with respect to $\theta$ to get the MLEs. Alternatively, we can derive the score equations by taking the derivative of the log-likelihood, and numerically solve the non-linear equations we get from doing so. The score equations are present in \cite{DitlevsenSupplementary}. To solve the equations, we use the $\code{nleqslv::nleqslv}$-method \cite{nleqslv}. For starting values in both methods we use the approximation for the MLE of $\mu$ in equation \cite[(S4)]{DitlevsenSupplementary} along with (S4),(S5) for $\rho, \gamma^2$. 
 \subsubsection{Dynamic part part}\label{subsubsec:OUprocessDynamic}
-This part of the estimation procedure has to do with the estimation of the parameters linked to the dynamic part of the process
+This part of the estimation procedure has to do with the estimation of the parameters linked to the dynamic part of the process. For the processes with additive noise, our estimation proceduere mostly follows \cite{Ditlevsen2023} barring the addition of the $\nu$-parameter.
 \begin{align}
-    \mathrm{d}X_t &= -\left(A\left(X_t - m\right) + \lambda_t\right) + \sigma \mathrm{d}W_t,\\
-    \lambda_t &= \lambda_0\left(1 - \frac{t - t_0}{\tau_c}\right)^\nu,
+    \mathrm{d}X_t &= -\left(A\left(X_t - m\right) + \lambda_t\right) + \sigma \mathrm{d}W_t \label{eq:additiveDynamicPart},\\
+    \lambda_t &= \lambda_0\left(1 - \frac{t - t_0}{\tau_c}\right)^\nu.
 \end{align}
+For this part of the process, we utilize the estimation method described in \cite{DitlevsenSupplementary}. The fixpoint of the process is $\mu\left(\lambda\right) = \sqrt{-\frac{\lambda_t}{A}}$. Linearizing the process around this value yields the splitting
+\begin{align}
+    \mathrm{d}X_t^{(1)} &= -\alpha\left(\lambda\right)\left(X_t^{(1)} - \mu\left(\lambda\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \label{eq:additiveSDE}\\
+    \mathrm{d}X_t^{(2)} &= -A \left(X_t^{(2)} - \mu\left(\lambda\right)\right)^2\mathrm{d}t. \label{eq:additiveODE}
+\end{align}
+We recognize the Ornstein-Uhlenbeck process in \ref{eq:additiveSDE}, for which the flow is known. Denote this flow $\varphi_\Delta(x)^{(1)}$. Additionally, one can show that (\ref{eq:additiveODE}) is solved by 
+\begin{align}
+    \varphi^{(2)}_{\Delta t}(x) = \frac{\mu\left(\lambda\right)A\Delta t\left(x - \mu\left(\lambda\right)\right) + x}{A\Delta t\left(x- \mu\left(\lambda\right)\right) + 1}.
+\end{align}
+By the remark below \cite[equation 9]{SplittingSchemes} 
+\begin{align}
+    \left(\varphi^{(2)}_{\Delta t}\right)^{-1}(x) = \varphi^{(2)}_{-\Delta t}(x) = \frac{\mu\left(\lambda\right)A\Delta t\left(x - \mu\left(\lambda\right)\right) - x}{A\Delta t\left(x- \mu\left(\lambda\right)\right) - 1},
+\end{align}
+and 
+\begin{align}
+    \partial_x \left(\varphi^{(2)}_{\Delta t}\right)^{-1}(x) = \frac{1}{\left(A \Delta t\left(x-\mu\left(\lambda \right)\right) - 1\right)^2}.
+\end{align}
+Then the Strang splitting approximates the transition density of (\ref{eq:additiveDynamicPart}) by
+\begin{align}
+    \left(X_{t + \Delta t} | X_t = x\right) &= \left(\varphi^{(2)}_{\Delta t / 2}\circ \varphi^{(1)}_{\Delta t} \circ \varphi^{(2)}_{\Delta t / 2}\right)
+\end{align}
+This is a non-linear transformation of a gaussian random variable, so we can easily get the pseudo-loglikelhood using the elements from above. The maximizer of this quantity is then our estimate. 
 \subsection{Square-root process}\label{subsec:squareroot}
 \subsubsection{Stationary part}\label{subsubsec:squarerootStationary}
 In the stationary part we assume the process can be modelled by the square-root process
@@ -114,15 +136,7 @@ We start by deriving the expressions for the one-step ahead conditional mean and
 \begin{align}
     \mathcal{L}(f) = \frac{1}{2}\sigma^2x\frac{\mathrm{d}}{\mathrm{d}x^2}f -\beta\left(x - \mu\right)\frac{\mathrm{d}}{\mathrm{d}x}f.
 \end{align}
-we say that $\varphi$, $\lambda$ are eigen functions and -values for the process if
-\begin{align}
-    \mathcal{L}\varphi = - \lambda \varphi,
-\end{align}
-and under mild regulatory conditions \cite[theorem 1.16]{StatisticalMethodsForSDE} gives a method to derive the moments as
-\begin{align}
-    \mathbb{E}\left[\varphi(X_{t_k + 1}) \middle | X_{t_k}\right] = \exp\left(-\lambda t\right)\varphi \label{eq:momentConditions}
-\end{align}
-For typographical reasons, the dependence on the parameters have been suppresed in both $\varphi$ and $\lambda$. Additionally, Forman and Sorensen \cite{FormanSorensen2008} showed that for simple diffusions, such as the square-root process, the eigenfunctions are all polynomials. Since we only will be constructing a quadratic martingale estimation equation, we only need the first two eigen functions and -values. By direct computation one easily finds that 
+By direct computation one easily finds that 
 \begin{align}
     \phi_1(x) &= x-\mu, &&\; \lambda_1 = \beta, \label{squarerooteigen1}\\
     \phi_2(x) &= x^2 - \left(2\mu + \frac{\sigma^2}{\beta}\right)x + \mu^2 + \frac{\sigma^2\mu}{2\beta}, &&\; \lambda_2 = 2\beta. \label{squarerooteigen2}
@@ -153,7 +167,7 @@ By definition of conditional variance and combining (\ref{squarerootCondsecondMo
 \begin{align}
     \mathrm{Var}\left(X_\Delta \middle| X = x \right) = \frac{\sigma^2}{\beta}\left(\exp\left(-2\beta\Delta\right)\left(\frac{\mu}{2} - x   \right) - \exp\left(-\beta\Delta \right)\left(\mu - x\right) + \frac{\mu}{2}\right).
 \end{align}
-Invoking the result from \cite[Example 1.11]{StatisticalMethodsForSDE} and denoting the conditional mean and -variance, $F_i, \Phi_i$, respectively we get an approximate quadratic martingale estimation equation
+Denote the conditional mean and -variance, $F_i, \Phi_i$, respectively. We get by using (\ref{eq:approximatelyOptimalMartingale}) an approximate quadratic martingale estimation equation
 \begin{align}
         G_N^{sq} = \begin{bmatrix}
             \sum_{i = 1}^N \frac{\beta}{\sigma^2 X_{t_{i-1}}}\left(X_{t_i} - F_{t_i}\right)\\
@@ -161,16 +175,16 @@ Invoking the result from \cite[Example 1.11]{StatisticalMethodsForSDE} and denot
             \sum_{i = 1}^N \frac{1}{\sigma^3 X_{t_{i-1}}}\left(\left(X_{t_i} - F_{t_i}\right)^2 - \Phi_{t_i}\right) \label{eq:squarerootMartingaleEquation}
         \end{bmatrix}.
 \end{align}
-Setting $G_N^{sq} = 0$ we get the following results
+Setting $G_N^{sq} = 0$ we get the following explicit estimators
 \begin{align}
     \exp\left(-\hat{\beta}_N\Delta\right) &= \frac{N\sum_{i=1}^{N}X_{t_i} / X_{t_{i - 1}} - \left(\sum_{i = 1}^{N}X_{t_i}\right)\left(\sum_{i}^{N}1/X_{t_{i - 1}}\right)}{N^2 - \left(\sum_{i = 1}^{n}X_{t_i}\right)\left(1/X_{t_{i - 1}}\right)},\\
     \hat{\mu}_N &= \frac{\sum_{i = 1}^{N}X_{t_i} / X_{t_{i - 1}} - N \exp\left(-\hat{\beta}_N\Delta\right)}{\left(1-\exp\left(-\hat{\beta}_N\Delta\right)\right)\sum_{i = 1}^{N}1/X_{t_{i - 1}}}.
 \end{align}
-For the two parameters related to the drift of the process. Define
+For the two parameters related to the drift of the process.Now, define
 \begin{align}
     \Phi^*(\Delta, x; \theta) := \left(\frac{x}{\beta}\left(\exp\left(-\beta\Delta - \exp\left(-2\beta \Delta\right)\right)\right) + \frac{\mu}{2\beta}\left(1-\exp\left(-\beta\Delta\right)\right)^2\right).
 \end{align}
-Then the third equation in (\ref{eq:squarerootMartingaleEquation}) yields the explicit equation for third noise-parameter
+Then the third equation in (\ref{eq:squarerootMartingaleEquation}) yields the explicit equation for the noise-parameter
 \begin{align}
     \hat{\sigma}^2_N = \frac{\sum_{i = 1}^{N}\frac{1}{X_{t_{i - 1}}}\left(X_{t_i} - F_i\right)^2}{\sum_{i = 1}^{N}\frac{1}{X_{t_{i - 1}}}\Phi^*(\Delta, x; \theta)}
 \end{align}

@@ -45,12 +45,10 @@ OU_likelihood <- function(par, data, delta){
   gamma2 <- sigma^2 / (2 * alpha0)
   rho0   <- exp(-alpha0 * delta)
   
-  #m_part <- Xupp - Xlow * rho0 - mu0 * (1 - rho0)
   v_part <- gamma2 * (1 - rho0^2)
   m_part <- Xlow * rho0 + mu0 * (1 - rho0)
   
   # Negative log-likelihood
-  #N * (log(v_part)) + sum(m_part^2) / v_part 
   -mean(dnorm(x = Xupp, mean = m_part, sd = sqrt(v_part), log = TRUE))
 }
 
@@ -114,9 +112,6 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma){
   det_Dfh_half_inv <- 1 / (fh_half_tmp_upp-1)^2
   
   # Negative log-likelihood
-  # sum(log(v_part)) + sum(m_part^2 / v_part) -
-  #   2 * sum(log(det_Dfh_half_inv)) + pen * N * (1 / A - 1) * (A < exp(1))
-  
   -sum(stats::dnorm(fh_half_inv, mu_h, sqrt(v_part), log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
 }
 
