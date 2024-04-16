@@ -204,4 +204,39 @@ sim_res_sqrt |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) +
   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param_sqrt[2], linetype = "dashed") +
   ggplot2::geom_vline(xintercept = t_0)
 
+#nu plot 
+# Parameters
+lambda_0 <- 2 
+tau <- 75
+t_0 <- 10
+nu_values <- c(0.05, 0.1, 0.5, 0.8, 1, 1.2, 1.7, 2.2, 3)
+
+# Create a sequence of t values from 0 to 100
+t_values <- seq(0, tau + t_0, length.out = 500)
+
+# Initialize a data frame to hold the values
+plot_data <- data.frame()
+
+# Calculate the function values for each nu
+for (nu in nu_values) {
+  # Apply the function to each value of t
+  lambda_t <- lambda_0 * (1 - ifelse(t_values > t_0, (t_values - t_0) / tau, 0))^nu
+  
+  # Append to the data frame
+  plot_data <- rbind(plot_data, data.frame(t = t_values, lambda = lambda_t, nu = as.factor(nu)))
+}
+
+# Plotting using ggplot2
+ggplot(plot_data, aes(x = t, y = lambda, color = nu, group = nu)) +
+  geom_line() +
+  labs(title = "Plot of the function for different values of nu",
+       x = "Time (t)",
+       y = "Function value",
+       color = "Nu")
+
+
+
+
+
+
 

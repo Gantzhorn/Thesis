@@ -275,28 +275,29 @@ whence we get the eigen functions and -values.
     \varphi_1(x) &= x - \mu, \qquad &&\lambda_1 = \beta, \label{GBMeigen1} \\
     \varphi_2(x) &= x^2 - \frac{2\beta\mu}{\beta - \sigma^2}x + \frac{2\mu^2\beta^2}{\left(\beta - \sigma^2\right)\left(2\beta - \sigma^2\right)}, \qquad &&\lambda_2 = 2\beta - \sigma^2 \label{GBMeigen2}.
 \end{align}
-Evidently, the verification done on (\ref{squarerooteigen1}) can be done completely analagously on (\ref{GBMeigen1}). Instead, we verify that (\ref{GBMeigen2}) contains the second eigen function and -value
+Evidently, (\ref{squarerooteigen1}) is identical to (\ref{GBMeigen1}), thus the one-step ahead conditional means are too. Commencing, we now verify that (\ref{GBMeigen2}) is the second eigen function and -value
 \begin{align}
     \mathcal{L}\varphi_2 & = -\beta\left(x-\mu\right)\left(2x - \frac{2\beta\mu}{\beta-\sigma^2}\right) + \sigma^2x^2,\\
     &=-\left(2\beta - \sigma^2\right)x^2 + \frac{2\beta\mu\left(2\beta-\sigma^2\right)}{\beta - \sigma^2}x - \frac{2\beta^2\mu^2}{\beta - \sigma^2}, \\
     &= -\left(2\beta -\sigma^2\right)\left(x^2 - \frac{2\beta\mu}{\beta-\sigma^2} + \frac{2\beta^2\mu^2}{\left(\beta-\sigma^2\right)\left(2\beta-\sigma^2\right)}\right),\\
     &= - \lambda_2 \varphi_2.
 \end{align}
-Since it has the same first eigen function the mean-reverting GBM has the sam one-step ahead conditional mean as (\ref{squarerootCondMean}). In fact, it is not difficult to see that this result generalizes to any pearson diffusion. Conversely, we can calculate the one-step ahead conditional second moment by realizing
+%Since it has the same first eigen function the mean-reverting GBM has the sam one-step ahead conditional mean as (\ref{squarerootCondMean}). In fact, it is not difficult to see that this result generalizes to any pearson diffusion. 
+Therefore, we can calculate the one-step ahead conditional second moment by
 \begin{align}
     \mathbb{E}\left[\varphi_2(X_\Delta)\middle|X = x\right] &= \exp\left(-\left(2\beta - \sigma^2\right)\right)\varphi_2(x),
 \end{align}
 and thus
 \begin{align}
     \mathbb{E}\left[X_\Delta^2 \middle| X = x\right] &= \exp\left(-\left(2\beta - \sigma^2\right)\right)\varphi_2(x) + \frac{2\beta\mu}{\beta-\sigma^2} \mathbb{E}\left[X_\Delta\middle|X=x\right] \nonumber \\
-    &\quad - \frac{2\beta^2\mu^2}{\left(\beta-\sigma^2\right)\left(2\beta-\sigma^2\right)}
+    &\quad - \frac{2\beta^2\mu^2}{\left(\beta-\sigma^2\right)\left(2\beta-\sigma^2\right)} \label{CIR_secondmoment}
 \end{align}
 Now since 
 \begin{align}
-    \left(\mathbb{E}\left[X_\Delta\middle|X=x\right]\right)^2 &= \left(\exp\left(-\beta\Delta\right)\left(x-\mu\right) + \mu\right)^2 \\
-    &= \exp\left(-2\beta\Delta\right)\left(x-\mu\right)^2 + \mu^2 + 2\mu\exp\left(-\beta\Delta\right)\left(x-\mu\right).
+    \left(\mathbb{E}\left[X_\Delta\middle|X=x\right]\right)^2 &= \left(\exp\left(-\beta\Delta\right)\left(x-\mu\right) + \mu\right)^2 \nonumber\\
+    &= \exp\left(-2\beta\Delta\right)\left(x-\mu\right)^2 + \mu^2 + 2\mu\exp\left(-\beta\Delta\right)\left(x-\mu\right). \label{CIR_firstmoment_square}
 \end{align}
-Combining these and using the definition of conditional variance, we get the desired result
+We get the desired result by combining (\ref{CIR_secondmoment}) and (\ref{CIR_firstmoment_square}) and using the definition of conditional variance
 \begin{align}
     \mathrm{Var}\left(X_\Delta \middle| X = x\right) &= \exp\left(-\left(2\beta - \sigma^2\right)\Delta\right)\left(x^2 - \frac{2\beta\mu}{\beta-\sigma^2}x + \frac{2\beta^2 \mu^2}{\left(\beta-\sigma^2\right)\left(2\beta - \sigma^2\right)}\right) \nonumber \\
     &+ \frac{2\beta\mu}{\beta-\sigma^2}\left(\exp\left(-\beta\Delta\right)\left(x-\mu\right) + \mu\right) - \frac{2\beta^2\mu^2}{\left(\beta-\sigma^2\right)\left(2\beta - \sigma^2\right)} \nonumber\\
