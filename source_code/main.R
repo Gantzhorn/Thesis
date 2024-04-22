@@ -2,6 +2,115 @@ library(tidyverse)
 ggplot2::theme_set(ggthemes::theme_base())
 source("source_code/tipping_simulations.R")
 source("source_code/model_fitting.R")
+
+# Colorblind friendly plot palette
+thesis_palette <- c("#E69F00", "#56B4E9", "#009E73", "#CCB400", "#0072B2", "#D55E00", "#CC79A7")
+
+# Create plot of path for figures in "Saddle-node bifurcation and Tipping Point Estimation
+# Choose parameters appropriate for any of the diffusions
+true_param <- c(1.5, 0.2 , -0.4, 0.15)
+actual_dt <- 1/12 * 1 / 10
+tau <- 50
+t_0 <- 25
+methodPlotseed <- 210424 
+
+simulate_multiple_times <- function(simulate_function, n_times, ...) {
+  simulate_res <- do.call(rbind,
+          lapply(1:n_times, function(i) {
+            #set.seed(methodPlotseed + i)
+            simulate_function(..., seed = methodPlotseed + i) |>
+              mutate(sample_id = i)
+          })
+  )
+  simulate_res$sample_id <- factor(simulate_res$sample_id)
+  simulate_res
+}
+numSim <- 3
+
+xs_all <- bind_rows(
+  simulate_multiple_times(simulate_additive_noise_tipping_model, numSim, actual_dt, true_param, tau, t_0)  |> 
+    mutate(Model = "Additive"),
+  simulate_multiple_times(simulate_squareroot_noise_tipping_model, numSim, actual_dt, true_param, tau, t_0) |>
+    mutate(Model = "Square root"),
+  simulate_multiple_times(simulate_linear_noise_tipping_model, numSim, actual_dt, true_param, tau, t_0) |>
+    mutate(Model = "Linear"),
+  simulate_multiple_times(simulate_t_distribution_tipping_model, numSim, actual_dt, true_param, tau, t_0) |>
+    mutate(Model = "t-distribution"),
+  simulate_multiple_times(simulate_F_distribution_tipping_model, numSim, actual_dt, true_param, tau, t_0) |>
+    mutate(Model = "F-distribution"),
+  simulate_multiple_times(simulate_jacobi_diffusion_tipping_model, numSim, actual_dt, true_param, tau, t_0) |>
+    mutate(Model = "Jacobi diffusion")
+)
+
+
+ggplot(xs_all, aes(x = t, y = X_t, color = Model)) +
+  geom_step(linewidth = 0.5) + 
+  geom_hline(yintercept = true_param[2], linetype = "dashed") +
+  facet_grid(sample_id ~ Model) +
+  ylim(0, 1) +
+  scale_color_manual(values = thesis_palette) +
+  labs(y = expression(X[t])) + 
+  theme(
+    strip.text.x = element_blank(),
+    strip.text.y = element_blank(),
+    legend.key.width = unit(2, "lines"),
+    legend.key.height = unit(1, "lines")
+  ) +
+  guides(color = guide_legend(override.aes = list(linewidth = 5))) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10))
+
+# Create plot of path for figures in "Saddle-node bifurcation and Tipping Point Estimation
+# Choose parameters appropriate for all but jacobi diffusion
+true_param <- c(0.15, 10, -2, 0.05)
+
+actual_dt <- 0.005
+tau <- 100
+t_0 <- 50
+methodPlotseed <- 210424 
+
+simulate_multiple_times <- function(simulate_function, n_times, ...) {
+  simulate_res <- do.call(rbind,
+                          lapply(1:n_times, function(i) {
+                            #set.seed(methodPlotseed + i)
+                            simulate_function(..., seed = methodPlotseed + i) |>
+                              mutate(sample_id = i)
+                          })
+  )
+  simulate_res$sample_id <- factor(simulate_res$sample_id)
+  simulate_res
+}
+numSim <- 3
+
+xs_all <- bind_rows(
+  simulate_multiple_times(simulate_additive_noise_tipping_model, numSim, actual_dt, true_param, tau, t_0)  |> 
+    mutate(Model = "Additive"),
+  simulate_multiple_times(simulate_squareroot_noise_tipping_model, numSim, actual_dt, true_param, tau, t_0) |>
+    mutate(Model = "Square root"),
+  simulate_multiple_times(simulate_linear_noise_tipping_model, numSim, actual_dt, true_param, tau, t_0) |>
+    mutate(Model = "Linear"),
+  simulate_multiple_times(simulate_t_distribution_tipping_model, numSim, actual_dt, true_param, tau, t_0) |>
+    mutate(Model = "t-distribution"),
+  simulate_multiple_times(simulate_F_distribution_tipping_model, numSim, actual_dt, true_param, tau, t_0) |>
+    mutate(Model = "F-distribution")
+)
+
+
+ggplot(xs_all, aes(x = t, y = X_t, color = Model)) +
+  geom_step(linewidth = 0.5) + 
+  geom_hline(yintercept = true_param[2], linetype = "dashed") +
+  facet_grid(sample_id ~ Model) +
+  scale_color_manual(values = thesis_palette) +
+  labs(y = expression(X[t])) + 
+  theme(
+    strip.text.x = element_blank(),
+    strip.text.y = element_blank(),
+    legend.key.width = unit(2, "lines"),
+    legend.key.height = unit(1, "lines")
+  ) +
+  guides(color = guide_legend(override.aes = list(linewidth = 5))) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  ylim(true_param[2] - 1, true_param[2] + sqrt(true_param[3] / true_param[1]) + 1)
+
 # Experiment with different estimation methods on simulated data
 
 # Additive noise model
@@ -71,14 +180,14 @@ for (i in 1:numSim){
 }
 
 # stationary plot
-stationaryPart_Likelihood_tibble <-  as_tibble(stationaryPart_Likelihood_Optimization) %>% mutate(type = "Likelihood")
+stationaryPart_Likelihood_tibble <-  as_tibble(stationaryPart_Likelihood_Optimization) |> mutate(type = "Likelihood")
 names(stationaryPart_Likelihood_tibble) <- c("beta", "mu", "sigma", "type")
-stationaryPart_Score_tibble <-  as_tibble(stationaryPart_Score_root) %>% mutate(type = "Score")
+stationaryPart_Score_tibble <-  as_tibble(stationaryPart_Score_root) |> mutate(type = "Score")
 names(stationaryPart_Score_tibble) <- c("beta", "mu", "sigma", "type")
 
 
-bind_rows(stationaryPart_Likelihood_tibble, stationaryPart_Score_tibble) %>%
-  pivot_longer(-type, names_to = "Estimate", values_to = "Value") %>% 
+bind_rows(stationaryPart_Likelihood_tibble, stationaryPart_Score_tibble) |>
+  pivot_longer(-type, names_to = "Estimate", values_to = "Value") |> 
   ggplot(aes(y = Value, x = type, fill = type)) + 
   geom_boxplot() + 
   facet_wrap(~Estimate, scales = "free_y") + theme(
@@ -88,9 +197,9 @@ bind_rows(stationaryPart_Likelihood_tibble, stationaryPart_Score_tibble) %>%
   )
 
 # Dynamic plot
-dynamicPart_Strang_tibble <-  as_tibble(dynamicPart_Likelihood_Strang) %>% mutate(type = "Strang")
+dynamicPart_Strang_tibble <-  as_tibble(dynamicPart_Likelihood_Strang) |> mutate(type = "Strang")
 names(dynamicPart_Strang_tibble) <- c("tau", "A", "type")
-dynamicPart_Simulation_tibble <-  as_tibble(dynamicPart_Likelihood_Sim) %>% mutate(type = "Simulation")
+dynamicPart_Simulation_tibble <-  as_tibble(dynamicPart_Likelihood_Sim) |> mutate(type = "Simulation")
 names(dynamicPart_Simulation_tibble) <- c("tau", "A", "type")
 
 

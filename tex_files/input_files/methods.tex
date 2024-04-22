@@ -1,11 +1,43 @@
-\subsection{Saddle-node bifurcation and Tipping Point Estimation}
+\subsection{Stochastic Differential Equations}
+A stochastic differential equation (SDE) is a differential equation where at least one term is a stochastic process. We only consider processes driven by a Brownian motion - also known as a Wiener process. To properly define the SDE we work with, we need to define a brownian motion. A brownian motion is a continuous stochastic processes, $W_t\in\mathbb{R}$ where
+\begin{enumerate}
+    \item $X_0 = 0$ almost surely
+    \item $\Delta W_n = W\left(t_{n + 1}\right) - W\left(t_{n}\right)\sim\mathcal{N}\left(0, t_{n + 1} - t_{n}\right)$
+    \item $X_{t_1}\indep \left(X_{t_2} - X_{t_1}\right)\indep \dots \indep \left(X_{t_n} - X_{t_{n - 1}}\right), \: 0 < t_1 < t_2 < \dots < t_n$.
+\end{enumerate}
+Then we define integration of some function $\sigma^2(X_t, t)$ with respect to $W_t$ as
+\begin{align}
+    \int_{t_0}^t \sigma^2(X_s, s) \mathrm{d}W_s = \lim_{n \to \infty}\sum_k L\left(X_{t_k}, t_k\right)\left(W(t_{k + 1}) - W_{t_k}\right),
+\end{align}
+where the limit is in $L_2$-sense \cite[equation 4.6]{Srkk2019}. We call this the Itô integral and it is an important part of Itô calculus, which expands the techniques of calculus to stochastic processes. In our case, we consider the Itô integral equation
+\begin{align}
+    X_t - x_0 = \int_{t_0}^t b(X_s, s)\mathrm{d}s + \int_{t_0}^t \sigma^2(X_s, s)\mathrm{d}W_s. \label{eq:itoIntegralEquation}
+\end{align}
+Note that the first integral on the right hand side merely is a Riemann integral. A stochastic differential equation can then by understood by letting the limits of integration in (\ref{eq:itoIntegralEquation}) be $t$ and $t+\mathrm{d}t$ for some small $\mathrm{d}t$. As shorthand for (\ref{eq:itoIntegralEquation}) we can namely write
+\begin{align}
+    \mathrm{d}X_t = b(X_t, t)\mathrm{d}t + \sigma^2(X_t, t)\mathrm{d}W_t \label{eq:firstSDE}
+\end{align}
+And this is what we understand by a stochastic differential equation. We denote the functions $b(X_t, t), \sigma^2(X_t, t)$ the drift- and diffusion coefficients respectively. For ease of language we sometimes leave out the "coefficient" part. Although, the representation in (\ref{eq:firstSDE}) is the most common in the litterature and the the one we use throughout, we have to note that is just a representation of (\ref{eq:itoIntegralEquation}). If one formally divides by $\mathrm{d}t$ though, we end up with a term, where we take the derivative of the Wiener process. Even though this process has almost surely continuous sample paths, they are nowhere differentiable too \cite[theorem 11.22 and theorem 11.35]{Hansen2022}. Now, we motivate an important result regarding stochastic differential equations by by doing the following: Consider integrating the Wiener process with respect to itself
+\begin{align}
+    \int_0^t W_s \mathrm{d}W_s &= \lim_{n \to \infty}\sum_k W_{t_k}\left(W(t_{k + 1}) - W_{t_k}\right), \\
+    &= -\frac{1}{2}\lim_{n \to \infty}\sum_k \left(W(t_{k + 1}) - W(t_{k})\right)^2+ \frac{1}{2}\lim_{n \to \infty}\sum_k\left(W(t_{k + 1})^2 - W(t_{k})^2\right), \\
+    &= -\frac{t}{2} + \frac{W_t^2}{2}.
+\end{align}
+We have used the observation that the last sum was telescopic an equal to $W_t$ and the fact that the first sum was the quadratic variation of the wiener process, which by \cite[theorem 11.34]{Hansen2022} is equal
+\subsection{Dynamical systems}
+\subsubsection{Deterministic Dynamical Systems}
+
+
+
+\subsubsection{Saddle-node bifurcations and Tipping Point Estimation}
 In the study of dynamical systems, we refer to how changes in parameters affect the qualitative structure of the flow as bifurcations. The parameter values that results in the changes we call bifurcations points. In applications, we sometimes denote these tipping and tipping points, respectively, to get more metaphorical- and intuitive terms. \cite{Strogatz2019_gv}. Nevertheless, we only consider the so-called Saddle-node bifurcations, defined qua the normal form
 \begin{align}
-    \mathrm{d}X_t &= \lambda \pm X_t^2. \label{standardForm}
+    X_t &= \left(\lambda \pm X_t^2\right) \mathrm{d}t \label{standardForm}
 \end{align}
+
 The fixed point of the system is always $x^* = \pm\sqrt{\abs{\lambda}}$. There is always one stable- and unstable fixed point. The stable fixed point is the negative branch of the root for the positive version of the normal form, whereas the opposite is true for the negative version. In both cases, the system has its bifurcation point at $\lambda = 0$, where the fixed point becomes half-stable. Lastly, there are no fixed-points for $\lambda>0$ in the positive version of (\ref{standardForm}) and vice versa. Now, in order to make the model more flexible we introduce the parameters, $m, A$ to shift the dynamics and scale the bifurcation point respectively. Then for values of $\lambda$ sufficiently close to the bifurcation point, $\lambda_c = 0$, any system that has the saddle-node bifurcation characteristic is approximated well by 
 \begin{align}
-    \mathrm{d}X_t &= -\left(\lambda \pm A\left(X_t - m\right)^2\right), 
+    \mathrm{d}X_t &= \pm\left(\lambda + A\left(X_t - m\right)^2\right), 
 \end{align}
 with $m = \mu \pm \sqrt{\left|\frac{\lambda}{A}\right|}$ and $\mu$ is the stable fixed point of the system. \cite{Ditlevsen2023}. That is, we can be completely agnostic about the overall dynamics of the system. Yet, this naturally implies that we are completely oblivious to them as well. In our applications, the sign of the parameters, $A, \lambda$, will always be different, thus we can simplify the notation in the model to
 \begin{align}
@@ -46,6 +78,7 @@ We define $Y_t := \psi\left(X_t, t\right)$. However, in order to commence, we ne
     Jacobi-diffusion  & $\sigma\sqrt{X_t\left(1 - X_t\right)}$  & $ 2\sin^{-1}\left(X_t\right)$ & $(0, 1)$ \\ \hline
     \end{tabular}
     \caption{Overview of the ergodic pearson diffusions}
+    \label{table:ergodicDiffusions}
 \end{center}
 \end{table}\\
 For the the expressions of $\mathrm{d}Y_t$ for each of the diffusions refer to appendix \ref{sec:AppendixEstim}. The lamperti-transformed process is instrumental to our later estimation as it per construction has additive noise, which we can exploit. Confer these concrete diffusion terms it is clear that \ref{eq:lampertiDefinition} is always well-defined; that is, the process is reducible.  We note that some of the diffusions are not ergodic for any choice of parameters. Whether there are any conditions for ergodicity and what these are depends on the diffusion in question; the condition is on the parameters. For instance, the Ornstein-Uhlenbeck is always ergodic and has invariant distribution $\mathcal{N}\left(\mu, \frac{\sigma^2}{2\beta}\right)$, whereas the square-root process is ergodic exactly when $2\beta\mu\geq \sigma^2$ and the invariant distribution here is $\Gamma\left(\frac{2\beta\mu}{\sigma^2}, \frac{2\beta}{\sigma^2}\right)$. \\
@@ -54,7 +87,7 @@ Later, we also need to be able to calculate moments up to the second order. In o
 \begin{align}
     \mathcal{L}\varphi(x) = b(x, t) \varphi' + \frac{1}{2}\sigma^2(X_t, t)\varphi'', \label{eq:infinitesemalGenerator}
 \end{align}
-where the derivatives are taken with respect to $x$ and $\varphi$ is a suitably regular function. We say that $\varphi$, $\lambda$ are eigen functions and -values for the process respectively if
+where the derivatives are taken with respect to $x$, $\varphi$ is a suitably regular function and $b(X_t, t)$ is the drift of the SDE. We say that $\varphi$, $\lambda$ are eigen functions and -values for the process respectively if
 \begin{align}
     \mathcal{L}\varphi = - \lambda \varphi,
 \end{align}
@@ -62,7 +95,11 @@ Under mild regulatory conditions \cite[theorem 1.16]{StatisticalMethodsForSDE} t
 \begin{align}
     \mathbb{E}\left[\varphi(X_{t_k + 1}) \middle | X_{t_k}\right] = \exp\left(-\lambda t\right)\varphi \label{eq:momentConditions}
 \end{align}
-For typographical reasons, the dependence on the parameters have been suppresed in both $\varphi$ and $\lambda$. Additionally, Forman and Sorensen \cite{FormanSorensen2008} showed that for our ergodic diffusions, the eigenfunctions are all polynomials. Because of this, it is possible to derive any conditional moment of these processes, in spite of the fact that  the transition densities themselves are unknown. For our purposes, we only need the first two eigenfunctions and eigenvalues, specifically those associated with the first- and second-order polynomials. However, observe thatthe regardless of the noise term, (\ref{eq:pearsonDiffusion}) always have the same first-order eigenfunction and eigenvalue,  due to the vanishing of the noise term in (\ref{eq:infinitesemalGenerator}) 
+For typographical reasons, the dependence on the parameters have been suppresed in both $\varphi$ and $\lambda$. Additionally, Forman and Sorensen \cite{FormanSorensen2008} showed that for our ergodic diffusions, the eigenfunctions are all polynomials. Because of this, it is possible to derive any conditional moment of these processes, in spite of the fact that the transition densities themselves, for the most part, are unknown. For our purposes, we only need the first two eigenfunctions and eigenvalues; that is those associated with the first- and second-order polynomials. However, observe that regardless of the noise term, (\ref{eq:pearsonDiffusion}) always have the same first-order eigenfunction and eigenvalue,  due to the vanishing of the noise term in (\ref{eq:infinitesemalGenerator}). This naturally results in the same conditional mean too, which for any of the diffusions in table \ref{table:ergodicDiffusions} is
+\begin{align}
+    \mathbb{E}\left[X_{t_{i}} \middle|X_{t_{i - 1}} \right] = \exp\left(-\beta\Delta t\right)\left(x-\mu\right) + \mu
+\end{align}
+This we also verify directly in (\ref{eq:directVerificationCondMean}). The conditional second moments are, however, different and must be considered individually. 
 \subsection{Inference for stochastic differential equations}
 Regardless of ones exact method, inference about parameters in stochastic differential equations are often done by leveraging the markov property of Itô processes. This means that in order to estimate the parameters, it is sufficient to have the transition density or approximations thereof. Getting the transtion density involves solving the Fokker-Planck equation, which for the most part is intractable, thus one employ one or more approximation methods.\\
 To this end, inference is traditionally done qua the Euler-maruyama scheme. In this thesis, we only used the estimator based on this scheme in the initial development; it is fairly easy to derive, implement and it is computationally quite efficient. Yet, the estimator is biased even for moderately large stepsizes, and quite notably so in non-linear models \cite{SplittingSchemes}. Instead, we consider two other means of estimation 
@@ -72,7 +109,7 @@ The Strang based estimator is a method based on splitting schemes. Other similar
     \mathrm{d}X_t^{(1)} &= -\beta(\theta)\left(X_t^{(1)} - \mu(\theta)\right)\mathrm{d}t + \sigma \mathrm{d}W_t, &&X_t^{(1)} = x_0, \\
     \mathrm{d}X_t^{(2)} &= N\left(X_t^{(2)}\right)\mathrm{d}t, &&X_t^{(2)} = x_0, \label{ODE_Split}
 \end{align}
-where $N$ is some non-linear function that also might depend on the parameters. Although the splitting is not unique and is irrelevant asymtotically, the choice might have an impact with finite samples. Additionally, one can imagine that some splittings are numerically more well-behaved. For the most part, we use the heuristic provided in \cite[section 2.3 and 2.5]{SplittingSchemes}. That is, we find the linear SDE be the linearization around the fix points of the drift; the ODE is then found as the residual of the original SDE and our linear SDE. In the one dimensional case, the solution with stepsize, $\Delta t$, to the linear SDE is given by the flow
+where $N$ is some non-linear function that also might depend on the parameters. Evidently, the choice of splitting is not unique, and asymptotically any splitting is equivalent. Yet, the choice might have an impact with finite samples. Additionally, one can imagine that some splittings are numerically more well-behaved. For the most part, we use the heuristic provided in \cite[section 2.3 and 2.5]{SplittingSchemes}. That is, we find the linear SDE as the linearization around the fixed points of the drift; the ODE is then the residual of the original SDE and our linear SDE. In the one dimensional case, the solution with stepsize, $\Delta t$, to the linear SDE is given by the flow
 \begin{align}
     \varphi_{\Delta t}^{(1)}(x) = \exp\left(-\beta\left(\theta\right) \Delta t\right)\left(x - \mu\left(\theta\right)\right) + \mu\left(\theta\right) + \xi_{\Delta t},
 \end{align}
@@ -83,14 +120,14 @@ with $\xi_{\Delta t}\sim\mathcal{N}\left(0, \Omega_{\Delta t}\right)$. That is, 
 \end{align}
 where the latter is calculated using \cite[equation (6)]{SplittingSchemes}. For our purposes the solution to (\ref{ODE_Split}) exists and is unique; with stepsize, $\Delta t$, we denote it $\varphi_{\Delta t}^{(2)}$. The conditions for this is provided in \cite[Assumption (A1) and - (A2)]{SplittingSchemes}. Then the Strang splitting scheme gives the approximation of the transition
 \begin{align}
-    X_{t_{i+1}}^{(S)} = \varphi_{\Delta t / 2}^{(2)}\left(\mu_{\Delta t}\left(\varphi_{\Delta t/2}^{(2)}\left(X_{t_{i}}^{(S)}\right); \theta\right) + \xi_{\Delta t}\right).
+    X_{t_{i+1}}^{(S)} = \varphi_{\Delta t / 2}^{(2)}\left(\mu_{\Delta t}\left(\varphi_{\Delta t/2}^{(2)}\left(X_{t_{i}}^{(S)}\right); \theta\right) + \xi_{\Delta t} \; ; \theta \right).
 \end{align}
 This is a non-linear transformation of a gaussian variable; so by the density transformation theorem, the flow gives us the following negative pseudo-loglikelihood 
 \begin{align}
     l^{[S]} &= -\log\left(g\left(\left(\varphi_{\Delta t / 2}^{(2)}\right)^{-1}\left(X_{t_{i+1}}\right); \mu_{\Delta t}\left(\varphi_{\Delta t/2}^{(2)}\left(X_{t_{i}}\right); \theta \right), \Omega_{\Delta t} \right) \right) \nonumber \\
     &- \log\left(\partial_x \left(\varphi_{\Delta t / 2}^{(2)}\right)^{-1} \right), \label{Strang_likelihood}
 \end{align}
-and we say that the $\theta$ that minimizes this expression is the Strang-based estimator. In (\ref{Strang_likelihood}) $g$ is the density of the gaussian distribution with the specified mean and variance.
+and we say that the $\theta$ that minimizes this expression is the Strang-based estimator. In (\ref{Strang_likelihood}) $g$ is the density of the gaussian distribution with the specified mean and variance. For the above arguments to be valud, we require additive noise in the models, which we of course get by means of the lamperti-transform. In rare instances, there exists other closes form solutions to linear stochastic differential equations than the one with additive noise. This novel splitting strategy avoids using the Lamperti-transform; although it is not central to the, we still explore the option in (\ref{meanrevertingGBMSplit1}).
 \subsubsection{Approximately Optimal Martingale Estimation Equations}
 Other than the strang splitting, we also estimate the parameters by means of the following approximately optimal martingale estimation functions \cite[Example 1.11]{StatisticalMethodsForSDE}.
 \begin{align}
