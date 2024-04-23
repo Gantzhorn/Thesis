@@ -57,14 +57,29 @@ Multiply (\ref{eq:originalOUprocess}) with $\exp\left(\beta t\right)$ and rearra
 \end{align}
 Use Itô's formula on $\exp\left(\beta t\right)X_t$ to see
 \begin{align}
-    \mathrm{d}\left(\exp\left(\beta t\right)X_t\right) &= \exp\left(\beta t\right)\beta X_t \mathrm{d}t + \exp\left(\beta t\right) \mathrm{d}X_t \nonumber
+    \mathrm{d}\left(\exp\left(\beta t\right)X_t\right) &= \exp\left(\beta t\right)\beta \mu \mathrm{d}t + \exp\left(\beta t\right) \sigma \mathrm{d}W_t \nonumber
 \end{align}
 Understanding this as the integral equation (\ref{eq:itoIntegralEquation}) yields
 \begin{align}
     \exp\left(\beta t\right)&X_t - \exp\left(\beta t_0\right)X_{t_0} = \left(\exp\left(\beta t\right) - \exp\left(\beta t_0\right)\right)\mu + \int_{t_0}^t \exp\left(\beta s\right)\sigma \mathrm{d}W_s \nonumber \\
-    &X_t = \exp\left(-\beta\left(t - t_0\right)\right)\left(X_{t_0} - \mu\right) + \mu + \int_{t_0}^t \exp\left(-\beta \left(t - s\right)\right)\sigma \mathrm{d}W_s,
+    &X_t = \exp\left(-\beta\left(t - t_0\right)\right)\left(X_{t_0} - \mu\right) + \mu + \int_{t_0}^t \exp\left(-\beta \left(t - s\right)\right)\sigma \mathrm{d}W_s \label{eq:OU_solution},
 \end{align}
-which was what we wanted. Now, since the increments of the brownian motion is gaussian, the solution $X_t$ for givne $t$ is gaussian.
+which was what we wanted. Now, since the increments of the brownian motion is gaussian, the solution $X_t$ for given $t$ is gaussian. We can easily find its mean and variance using the following properties of the Itô integral \cite[theorem 3.2.1 and lemma 3.1.5]{Oksendal2003_yu}
+\begin{align}
+    \mathbb{E}\left[\int_{t_0}^t f(X_s, s) \mathrm{d}W_s\right] &= 0 \label{eq:meanOfItoIntegral},\\
+    \mathbb{E}\left[\left(\int_{t_0}^t f(X_s, s) \mathrm{d}W_s\right)^2\right] &= \int_{t_0}^t \mathbb{E}\left[\left(f(X_s, s)\right)^2\right] \mathrm{d}s. \label{eq:ItoIsometry}
+\end{align}
+Taking expectation of (\ref{eq:OU_solution}) and using (\ref{eq:meanOfItoIntegral}) we get
+\begin{align}
+    \mathbb{E}\left[X_t\right] = \exp\left(-\beta\left(t - t_0\right)\right)\left(x_0 - \mu\right) + \mu.
+\end{align}
+We commence as we take the variance of (\ref{eq:OU_solution})
+\begin{align}
+    \mathrm{Var}\left[X_t\right] &= \sigma^2\mathrm{Var}\left[\int_{t_0}^t \exp\left(-\beta \left(t - s\right)\right)\sigma \mathrm{d}W_s\right],\nonumber \\
+    & = \sigma^2\left(\int_{t_0}^t \mathbb{E}\left[\exp\left(-2\beta\left(t - s\right)\right)\right] \mathrm{d}s + 0^2 \right), \nonumber \\
+    & = \frac{\sigma^2}{2\beta}\left(1 - \exp\left(-2\beta(t - t_0)\right)\right).
+\end{align}
+Where we use both (\ref{eq:meanOfItoIntegral}) and (\ref{eq:ItoIsometry}) in the second step.
 \subsection{Dynamical systems}
 \subsubsection{Deterministic Dynamical Systems}
 
