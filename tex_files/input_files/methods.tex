@@ -1,59 +1,71 @@
 \subsection{Stochastic Differential Equations}
-A stochastic differential equation (SDE) is a differential equation where at least one term is a stochastic process. We only consider processes driven by a Brownian motion - also known as a Wiener process. To properly define the SDE we work with, we need to define a brownian motion. A brownian motion is a continuous stochastic processes, $W_t\in\mathbb{R}$ where
+\subsubsection{The Itô integral and - process}
+A stochastic differential equation (SDE) is a differential equation where at least one term is a stochastic process. We only consider processes driven by a Brownian motion - also known as a Wiener process. To define stochastic differential equations with more rigor we need to define a brownian motion: A brownian motion is a continuous stochastic processes, $W_t\in\mathbb{R}$ where
 \begin{enumerate}
     \item $X_0 = 0$ almost surely
     \item $\Delta W_n = W\left(t_{n + 1}\right) - W\left(t_{n}\right)\sim\mathcal{N}\left(0, t_{n + 1} - t_{n}\right)$
     \item $X_{t_1}\indep \left(X_{t_2} - X_{t_1}\right)\indep \dots \indep \left(X_{t_n} - X_{t_{n - 1}}\right), \: 0 < t_1 < t_2 < \dots < t_n$.
 \end{enumerate}
-Then we define integration of some function $\sigma^2(X_t, t)$ with respect to $W_t$ as
+Then to define integration from $t_0$ to $t$ of some function $\sigma(X_t, t)$ with respect to $W_t$, we partition the interval $[t_0, t]$ into smaller intervals $[t_k, t_{k + 1}]$ with $t_0 \leq t_1 \leq \dots \leq t_n = t$. The integral is constructed by having the partition get increasingly finer
 \begin{align}
-    \int_{t_0}^t \sigma^2(X_s, s) \mathrm{d}W_s = \lim_{n \to \infty}\sum_k L\left(X_{t_k}, t_k\right)\left(W(t_{k + 1}) - W_{t_k}\right),
+    \int_{t_0}^t \sigma^2(X_s, s) \mathrm{d}W_s = \lim_{n \to \infty}\sum_k \sigma\left(X_{t_k}, t_k\right)\left(W_{t_{k + 1}} - W_{t_k}\right),
 \end{align}
-where the limit is in $L_2$-sense \cite[equation 4.6]{Srkk2019}. We call this the Itô integral and it is an important part of Itô calculus an area that expands the techniques of calculus to stochastic processes. In our case, we consider the Itô integral equation
+where the limit is in $L_2$-sense \cite[equation 4.6]{Srkk2019}. We call this the Itô integral and it is an important part of Itô calculus; an area that expands the techniques of calculus to stochastic processes. This relates to stochastic differential equations via the Itô integral equation
 \begin{align}
-    X_t - x_0 = \int_{t_0}^t b(X_s, s)\mathrm{d}s + \int_{t_0}^t \sigma^2(X_s, s)\mathrm{d}W_s. \label{eq:itoIntegralEquation}
+    X_t - x_0 = \int_{t_0}^t b(X_s, s)\mathrm{d}s + \int_{t_0}^t \sigma(X_s, s)\mathrm{d}W_s. \label{eq:itoIntegralEquation}
 \end{align}
 Note that the first integral on the right hand side merely is a Riemann integral. A stochastic differential equation can then by understood by letting the limits of integration in (\ref{eq:itoIntegralEquation}) be $t$ and $t+\mathrm{d}t$ for some small $\mathrm{d}t$. As shorthand for (\ref{eq:itoIntegralEquation}) we write
 \begin{align}
-    \mathrm{d}X_t = b(X_t, t)\mathrm{d}t + \sigma^2(X_t, t)\mathrm{d}W_t \label{eq:firstSDE},
+    \mathrm{d}X_t = b(X_t, t)\mathrm{d}t + \sigma(X_t, t)\mathrm{d}W_t, \quad X_{t_0} = x_0 \label{eq:firstSDE},
 \end{align}
-and this is what we understand by a stochastic differential equation. The solutions to the equations are called Itô processes. In the equations themselves, we refer to the functions $b(X_t, t), \sigma^2(X_t, t)$ as the drift- and diffusion coefficients respectively. For ease of language we sometimes leave out the "coefficient" part. The drift and diffusion often depend on some parametervector, $\Theta$. For typographical reasons, we leave out the dependence in the notation for the most part. Although, the representation in (\ref{eq:firstSDE}) is the most common in the litterature and the the one we use throughout, we have to note that is merely a representation of (\ref{eq:itoIntegralEquation}). If one formally divides by $\mathrm{d}t$ though, we end up with a term, where we take the derivative of the Wiener process. Even though this process has almost surely continuous sample paths, they are nowhere differentiable \cite[theorem 11.22 and theorem 11.35]{Hansen2022}.\\
+and this is the general form of an SDE. \\
+To better understand stochastic differential equations we need to introduce a bit more nomenclature: The solution, $X_t$, is called an Itô process, and the values it can take is its state space. We refer to the functions $b(X_t, t)$ and $\sigma(X_t, t)$ as the drift- and diffusion coefficients respectively. For ease of language we sometimes leave out the "coefficient" part. In our applications the drift and diffusion depend on some parameter vector, $\theta\in\mathbb{R}^p$ or some subset thereof. For typographical reasons though, we mostly suppress this dependence in the notation. Additionally, we say that term with the diffusion coefficient is the noise term or stochastic term and the term with the drift is the deterministic term or deterministic part. We say that the noise is additive, if the function $\sigma(X_t, t)$ is constant and multiplicative otherwise. Lastly, the stochastic differential equation has autonomous drift or diffusion, when they do not directly depend on time; the system as a whole is autonomous, if both parts are autonomous.\\
+Although, the representation in (\ref{eq:firstSDE}) is the most common in the litterature and the one we use for the most part, we have to note that is merely a representation of (\ref{eq:itoIntegralEquation}). If one formally divides by $\mathrm{d}t$ though, we end up with a term, where we take the derivative of the Wiener process. Even though this process has almost surely continuous sample paths, they are nowhere differentiable \cite[theorem 11.22 and theorem 11.35]{Hansen2022}.\\
 Now, to motivate the arguably most important result in the study of stochastic differential equations, we consider integrating the Wiener process with respect to itself
 \begin{align}
-    \int_0^t W_s \mathrm{d}W_s &= \lim_{n \to \infty}\sum_k W_{t_k}\left(W(t_{k + 1}) - W_{t_k}\right) = - \frac{1}{2}\lim_{n \to \infty}\sum_k \left(W(t_{k + 1}) - W(t_{k})\right)^2  \nonumber \\
-    &+ \frac{1}{2}\lim_{n \to \infty}\sum_k\left(W(t_{k + 1})^2 - W(t_{k})^2\right) = -\frac{t}{2} + \frac{W_t^2}{2}.
+    \int_0^t W_s \mathrm{d}W_s & = \lim_{n \to \infty}\sum_k W_{t_k}\left(W(t_{k + 1}) - W_{t_k}\right) \nonumber \\ 
+    & = - \frac{1}{2}\lim_{n \to \infty}\sum_k \left(W(t_{k + 1}) - W(t_{k})\right)^2  + \frac{1}{2}\lim_{n \to \infty}\sum_k\left(W(t_{k + 1})^2 - W(t_{k})^2\right) \nonumber \\
+    & = -\frac{t}{2} + \frac{W_t^2}{2}.
 \end{align}
-We have used the observation that the last sum was telescopic an equal to $W_t$. The second sum is the quadratic variation of the wiener process, which by \cite[theorem 11.34]{Hansen2022} is $t$. Analagously,
+We have used the observation that the last sum was telescopic and equal to $W_t^2$. The first sum is the quadratic variation of the wiener process, which by \cite[theorem 11.34]{Hansen2022} is $t$. Put differently
 \begin{align}
     \mathrm{d}\left(\frac{1}{2}W_t^2\right) = W_t\mathrm{d}W_t + \frac{1}{2}\mathrm{d}t,
 \end{align}
-which is not what we would expect from the normal chain rule; Itô calculus needs its own version of the chain rule. Given an Itô process, $X_t$, described by the SDE in (\ref{eq:firstSDE}) and a function $\varphi(X_t, t)$ of the process, then the Itô SDE for $\varphi$ can be computed by
+which is not what we would expect from the normal chain rule, ergo Itô calculus needs its own version of the chain rule: Itô's formula \cite[Theorem 4.2]{Srkk2019}.  Given an Itô process, $X_t$, described by the SDE in (\ref{eq:firstSDE}) and a function $\varphi(X_t, t)$ of the process, then the Itô SDE for $\varphi$ can be computed by
 \begin{align}
     \mathrm{d}\varphi = \left(\frac{\partial \varphi}{\partial t} + \frac{\partial\varphi}{\partial x}b(X_t, t) + \frac{1}{2} \frac{\partial^2 \varphi}{\partial x^2}\sigma^2(X_t, t) \right)\mathrm{d}t + \frac{\partial\varphi}{\partial x}\sigma(X_t, t) \mathrm{d}W_t.
 \end{align}
-Finally, we note another result that is pivotal for the understanding of Itô processes. Since each $X_t$ is a random variable, it has a probability density; $p(X_t, t)$. In addition, we can talk about the conditional density of $X_t$ given some previously observed variable $X_s$; $p(X_t, t | X_s, s), \; t\geq s$. By \cite[theorem 7.1.2]{Oksendal2003_yu} all Itô processes are Markov processes, wherefore the process is completely characterized by $X_s$ only. The transition density of (\ref{eq:firstSDE}) is given by the following partial differential equation
+There are countless of important corollaries and applications of this result. The way we apply this result the most is qua the lamperti formation of a stochastic differential equation defined for an Itô process, $X_t$, given by (\ref{eq:firstSDE}) as
+\begin{align}
+    \psi(x, t) = \int_{\xi}^x \frac{\mathrm{d}u}{\sigma(u, t)}, \label{eq:firstLamperti}
+\end{align}
+for some $\xi$ in the state space of $X_t$. The lamperti-transform is obviously constructed such that $\mathrm{d}\psi(x, t)$ has additive noise, which is also easily verified with Itô's formula \cite[equation (7.5)]{Srkk2019}. Therefore the concern we should have is whether the transform is always well-defined; we need to make sure we do not divide by zero. If we have a process, where this is ensured, it is called reducible. Further, to work with this in practice we need to define the transformed variable $Y_t := \psi(X_t, t)$; and to get the SDE in terms of $Y_t$, we thus need $\psi^{-1}$ to exist.\\\\
+Finally, we note another result that is pivotal for the understanding of Itô processes. Since each $X_t$ is a random variable, it has a probability density; $p(X_t, t)$. In addition, we can talk about the conditional density of $X_t$ given some previously observed variable $X_s$; $p(X_t, t | X_s, s), \; t\geq s$. By \cite[theorem 7.1.2]{Oksendal2003_yu} all Itô processes are Markov processes, wherefore we need not the entire filtration but just the process information at the present, $X_s$, to characterize the transtion completely. The transition density of (\ref{eq:firstSDE}) is given by the following partial differential equation
 \begin{align}
     \frac{\partial p(X_t, t | X_s, s)}{\partial t} = -\frac{\partial}{\partial x}\left(b(X_t, t)p(X_t, t | X_s, s)\right) + \frac{1}{2}\frac{\partial^2}{\partial x^2}\left(\sigma^2(X_t, t)p(X_t, t | X_s, s)\right),\label{eq:fokkerPlanck} 
 \end{align}
-with initial condition $p(x_t, t|x_s, s) = \delta(x_t - x_s)$ at time $t = s$; $\delta$ is the dirac delta function. We refer to this PDE as the Kolmogorov forward equation. In practice, (\ref{eq:fokkerPlanck}) is often untractable - meaning that we are unable to find the closed form solution for the transition density. Instead, we then aim to approximate it. Closely related to it though is the so-called infinitesemal generator 
+with initial condition $p(x_t, t|x_s, s) = \delta(x_t - x_s)$ at time $t = s$; $\delta$ is the dirac delta function. We refer to this PDE as the Kolmogorov forward equation. As a result of giving us the transition density the Kolmogorov forward equation also lets us calculate any conditional moment, if it exists. In practice, however, (\ref{eq:fokkerPlanck}) is often untractable - meaning that we are unable to find the closed form solution for the transition density. Instead, we aim to approximate it. Closely related to it though is the so-called infinitesemal generator 
 \begin{align}
-    \mathcal{L}\varphi(x) = b(x, t) \frac{\partial\varphi}{\partial x} + \frac{1}{2}\sigma^2(X_t, t)\frac{\partial^2\varphi}{\partial x^2} \label{eq:infinitesemalGeneratorDefinition},
+    \mathcal{L}\varphi(x) = b(x, t) \frac{\partial\varphi}{\partial x} + \frac{1}{2}\sigma^2(x, t)\frac{\partial^2\varphi}{\partial x^2} \label{eq:infinitesemalGeneratorDefinition},
 \end{align}
-which is an operator on some sufficiently regular function, $\varphi$. We say that $\varphi, \lambda$ are the eigen functions and -values for the process respectively, if 
+which is an operator on some sufficiently regular function, $\varphi$. We say that $\varphi$ and $\lambda$ are the eigen functions and -values for the process respectively, if 
 \begin{align}
     \mathcal{L}\varphi = -\lambda\varphi,
 \end{align} 
-and it turns out that under mild regulatory conditions \cite[theorem 1.16]{StatisticalMethodsForSDE} then gives a method to derive the conditional moments as
+and under mild regulatory conditions \cite[theorem 1.16]{StatisticalMethodsForSDE} then gives a method to derive the conditional moments as
 \begin{align}
     \mathbb{E}\left[\varphi(X_{t}) \middle | X_{s}\right] = \exp\left(-\lambda \left(t - s\right)\right)\varphi \label{eq:momentConditions}, \quad t\geq s.
 \end{align}
-We use this result extensively for inference later. Finally, we find the closed form solution to a special Stochastic Differential Equation: The Ornstein-Uhlenbeck process 
+even when we cannot find the solution to (\ref{eq:fokkerPlanck}). As is clear, though, we still need the eigen function to be sufficiently simple e.g. a polynomium to actually be able to calculate the condtional moments, we are interested in such as the first and second conditional moment.
+\subsubsection{The Ornstein-Uhlenbeck process}
+As mentioned, closed-form solutions can only be derived for select stochastic differential equations. One such process is the Ornstein-Uhlenbeck process
 \begin{align}
-    dX_t = -\beta\left(X_t - \mu\right)\mathrm{d}t + \sigma dW_t \label{eq:originalOUprocess}
+    \mathrm{d}X_t = -\beta\left(X_t - \mu\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \quad X_{t_0} = x_0. \label{eq:originalOUprocess}
 \end{align}
-Multiply (\ref{eq:originalOUprocess}) with $\exp\left(\beta t\right)$ and rearrange
+In this rather simple process the drift and diffusion are parameterized by $\theta = \left(\beta, \mu, \sigma\right)^\top$ with the constraint that $\beta>0$.
+To get the closed form solution for this SDE multiply (\ref{eq:originalOUprocess}) with $\exp\left(\beta t\right)$ and rearrange
 \begin{align}
-    \exp\left(\beta t\right)\mathrm{text}X_t + \exp\left(\beta t\right) \beta X_t \mathrm{d}t = \exp\left(\beta t\right)\theta\mu \mathrm{d}t + \exp\left(\beta t\right)\sigma \mathrm{d}W_t
+    \exp\left(\beta t\right)\mathrm{d}X_t + \exp\left(\beta t\right) \beta X_t \mathrm{d}t = \exp\left(\beta t\right)\beta\mu \mathrm{d}t + \exp\left(\beta t\right)\sigma \mathrm{d}W_t
 \end{align}
 Use Itô's formula on $\exp\left(\beta t\right)X_t$ to see
 \begin{align}
@@ -61,8 +73,8 @@ Use Itô's formula on $\exp\left(\beta t\right)X_t$ to see
 \end{align}
 Understanding this as the integral equation (\ref{eq:itoIntegralEquation}) yields
 \begin{align}
-    \exp\left(\beta t\right)&X_t - \exp\left(\beta t_0\right)X_{t_0} = \left(\exp\left(\beta t\right) - \exp\left(\beta t_0\right)\right)\mu + \int_{t_0}^t \exp\left(\beta s\right)\sigma \mathrm{d}W_s \nonumber \\
-    &X_t = \exp\left(-\beta\left(t - t_0\right)\right)\left(X_{t_0} - \mu\right) + \mu + \int_{t_0}^t \exp\left(-\beta \left(t - s\right)\right)\sigma \mathrm{d}W_s \label{eq:OU_solution},
+    \exp\left(\beta t\right)&X_t - \exp\left(\beta t_0\right)x_0 = \left(\exp\left(\beta t\right) - \exp\left(\beta t_0\right)\right)\mu + \int_{t_0}^t \exp\left(\beta s\right)\sigma \mathrm{d}W_s \nonumber \\
+    &X_t = \exp\left(-\beta\left(t - t_0\right)\right)\left(x_0 - \mu\right) + \mu + \int_{t_0}^t \exp\left(-\beta \left(t - s\right)\right)\sigma \mathrm{d}W_s \label{eq:OU_solution},
 \end{align}
 which was what we wanted. Now, since the increments of the brownian motion is gaussian, the solution $X_t$ for given $t$ is gaussian. We can easily find its mean and variance using the following properties of the Itô integral \cite[theorem 3.2.1 and lemma 3.1.5]{Oksendal2003_yu}
 \begin{align}
@@ -73,13 +85,51 @@ Taking expectation of (\ref{eq:OU_solution}) and using (\ref{eq:meanOfItoIntegra
 \begin{align}
     \mathbb{E}\left[X_t\right] = \exp\left(-\beta\left(t - t_0\right)\right)\left(x_0 - \mu\right) + \mu.
 \end{align}
-We commence as we take the variance of (\ref{eq:OU_solution})
+Then we take the variance of (\ref{eq:OU_solution})
 \begin{align}
     \mathrm{Var}\left[X_t\right] &= \sigma^2\mathrm{Var}\left[\int_{t_0}^t \exp\left(-\beta \left(t - s\right)\right)\sigma \mathrm{d}W_s\right],\nonumber \\
     & = \sigma^2\left(\int_{t_0}^t \mathbb{E}\left[\exp\left(-2\beta\left(t - s\right)\right)\right] \mathrm{d}s + 0^2 \right), \nonumber \\
     & = \frac{\sigma^2}{2\beta}\left(1 - \exp\left(-2\beta(t - t_0)\right)\right).
 \end{align}
 Where we use both (\ref{eq:meanOfItoIntegral}) and (\ref{eq:ItoIsometry}) in the second step.
+\subsubsection{Pearson diffusions}
+A special family of one-dimensional Itô processes are the Pearson diffusions. Structurally, they are very similiar to the Ornstein-Uhlenbeck process in the way that they share drift function. More specifically, we define a pearson diffusion as a solution to a stochastic differential equation on the form
+\begin{align}
+    \mathrm{d}X_t = -\beta \left(X_t - \mu\right)\mathrm{d}t + \sigma\sqrt{\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, \: \beta, \sigma > 0. \label{eq:pearsonDiffusion}
+\end{align}
+For appropriate choices of $a, b, c$ making the square-root well-defined in the state space of $X_t$. Our focus is on the ergodic pearson diffusions; one can show that this is a class of six special diffusions \cite[p.36]{StatisticalMethodsForSDE}. \\
+Amongst other things, we consider the Lamperti-transform defined in (\ref{eq:firstLamperti}). Here it is
+\begin{align}
+    Y_t := \psi\left(X_t, t\right) = \int_{\xi}^{X_t} \frac{\mathrm{d}x}{\sqrt{\left(ax^2 + bx + c\right)}}. \label{eq:lampertiDefinition}
+\end{align}
+Again, for some appropriate $\xi$ in the state space of the respective processes. By Itô's formula
+\begin{align}
+    \mathrm{d}\psi\left(X_t, t\right) = - \frac{1}{\sqrt{\left(aX_t^2 + bX_t + c\right)}}\left(\beta\left(X_t - \mu\right) + \frac{\sigma^2}{4}\left(2aX_t + b\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t.
+\end{align}
+However, to the expression of $\mathrm{d}Y_t$ we need to invert $\psi\left(X_t, t\right)$ and this obviously has to be handled casewise.
+We sketch a quick overview of the processes \cite[p.36]{StatisticalMethodsForSDE}
+\begin{table}[h!]
+    \begin{center}
+    \begin{tabular}{lllll}\hline
+    \textbf{Name} & \textbf{Diffusion term} & \textbf{Lamperti-transform} & \textbf{State space}\\ \hline
+    Ornstein-Uhlenbeck  & $\sigma$  & $X_t$ & $\mathbb{R}$ \\
+    Square-root process & $\sigma\sqrt{X_t}$  & $ 2\sqrt{X_t}$ & $\mathbb{R}_{>0}$ \\
+    Mean-reverting GBM  & $\sigma X_t $  & $ \log\left(X_t\right)$  & $\mathbb{R}_{>0}$ \\
+    Skew t-diffusion  & $\sigma\sqrt{X_t^2 + 1}$  & $ \sinh^{-1}(X_t)$ & $\mathbb{R}$\\
+    Scaled F-diffusion  & $\sigma\sqrt{X_t\left(X_t + 1\right)}$  & $ 2\sinh^{-1}\left(\sqrt{X_t}\right)$ & $\mathbb{R}_{>0}$ \\
+    Jacobi-diffusion  & $\sigma\sqrt{X_t\left(1 - X_t\right)}$  & $ 2\sin^{-1}\left(X_t\right)$ & $(0, 1)$ \\ \hline
+    \end{tabular}
+    \caption{Overview of the ergodic pearson diffusions}
+    \label{table:ergodicDiffusions}
+\end{center}
+\end{table}\\
+For the the expressions of $\mathrm{d}Y_t$ for each of the diffusions refer to appendix \ref{sec:AppendixEstim}. Confer these concrete diffusion terms it is clear that \ref{eq:lampertiDefinition} is always well-defined; that is, the process is reducible. Additionally, we see that the respective lamperti-transform are one-to-one on the state space and therefore have well-defined inverse. \\
+We note that although named the erdogic pearson diffusions some are not ergodic for any choice of parameters. Whether there are any conditions for ergodicity and what these are depends on the diffusion in question; the condition, of course, is on the parameters. For instance, the Ornstein-Uhlenbeck is always ergodic and has invariant distribution $\mathcal{N}\left(\mu, \frac{\sigma^2}{2\beta}\right)$, whereas the square-root process is ergodic exactly when $2\beta\mu\geq \sigma^2$ and the invariant distribution here is $\Gamma\left(\frac{2\beta\mu}{\sigma^2}, \frac{2\beta}{\sigma^2}\right)$. \\
+Yet, more beneficial for our applications is the fact that Forman and Sorensen \cite{FormanSorensen2008} proved that for our ergodic diffusions, the eigen functions are all polynomials. Because of this, (\ref{eq:momentConditions}) allows us to derive any conditional moment of these processes, in spite of the fact that the transition densities themselves, for the most part, are unknown. Still, the calculations can become quite involved algebraically especially for moments of higher order. For this reason, it is fortunate that we only need the first two eigenfunctions and eigenvalues: those associated with the first- and second-order polynomials. To this end, observe that regardless of the noise term, (\ref{eq:pearsonDiffusion}) always have the same first-order eigen function and eigen value, due to the vanishing of the noise term in (\ref{eq:infinitesemalGeneratorDefinition}), whenever $\varphi$ is affine. This naturally results in the same conditional mean too, which for any of the diffusions in table \ref{table:ergodicDiffusions} is
+\begin{align}
+    \mathbb{E}\left[X_{t_{i}} \middle|X_{t_{i - 1}} \right] = \exp\left(-\beta\Delta t\right)\left(x-\mu\right) + \mu
+\end{align}
+This we also verify directly in (\ref{eq:directVerificationCondMean}). The conditional second moments are, however, different and must be considered individually. 
 \subsection{Dynamical systems}
 \subsubsection{Deterministic Dynamical Systems}
 
@@ -108,54 +158,6 @@ where $\sigma^2(X_t, t)$ is a function that dictates how the noise enters the sy
     \lambda_t = \lambda_0\left(1 - \mathds{1}\left(t>t_0\right)\frac{\left(t - t_0\right)}{\tau_c}\right)^\nu \label{eq:lambda_t}.
 \end{align}
 That is we use the particular form of (\ref{eq:lambda_t}) in (\ref{eq:dynamicsOriginal}). We imagine that our systems exists in some stationary state with $\lambda_t = \lambda_0$ before time $t_0$, after which a ramping starts. Apart from the stochastic part, the model is the saddle-node bifurcation \cite{Strogatz2019_gv}; we study the effects of picking different functions for $\sigma^2(X_t, t)$. More specifically, we consider functions belonging to the class of stochastic differential equations named pearson diffusions. Along with the addition of the $\nu$-parameter, this is an apparent way to extend the model with additive noise presented in \cite[equation (1)]{Ditlevsen2023}. The practical motivations for this class of diffusions will later become clear as we see that the diffusions have readily available tools that allow efficient inference.
-\subsection{Pearson diffusions}
-A pearson diffusion is a solution to a stochastic differential equation on the form
-\begin{align}
-    \mathrm{d}X_t = -\beta \left(X_t - \mu\right)\mathrm{d}t + \sigma\sqrt{\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, \: \beta, \sigma > 0. \label{eq:pearsonDiffusion}
-\end{align}
-For appropriate choices of $a, b, c$ making the square-root well-defined in the state space of $X_t$. In this thesis we focus on the ergodic pearson diffusions. One can show that this is class of six special diffusions \cite[p.36]{StatisticalMethodsForSDE}. Amongst other things, we consider the Lamperti-transform of these processes defined as
-\begin{align}
-    \psi\left(X_t, t\right) := \int_{\xi}^{X_t} \frac{\mathrm{d}x}{\sqrt{\left(ax^2 + bx + c\right)}}. \label{eq:lampertiDefinition}
-\end{align}
-For some appropriate $\xi$ in the state space of the respective diffusions. Now by Itô's formula
-\begin{align}
-    \mathrm{d}\psi\left(X_t, t\right) = - \frac{1}{\sqrt{\left(aX_t^2 + bX_t + c\right)}}\left(\beta\left(X_t - \mu\right) + \frac{\sigma^2}{4}\left(2aX_t + b\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t.
-\end{align}
-We define $Y_t := \psi\left(X_t, t\right)$. However, in order to commence, we need to invert $\psi\left(X_t, t\right)$ and this obviously has to be handled casewise. We sketch a quick overview of the processes
-\begin{table}[h!]
-    \begin{center}
-    \begin{tabular}{lllll}\hline
-    \textbf{Name} & \textbf{Diffusion term} & \textbf{Lamperti-transform} & \textbf{State space}\\ \hline
-    Ornstein-Uhlenbeck  & $\sigma$  & $X_t$ & $\mathbb{R}$ \\
-    Square-root process & $\sigma\sqrt{X_t}$  & $ 2\sqrt{X_t}$ & $\mathbb{R}_{>0}$ \\
-    Mean-reverting GBM  & $\sigma X_t $  & $ \log\left(X_t\right)$  & $\mathbb{R}_{>0}$ \\
-    Skew t-diffusion  & $\sigma\sqrt{X_t^2 + 1}$  & $ \sinh^{-1}(X_t)$ & $\mathbb{R}$\\
-    Scaled F-diffusion  & $\sigma\sqrt{X_t\left(X_t + 1\right)}$  & $ 2\sinh^{-1}\left(\sqrt{X_t}\right)$ & $\mathbb{R}_{>0}$ \\
-    Jacobi-diffusion  & $\sigma\sqrt{X_t\left(1 - X_t\right)}$  & $ 2\sin^{-1}\left(X_t\right)$ & $(0, 1)$ \\ \hline
-    \end{tabular}
-    \caption{Overview of the ergodic pearson diffusions}
-    \label{table:ergodicDiffusions}
-\end{center}
-\end{table}\\
-For the the expressions of $\mathrm{d}Y_t$ for each of the diffusions refer to appendix \ref{sec:AppendixEstim}. The lamperti-transformed process is instrumental to our later estimation as it per construction has additive noise, which we can exploit. Confer these concrete diffusion terms it is clear that \ref{eq:lampertiDefinition} is always well-defined; that is, the process is reducible.  We note that some of the diffusions are not ergodic for any choice of parameters. Whether there are any conditions for ergodicity and what these are depends on the diffusion in question; the condition is on the parameters. For instance, the Ornstein-Uhlenbeck is always ergodic and has invariant distribution $\mathcal{N}\left(\mu, \frac{\sigma^2}{2\beta}\right)$, whereas the square-root process is ergodic exactly when $2\beta\mu\geq \sigma^2$ and the invariant distribution here is $\Gamma\left(\frac{2\beta\mu}{\sigma^2}, \frac{2\beta}{\sigma^2}\right)$. \\
-
-% Later, we also need to be able to calculate moments up to the second order. In order to do so, we introduce the so-called infinitesemal generator of a stochastic process
-% \begin{align}
-%     \mathcal{L}\varphi(x) = b(x, t) \varphi' + \frac{1}{2}\sigma^2(X_t, t)\varphi'', \label{eq:infinitesemalGenerator}
-% \end{align}
-% where the derivatives are taken with respect to $x$, $\varphi$ is a suitably regular function and $b(X_t, t)$ is the drift of the SDE. We say that $\varphi$, $\lambda$ are eigen functions and -values for the process respectively if
-% \begin{align}
-%     \mathcal{L}\varphi = - \lambda \varphi,
-% \end{align}
-% Under mild regulatory conditions \cite[theorem 1.16]{StatisticalMethodsForSDE} then gives a method to derive the moments as
-% \begin{align}
-%     \mathbb{E}\left[\varphi(X_{t_k + 1}) \middle | X_{t_k}\right] = \exp\left(-\lambda t\right)\varphi \label{eq:momentConditions}
-% \end{align}
-For typographical reasons, the dependence on the parameters have been suppresed in both $\varphi$ and $\lambda$. Additionally, Forman and Sorensen \cite{FormanSorensen2008} showed that for our ergodic diffusions, the eigenfunctions are all polynomials. Because of this, it is possible to derive any conditional moment of these processes, in spite of the fact that the transition densities themselves, for the most part, are unknown. For our purposes, we only need the first two eigenfunctions and eigenvalues; that is those associated with the first- and second-order polynomials. However, observe that regardless of the noise term, (\ref{eq:pearsonDiffusion}) always have the same first-order eigenfunction and eigenvalue,  due to the vanishing of the noise term in (\ref{eq:infinitesemalGeneratorDefinition}). This naturally results in the same conditional mean too, which for any of the diffusions in table \ref{table:ergodicDiffusions} is
-\begin{align}
-    \mathbb{E}\left[X_{t_{i}} \middle|X_{t_{i - 1}} \right] = \exp\left(-\beta\Delta t\right)\left(x-\mu\right) + \mu
-\end{align}
-This we also verify directly in (\ref{eq:directVerificationCondMean}). The conditional second moments are, however, different and must be considered individually. 
 \subsection{Inference for stochastic differential equations}
 Regardless of ones exact method, inference about parameters in stochastic differential equations are often done by leveraging the markov property of Itô processes. This means that in order to estimate the parameters, it is sufficient to have the transition density or approximations thereof. Getting the transtion density involves solving the Fokker-Planck equation, which for the most part is intractable, thus one employ one or more approximation methods.\\
 To this end, inference is traditionally done qua the Euler-maruyama scheme. In this thesis, we only used the estimator based on this scheme in the initial development; it is fairly easy to derive, implement and it is computationally quite efficient. Yet, the estimator is biased even for moderately large stepsizes, and quite notably so in non-linear models \cite{SplittingSchemes}. Instead, we consider two other means of estimation 
