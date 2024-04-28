@@ -60,21 +60,21 @@ even when we cannot find the solution to (\ref{eq:fokkerPlanck}). As is clear, t
 \subsubsection{The Ornstein-Uhlenbeck process}
 As mentioned, closed-form solutions can only be derived for select stochastic differential equations. One such process is the Ornstein-Uhlenbeck process
 \begin{align}
-    \mathrm{d}X_t = -\beta\left(X_t - \mu\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \quad X_{t_0} = x_0. \label{eq:originalOUprocess}
+    \mathrm{d}X_t = -\alpha_0\left(X_t - \mu\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \quad X_{t_0} = x_0. \label{eq:originalOUprocess}
 \end{align}
-In this rather simple process the drift and diffusion are parameterized by $\theta = \left(\beta, \mu, \sigma\right)^\top$ with the constraint that $\beta>0$.
-To get the closed form solution for this SDE multiply (\ref{eq:originalOUprocess}) with $\exp\left(\beta t\right)$ and rearrange
+In this rather simple process the drift and diffusion are parameterized by $\theta = \left(\alpha_0, \mu, \sigma\right)^\top$ with the constraint that $\alpha_0>0$.
+To get the closed form solution for this SDE multiply (\ref{eq:originalOUprocess}) with $\exp\left(\alpha_0 t\right)$ and rearrange
 \begin{align}
-    \exp\left(\beta t\right)\mathrm{d}X_t + \exp\left(\beta t\right) \beta X_t \mathrm{d}t = \exp\left(\beta t\right)\beta\mu \mathrm{d}t + \exp\left(\beta t\right)\sigma \mathrm{d}W_t
+    \exp\left(\alpha_0 t\right)\mathrm{d}X_t + \exp\left(\alpha_0 t\right) \alpha_0 X_t \mathrm{d}t = \exp\left(\alpha_0 t\right)\alpha_0\mu \mathrm{d}t + \exp\left(\alpha_0 t\right)\sigma \mathrm{d}W_t
 \end{align}
-Use Itô's formula on $\exp\left(\beta t\right)X_t$ to see
+Use Itô's formula on $\exp\left(\alpha_0 t\right)X_t$ to see
 \begin{align}
-    \mathrm{d}\left(\exp\left(\beta t\right)X_t\right) &= \exp\left(\beta t\right)\beta \mu \mathrm{d}t + \exp\left(\beta t\right) \sigma \mathrm{d}W_t \nonumber
+    \mathrm{d}\left(\exp\left(\alpha_0 t\right)X_t\right) &= \exp\left(\alpha_0 t\right)\alpha_0 \mu \mathrm{d}t + \exp\left(\alpha_0 t\right) \sigma \mathrm{d}W_t \nonumber
 \end{align}
 Understanding this as the integral equation (\ref{eq:itoIntegralEquation}) yields
 \begin{align}
-    \exp\left(\beta t\right)&X_t - \exp\left(\beta t_0\right)x_0 = \left(\exp\left(\beta t\right) - \exp\left(\beta t_0\right)\right)\mu + \int_{t_0}^t \exp\left(\beta s\right)\sigma \mathrm{d}W_s \nonumber \\
-    &X_t = \exp\left(-\beta\left(t - t_0\right)\right)\left(x_0 - \mu\right) + \mu + \int_{t_0}^t \exp\left(-\beta \left(t - s\right)\right)\sigma \mathrm{d}W_s \label{eq:OU_solution},
+    \exp\left(\alpha_0 t\right)&X_t - \exp\left(\alpha_0 t_0\right)x_0 = \left(\exp\left(\alpha_0 t\right) - \exp\left(\alpha_0 t_0\right)\right)\mu + \int_{t_0}^t \exp\left(\alpha_0 s\right)\sigma \mathrm{d}W_s \nonumber \\
+    &X_t = \exp\left(-\alpha_0\left(t - t_0\right)\right)\left(x_0 - \mu\right) + \mu + \int_{t_0}^t \exp\left(-\alpha_0 \left(t - s\right)\right)\sigma \mathrm{d}W_s \label{eq:OU_solution},
 \end{align}
 which was what we wanted. Now, since the increments of the brownian motion is gaussian, the solution $X_t$ for given $t$ is gaussian. We can easily find its mean and variance using the following properties of the Itô integral \cite[theorem 3.2.1 and lemma 3.1.5]{Oksendal2003_yu}
 \begin{align}
@@ -83,19 +83,19 @@ which was what we wanted. Now, since the increments of the brownian motion is ga
 \end{align}
 Taking expectation of (\ref{eq:OU_solution}) and using (\ref{eq:meanOfItoIntegral}) we get
 \begin{align}
-    \mathbb{E}\left[X_t\right] = \exp\left(-\beta\left(t - t_0\right)\right)\left(x_0 - \mu\right) + \mu.
+    \mathbb{E}\left[X_t\right] = \exp\left(-\alpha_0\left(t - t_0\right)\right)\left(x_0 - \mu\right) + \mu. \label{eq:OU_mean}
 \end{align}
 Then we take the variance of (\ref{eq:OU_solution})
 \begin{align}
-    \mathrm{Var}\left[X_t\right] &= \sigma^2\mathrm{Var}\left[\int_{t_0}^t \exp\left(-\beta \left(t - s\right)\right)\sigma \mathrm{d}W_s\right],\nonumber \\
-    & = \sigma^2\left(\int_{t_0}^t \mathbb{E}\left[\exp\left(-2\beta\left(t - s\right)\right)\right] \mathrm{d}s + 0^2 \right), \nonumber \\
-    & = \frac{\sigma^2}{2\beta}\left(1 - \exp\left(-2\beta(t - t_0)\right)\right).
+    \mathrm{Var}\left[X_t\right] &= \sigma^2\mathrm{Var}\left[\int_{t_0}^t \exp\left(-\alpha_0 \left(t - s\right)\right)\sigma \mathrm{d}W_s\right],\nonumber \\
+    & = \sigma^2\left(\int_{t_0}^t \mathbb{E}\left[\exp\left(-2\alpha_0\left(t - s\right)\right)\right] \mathrm{d}s + 0^2 \right), \nonumber \\
+    & = \frac{\sigma^2}{2\alpha_0}\left(1 - \exp\left(-2\alpha_0(t - t_0)\right)\right). \label{eq:OU_variance}
 \end{align}
 Where we use both (\ref{eq:meanOfItoIntegral}) and (\ref{eq:ItoIsometry}) in the second step.
 \subsubsection{Pearson diffusions}
 A special family of one-dimensional Itô processes are the Pearson diffusions. Structurally, they are very similiar to the Ornstein-Uhlenbeck process in the way that they share drift function. More specifically, we define a pearson diffusion as a solution to a stochastic differential equation on the form
 \begin{align}
-    \mathrm{d}X_t = -\beta \left(X_t - \mu\right)\mathrm{d}t + \sigma\sqrt{\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, \: \beta, \sigma > 0. \label{eq:pearsonDiffusion}
+    \mathrm{d}X_t = -\alpha_0 \left(X_t - \mu\right)\mathrm{d}t + \sigma\sqrt{\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, \: \alpha_0, \sigma > 0. \label{eq:pearsonDiffusion}
 \end{align}
 For appropriate choices of $a, b, c$ making the square-root well-defined in the state space of $X_t$. Our focus is on the ergodic pearson diffusions; one can show that this is a class of six special diffusions \cite[p.36]{StatisticalMethodsForSDE}. \\
 Amongst other things, we consider the Lamperti-transform defined in (\ref{eq:firstLamperti}). Here it is
@@ -104,7 +104,7 @@ Amongst other things, we consider the Lamperti-transform defined in (\ref{eq:fir
 \end{align}
 Again, for some appropriate $\xi$ in the state space of the respective processes. By Itô's formula
 \begin{align}
-    \mathrm{d}\psi\left(X_t, t\right) = - \frac{1}{\sqrt{\left(aX_t^2 + bX_t + c\right)}}\left(\beta\left(X_t - \mu\right) + \frac{\sigma^2}{4}\left(2aX_t + b\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t.
+    \mathrm{d}\psi\left(X_t, t\right) = - \frac{1}{\sqrt{\left(aX_t^2 + bX_t + c\right)}}\left(\alpha_0\left(X_t - \mu\right) + \frac{\sigma^2}{4}\left(2aX_t + b\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t.
 \end{align}
 However, to the expression of $\mathrm{d}Y_t$ we need to invert $\psi\left(X_t, t\right)$ and this obviously has to be handled casewise.
 We sketch a quick overview of the processes \cite[p.36]{StatisticalMethodsForSDE}
@@ -123,19 +123,48 @@ We sketch a quick overview of the processes \cite[p.36]{StatisticalMethodsForSDE
     \label{table:ergodicDiffusions}
 \end{center}
 \end{table}\\
-For the the expressions of $\mathrm{d}Y_t$ for each of the diffusions refer to appendix \ref{sec:AppendixEstim}. Confer these concrete diffusion terms it is clear that \ref{eq:lampertiDefinition} is always well-defined; that is, the process is reducible. Additionally, we see that the respective lamperti-transform are one-to-one on the state space and therefore have well-defined inverse. \\
-We note that although named the erdogic pearson diffusions some are not ergodic for any choice of parameters. Whether there are any conditions for ergodicity and what these are depends on the diffusion in question; the condition, of course, is on the parameters. For instance, the Ornstein-Uhlenbeck is always ergodic and has invariant distribution $\mathcal{N}\left(\mu, \frac{\sigma^2}{2\beta}\right)$, whereas the square-root process is ergodic exactly when $2\beta\mu\geq \sigma^2$ and the invariant distribution here is $\Gamma\left(\frac{2\beta\mu}{\sigma^2}, \frac{2\beta}{\sigma^2}\right)$. \\
-Yet, more beneficial for our applications is the fact that Forman and Sorensen \cite{FormanSorensen2008} proved that for our ergodic diffusions, the eigen functions are all polynomials. Because of this, (\ref{eq:momentConditions}) allows us to derive any conditional moment of these processes, in spite of the fact that the transition densities themselves, for the most part, are unknown. Still, the calculations can become quite involved algebraically especially for moments of higher order. For this reason, it is fortunate that we only need the first two eigenfunctions and eigenvalues: those associated with the first- and second-order polynomials. To this end, observe that regardless of the noise term, (\ref{eq:pearsonDiffusion}) always have the same first-order eigen function and eigen value, due to the vanishing of the noise term in (\ref{eq:infinitesemalGeneratorDefinition}), whenever $\varphi$ is affine. This naturally results in the same conditional mean too, which for any of the diffusions in table \ref{table:ergodicDiffusions} is
+For the the expressions of $\mathrm{d}Y_t$ for each of the diffusions refer to appendix \ref{sec:AppendixEstim}. Confer these concrete diffusion terms it is clear that (\ref{eq:lampertiDefinition}) is always well-defined; that is, the process is reducible. Additionally, we see that the respective lamperti-transform are one-to-one on the state space and therefore have well-defined inverse. \\
+We note that although named the erdogic pearson diffusions some are not ergodic for any choice of parameters. Whether there are any conditions for ergodicity and what these are depends on the diffusion in question; the condition, of course, is on the parameters. For instance, the Ornstein-Uhlenbeck is always ergodic and has invariant distribution $\mathcal{N}\left(\mu, \frac{\sigma^2}{2\alpha_0}\right)$, whereas the square-root process is ergodic exactly when $2\alpha_0\mu\geq \sigma^2$ and the invariant distribution here is $\Gamma\left(\frac{2\alpha_0\mu}{\sigma^2}, \frac{2\alpha_0}{\sigma^2}\right)$. \\
+Yet, more beneficial for our applications is the fact that Forman and Sorensen \cite{FormanSorensen2008} proved that for our ergodic diffusions, the eigen functions are all polynomials. Because of this, (\ref{eq:momentConditions}) allows us to derive any conditional moment of these processes, in spite of the fact that the transition densities themselves, for the most part, are unknown. Still, the calculations can become quite involved algebraically; this is especially true for moments of higher order. For this reason, it is fortunate that we for our applications only need the first two eigenfunctions and eigenvalues: those associated with the first- and second-order polynomials. To this end, observe that regardless of the noise term, (\ref{eq:pearsonDiffusion}) always have the same first-order eigen function and eigen value, due to the vanishing of the noise term in (\ref{eq:infinitesemalGeneratorDefinition}), whenever $\varphi$ is affine. This naturally results in the same conditional mean too, which for any of the diffusions in table \ref{table:ergodicDiffusions} is
 \begin{align}
-    \mathbb{E}\left[X_{t_{i}} \middle|X_{t_{i - 1}} \right] = \exp\left(-\beta\Delta t\right)\left(x-\mu\right) + \mu
+    \mathbb{E}\left[X_{t_{i}+\Delta} \middle|X_{t_{i}} \right] = \exp\left(-\alpha_0\Delta\right)\left(x-\mu\right) + \mu
 \end{align}
-This we also verify directly in (\ref{eq:directVerificationCondMean}). The conditional second moments are, however, different and must be considered individually. 
+This we also verify directly for a concrete pearson diffusion in (\ref{eq:directVerificationCondMean}). Though, it is evident that the calculations are completely analagous for the other pearson diffusions. With regard to the the conditional second moments and -variances, however, we are not as lucky, as they are different and must be considered individually.
+\subsubsection{Discretization of stochastic differential equations}
+In their abstract form stochastic differential equation are inherently different to the actual observations from them in real world applications.
+When sampling or considering sample paths from stochastic differential equations we are naturally limited to a finite amount of samples. Typically, we are in a situation, where we have samples $X_{t_0},\dots,X_{t_n}$ for some times $t_0,\dots,t_n$. We denote the time between the observations the temporal resolution of the data write $\Delta t_i = t_{i} - t_{i - 1}$; this quantity is often constant and when it is, we refer to it as uniform temporal resolution.
+Consider the SDE in (\ref{eq:firstSDE})
 \subsection{Dynamical systems}
-\subsubsection{Deterministic Dynamical Systems}
-
-
-
-\subsubsection{Saddle-node bifurcations and Tipping Point Estimation}
+When studying a system that evolves over time, one thing that frequently interests us is the long-term behaviour of the system: Will it reach an equillibrium of sorts, oscillate or something completely different. The answers to this question are the systems dynamics, and the type we are concerned with are the differential equation type of dynamical systems. Initially, we introduce relevant terminology for dynamical systems in their classic deterministic setting; then we see that they also align well in the setting of stochastic differential equation. 
+\subsubsection{Deterministic Dynamical Systems and bifurcations}
+A general dynamical system can be written as
+\begin{align}
+    \mathrm{d}x_t = f(x_t, \lambda)\mathrm{d}t, \label{eq:generalDynamicalSystem}
+\end{align}
+where $x_t$ is some variable of interest and $\lambda$ is some parameter that, for now, is fixed. We are often interested in the flow of the system. More specifically, we say that the flow is to the right, when (\ref{eq:generalDynamicalSystem}) is positive and to the left, if it negative. In the case, when $f(x_0, \lambda) = 0$, the point $x_0$ is called a fixed point. The fixed point is stable, if $\frac{\partial}{\partial x}f(x_0, \lambda) < 0$ and unstable, if it is positive. As an example consider the double-well potential given by the differential equation 
+\begin{align}
+    \mathrm{d}x_t = f_{DW}(x_t, \lambda) = \left(-x_t^3 - \lambda x_t\right) \mathrm{d}t \label{eq:originalDW}
+\end{align}
+The fixed points for (\ref{eq:originalDW}) are found by 
+\begin{align}
+    f_{DW}(x, \lambda) = x\left(-x^2 - \lambda\right) = 0,
+\end{align}
+clearly $x_0 = 0 \lor x_0 = \pm \sqrt{-\lambda}$. As 
+\begin{align}
+    \frac{\partial}{\partial x}f_{DW}(x, \lambda) = -3x^2 - \lambda,
+\end{align}
+we see that the fixed point located at zero, is unstable for $\lambda<0$ and stable when $\lambda>0$. For the other fixed points, direct calculations show $\frac{\partial}{\partial x}f_{DW}(x_0, \lambda) = 2\lambda$. These fixed points, however, only exist for negative $\lambda$, for which they clearly are stable. 
+Perhaps a bit surprisingly, a more often utilized approach for these kinds of problems is a rather qualitative one. As an example, we could achieve the same results by graphing the differential equation
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[scale = .125]{figures/double_well_plot_combined.jpeg}
+        \caption{The value of the derivative of $X_t$ as a function of $X_t$.
+        The graph on the left has $\lambda = -0.5$ and the one on the left has $\lambda = 0.5$.}
+    \end{center}
+\end{figure}\\
+By convention the fixed points are marked by points with stable fixed points being solid points and unstable being hollow and we have fillem them in simply by looking at the graphs. When $\dot{x}_t$ i.e. $x_t'$ is below 0, the flow is to the left and otherwise. In the intercepts we have the fixed points, and by analyzing them in combination with the flow, we get the same results from the plots as we found analytically earlier. \\
+The change in behaviour of the systems fixed points $\lambda$ going from negative to positive is a phenomenon that we refer to as bifurcation. What happened was that the fixed points moved closer to one another until they eventually were destroyed for $\lambda > 0$. Depending on the type of bifurcation in question this plays out differently. 
+\subsubsection{Saddle-node bifurcation and Tipping Point Estimation}
 In the study of dynamical systems, we refer to how changes in parameters affect the qualitative structure of the flow as bifurcations. The parameter values that results in the changes we call bifurcations points. In applications, we sometimes denote these tipping and tipping points, respectively, to get more metaphorical- and intuitive terms. \cite{Strogatz2019_gv}. Nevertheless, we only consider the so-called Saddle-node bifurcations, defined qua the normal form
 \begin{align}
     X_t &= \left(\lambda \pm X_t^2\right) \mathrm{d}t \label{standardForm}
@@ -178,7 +207,7 @@ with $\xi_{\Delta t}\sim\mathcal{N}\left(0, \Omega_{\Delta t}\right)$. That is, 
 \end{align}
 where the latter is calculated using \cite[equation (6)]{SplittingSchemes}. For our purposes the solution to (\ref{ODE_Split}) exists and is unique; with stepsize, $\Delta t$, we denote it $\varphi_{\Delta t}^{(2)}$. The conditions for this is provided in \cite[Assumption (A1) and - (A2)]{SplittingSchemes}. Then the Strang splitting scheme gives the approximation of the transition
 \begin{align}
-    X_{t_{i+1}}^{(S)} = \varphi_{\Delta t / 2}^{(2)}\left(\mu_{\Delta t}\left(\varphi_{\Delta t/2}^{(2)}\left(X_{t_{i}}^{(S)}\right); \theta\right) + \xi_{\Delta t} \; ; \theta \right).
+    X_{t_{i+1}}^{(S)} = \varphi_{\Delta t / 2}^{(2)}\left(\mu_{\Delta t}\left(\varphi_{\Delta t/2}^{(2)}\left(X_{t_{i}}^{(S)}\right); \theta\right) + \xi_{\Delta t} \; ; \theta \right). \label{eq:classicStrangSplitting}
 \end{align}
 This is a non-linear transformation of a gaussian variable; so by the density transformation theorem, the flow gives us the following negative pseudo-loglikelihood 
 \begin{align}
@@ -186,7 +215,7 @@ This is a non-linear transformation of a gaussian variable; so by the density tr
     &- \log\left(\partial_x \left(\varphi_{\Delta t / 2}^{(2)}\right)^{-1} \right), \label{Strang_likelihood}
 \end{align}
 and we say that the $\theta$ that minimizes this expression is the Strang-based estimator. In (\ref{Strang_likelihood}) $g$ is the density of the gaussian distribution with the specified mean and variance. For the above arguments to be valud, we require additive noise in the models, which we of course get by means of the lamperti-transform. In rare instances, there exists other closes form solutions to linear stochastic differential equations than the one with additive noise. This novel splitting strategy avoids using the Lamperti-transform; although it is not central to the, we still explore the option in (\ref{meanrevertingGBMSplit1}).
-\subsubsection{Approximately Optimal Martingale Estimation Equations}
+\subsubsection{Approximately Optimal Martingale Estimation Equations}\label{subsubsec:approximatelyOptimalMartingaleEstimationEquation}
 Other than the strang splitting, we also estimate the parameters by means of the following approximately optimal martingale estimation functions \cite[Example 1.11]{StatisticalMethodsForSDE}.
 \begin{align}
     G_N^{\circ} &= \sum_{i = 1}^N 

@@ -1,5 +1,11 @@
 library(tidyverse)
-ggplot2::theme_set(ggthemes::theme_base())
+
+thesis_theme <- ggthemes::theme_base() +
+  theme(panel.border = element_blank(),       
+        plot.background = element_blank(),     
+        panel.background = element_blank())
+
+ggplot2::theme_set(thesis_theme)
 source("source_code/tipping_simulations.R")
 source("source_code/model_fitting.R")
 
@@ -315,7 +321,7 @@ sim_res_sqrt |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) +
 
 #nu plot 
 # Parameters
-lambda_0 <- 2 
+lambda_0 <- -2 
 tau <- 75
 t_0 <- 10
 nu_values <- c(0.05, 0.1, 0.5, 0.8, 1, 1.2, 1.7, 2.2, 3)
@@ -346,6 +352,99 @@ ggplot(plot_data, aes(x = t, y = lambda, color = nu, group = nu)) +
 
 
 
+# For negative lambda
+A <- 1
+C <- -0.5
 
+double_well <- function(x){
+  -A * x^3 - C * x
+}
 
+double_well_deriv <- function(x){
+  - 3 * A * x^2 - C
+}
 
+roots_neglambda <- polyroot(c(0, -C, 0, -A))
+
+real_roots_neglambda <- roots_neglambda[dplyr::near(Im(roots_neglambda), 0)]
+real_roots_neglambda <- sort(Re(real_roots_neglambda))
+
+double_well_approx <- function(x){
+  -3 * real_roots_neglambda[1] * (x - real_roots_neglambda[1])^2 - real_roots_neglambda[1] * C 
+}
+
+# Generate data
+x_values <- seq(real_roots_neglambda[1] - 0.2, real_roots_neglambda[3] + 0.2, by = 0.01)
+
+colors <- ifelse(double_well_deriv(real_roots_neglambda) < 0, "black", "white")
+
+data <- data.frame(x = x_values, force = double_well(x_values), approx = double_well_approx(x_values))
+
+data_pivot <- data |> 
+  pivot_longer(cols = c(force, approx), names_to = "Type", values_to = "Value")
+
+roots_data_neglambda <- data.frame(x = real_roots_neglambda, y = rep(0, length(real_roots_neglambda)), col = colors)
+
+double_well_plot_neg <- ggplot(data, aes(x = x, y = force)) +
+  geom_line(linewidth = 1) +
+  labs(x = "x",
+       y = expression(dot(x))) + 
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  geom_point(data = roots_data_neglambda, aes(x = x, y = y, fill = col), size = 3, pch = 21) +
+  scale_fill_manual(values = c("black", "white")) + 
+  theme(legend.position = "none",
+        axis.title.y = element_text(angle = 0, vjust = 0.5))
+
+ggsave(path = paste0(getwd(), "/tex_files/figures"), filename = "double_well_plot_neg.jpeg")
+
+# Double well potential plot positive lambda
+# Parameters
+A <- 1
+C <- 0.5
+
+roots_poslambda <- polyroot(c(0, -C, 0, -A))
+
+roots_poslambda <- roots_poslambda[dplyr::near(Im(roots_poslambda), 0)]
+roots_poslambda <- sort(Re(roots_poslambda))
+
+double_well_approx <- function(x){
+  -3 * roots_poslambda[1] * (x - roots_poslambda[1])^2 - roots_poslambda[1] * C 
+}
+
+# Generate data
+
+colors <- ifelse(double_well_deriv(roots_poslambda) < 0, "black", "white")
+
+data <- data.frame(x = x_values, force = double_well(x_values), approx = double_well_approx(x_values))
+
+data_pivot <- data |> 
+  pivot_longer(cols = c(force, approx), names_to = "Type", values_to = "Value")
+
+roots_data_poslambda <- data.frame(x = roots_poslambda, y = rep(0, length(roots_poslambda)), col = colors)
+
+double_well_plot_pos <- ggplot(data, aes(x = x, y = force)) +
+  geom_line(linewidth = 1) +
+  labs(x = "x",
+       y = expression(dot(x))) + 
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  geom_point(data = roots_data_poslambda, aes(x = x, y = y, fill = col), size = 3, pch = 21) +
+  scale_fill_manual(values = c("black", "white")) + 
+  theme(legend.position = "none",
+        axis.title.y = element_text(angle = 0, vjust = 0.5))
+
+ggsave(plot = double_well_plot_pos, 
+       path = paste0(getwd(), "/tex_files/figures"),
+       filename = "double_well_plot_pos.jpeg")
+
+double_well_plot_pos <- double_well_plot_pos + ylab("") 
+
+double_well_plot_combined <- gridExtra::grid.arrange(double_well_plot_neg, double_well_plot_pos, ncol = 2)
+
+ggsave(filename = "double_well_plot_combined.jpeg", plot = double_well_plot_combined,
+       path = paste0(getwd(), "/tex_files/figures"),
+       width = 10,
+       height = 5,
+       dpi = 300)
+       
