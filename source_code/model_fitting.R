@@ -974,7 +974,7 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Example usage
-# source("source_code/tipping_simulations.R")
+source("source_code/tipping_simulations.R")
 # 
 # ## Additive noise model
 # true_param <- c(-0.87, -1.51, 2, 0.2)
@@ -1015,27 +1015,27 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 ## Square-root noise model
-# true_param <- c(-0.5, 3, 1, 0.1)
-# actual_dt <- 0.005
-# tau <- 100
-# t_0 <- 50
-# sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sample_n(sim_res_sqrt, min(nrow(sim_res_sqrt), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
-# # # 
-# # ## Stationary part
-# # ## Parameters for stationary part
-# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
-# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
-# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-# 
-# CIR_quadratic_martingale(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0], actual_dt) - stationary_part_true_param
-# optimize_stationary_likelihood(CIR_alt_strang_splitting, exp(2*sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0])),
-#                                stationary_part_true_param, actual_dt) - stationary_part_true_param
-# 
-# optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
-#                                data = 2*sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
-#                                init_par = stationary_part_true_param,
-#                                delta = actual_dt, exp_sigma = FALSE) - stationary_part_true_param
+true_param <- c(0.8, 3, -1, 0.1)
+actual_dt <- 0.005
+tau <- 100
+t_0 <- 50
+sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param, tau, t_0)
+sample_n(sim_res_sqrt, min(nrow(sim_res_sqrt), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
+# #
+# ## Stationary part
+# ## Parameters for stationary part
+mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+
+CIR_quadratic_martingale(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0], actual_dt) - stationary_part_true_param
+optimize_stationary_likelihood(CIR_alt_strang_splitting, exp(2*sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0])),
+                               stationary_part_true_param, actual_dt) - stationary_part_true_param
+
+optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
+                               data = 2*sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
+                               init_par = stationary_part_true_param,
+                               delta = actual_dt, exp_sigma = FALSE) - stationary_part_true_param
 # 
 # ## Dynamic part
 # 

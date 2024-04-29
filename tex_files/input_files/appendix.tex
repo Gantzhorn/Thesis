@@ -1,5 +1,5 @@
 \section{Source code}
-The source code for this project, licensed under the MIT License, is hosted on \href{https://github.com/Gantzhorn/Thesis}{Github}. In the repository the source code can be found in the \textit{"source\_code"}-directory. To recreate the main results from the thesis run the \code{R}-script: \textit{"main.R"}. For the code itself refer to the other files. Apart from the code these also includes information about the code as well as examples on how to actually run it. 
+The source code for this project, licensed under the MIT License, is hosted on \href{https://github.com/Gantzhorn/Thesis}{Github}. In the repository the source code can be found in the \textit{"source\_code"}-directory. To recreate the main results from the thesis run the \code{R}-script: \textit{"main.R"}. For the code itself refer to the other \code{R}-files in the same directory. Apart from the code these also includes information about the code as well as examples on how to actually run it. 
 \section{Simulation Methods}\label{appendix:simMethods}
 This section focuses on constructing the simulation schemes that support the analytical work presented in this thesis. We considered the Euler-maruyama - as well the Milstein scheme. However, as the processes are quite non-linear our final choice was the Scalar weak order 2.0 Itô–Taylor method \cite[algorithm 8.5]{Srkk2019}. In the general setup we simulate $X_{t_0},X_{t_1},\dots, X_{t_N}$ according to the schemes by sampling $N$ random variables $\Delta W_{t_k}\sim\mathcal{N}\left(0, \Delta t_k\right)$. Note that we let $X_{t_0} = \mu_0$, i.e. mean-reverting parameter in the stationary parts of the processes.
 \noindent \textbf{Additive noise}\\
@@ -109,16 +109,20 @@ In the stationary part we assume the process can be modelled by the square-root 
 \end{align}
 We first introduce estimators based on the Strang splitting scheme, and then we consider an estimator based on martingale estimating equations.\\\\
 \noindent \textbf{The Strang-based Estimator}\\
-To obtain the strang estimator, we first use The lamperti transformation of (\ref{eq:squarerootAppendix}), which by table \ref{table:ergodicDiffusions} is $Y_t := 2\sqrt{X_t}$. To confirm this and get the result SDE see
+To obtain the strang estimator, we first use The lamperti transformation of (\ref{eq:squarerootAppendix}), which by table \ref{table:ergodicDiffusions} is $Y_t := 2\sqrt{X_t}$. To confirm this and get the resulting SDE see
 \begin{align}
     \mathrm{d}Y_t = - \frac{1}{Y_t}\left(\alpha_0 \frac{Y_t^2}{2} - 2 \alpha_0 \mu_0 + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \label{eq:lampertiSquarerootAppendix}
 \end{align}
-by Itô's formula. Then, using the heuristic from \cite[section 2.3 and 2.5]{SplittingSchemes} we let the Ornstein-Uhlenbeck part be the linearization around the fixed point of the drift.
+by Itô's formula. Then, we use the heuristic from \cite[section 2.3 and 2.5]{SplittingSchemes}. First we calculate the fixed point of the drift. That is, we solve the equation
 \begin{align}
-    \mathrm{d}Y_t^{[1]} &= -\alpha_0 \left(Y_t^{[1]} + \sqrt{\frac{4\alpha_0 \mu_0 - \sigma^2}{\alpha_0}}\right) + \sigma \mathrm{d}W_t , \label{eq:squarerootStationarySplit1} \\
+    f(y) := - \frac{1}{y}\left(\alpha_0 \frac{y^2}{2} - 2 \alpha_0 \mu_0 + \frac{\sigma^2}{2}\right) = 0
+\end{align}
+in terms of $y$. This is $y^* = \pm \sqrt{\frac{\alpha_0\mu_0 - \sigma^2}{\alpha_0}}$. In our case, however, $Y_t$ is non-negative by definition; thus we only want the positive solution. Therefore, we let the Ornstein-Uhlenbeck part be the linearization around the positive fixed point
+\begin{align}
+    \mathrm{d}Y_t^{[1]} &= -\alpha_0 \left(Y_t^{[1]} - \sqrt{\frac{4\alpha_0 \mu_0 - \sigma^2}{\alpha_0}}\right) + \sigma \mathrm{d}W_t , \label{eq:squarerootStationarySplit1} \\
     \mathrm{d}Y_t^{[2]} &= \frac{\alpha_0 Y_t^{[2]}}{2} + \frac{4\alpha_0 \mu_0 - \sigma^2}{2 Y_t} + \sqrt{\alpha_0\left(4\alpha_0\mu_0 - \sigma^2\right)}. \label{eq:squarerootStationarySplit2}
 \end{align}
-Due to the nature of the lamperti-transformation giving us non-negative values, we only consider the positive branch of the two fixed points of \ref{eq:lampertiSquarerootAppendix}. As always, the deterministic ODE in (\ref{eq:squarerootStationarySplit2}) is the residual of (\ref{eq:lampertiSquarerootAppendix}) and (\ref{eq:squarerootStationarySplit1}).
+As always, the deterministic ODE in (\ref{eq:squarerootStationarySplit2}) is the residual of (\ref{eq:lampertiSquarerootAppendix}) and (\ref{eq:squarerootStationarySplit1}).
 Equation (\ref{eq:squarerootStationarySplit1}) represents an Ornstein-Uhlenbeck process, which with stepsize, $\Delta t$, has a gaussian flow with mean 
 \begin{align}
     \mu_{\Delta t}(x) = \exp\left(-\alpha_0 \Delta t\right) \left(x + \sqrt{\frac{4\alpha_0\mu_0 - \sigma^2}{\alpha_0}}\right) - \sqrt{\frac{4\alpha_0\mu_0 - \sigma^2}{\alpha_0}}
@@ -392,18 +396,18 @@ Here we introduce how we construct the estimators for the model that is based on
 \subsubsection{Stationary part}
 In the stationary part of the process the pearson diffusion with the scaled F-distribution as its stationary distribution is governed by
 \begin{align}
-    \mathrm{d}X_t = -\beta\left(X_t - \mu\right)\mathrm{d}t + \sigma \sqrt{\left(X_t\left(X_t + 1\right)\right)}\mathrm{d}W_t.
+    \mathrm{d}X_t = -\alpha_0\left(X_t - \mu\right)\mathrm{d}t + \sigma \sqrt{\left(X_t\left(X_t + 1\right)\right)}\mathrm{d}W_t.
 \end{align}
 The lamperti-transform is $Y_t := 2 \sinh^{-1}\left(\sqrt{X_t}\right)$ and Itô's formula gives us
 \begin{align}
-    \mathrm{d}Y_t = - \frac{1}{\sinh(Y_t)}\left(\left(\beta + \frac{\sigma^2}{2}\right)\cosh(Y_t) - \beta\left(2\mu + 1\right)\right) \mathrm{d}t + \sigma \mathrm{d}W_t.
+    \mathrm{d}Y_t = - \frac{1}{\sinh(Y_t)}\left(\left(\alpha_0 + \frac{\sigma^2}{2}\right)\cosh(Y_t) - \alpha_0\left(2\mu + 1\right)\right) \mathrm{d}t + \sigma \mathrm{d}W_t.
 \end{align}
-This stochastic differential equation's drift has the fixed point $\cosh^{-1}\left(\frac{2\beta\left(2\mu + 1\right)}{2\beta + \sigma^2}\right)$.
+This stochastic differential equation's drift has the fixed point $\cosh^{-1}\left(\frac{2\alpha_0\left(2\mu + 1\right)}{2\alpha_0 + \sigma^2}\right)$.
 Therefore Continuing with the same heuristic of linearizing around the fix-points of the drift, we get the splitting
 \begin{align}
-    \mathrm{d}Y_t^{[1]} &= -\left(\beta + \frac{\sigma^2}{2}\right)\left(Y_t^{[1]} - \cosh^{-1}\left(\frac{2\beta\left(2\mu + 1\right)}{2\beta + \sigma^2}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \\
-    \mathrm{d}Y_t^{[2]} &= \left(\beta + \frac{\sigma^2}{2}\right) \left(Y_t^{[2]} - \cosh^{-1}\left(\frac{2\beta\left(2\mu + 1\right)}{2\beta + \sigma^2}\right) - \coth\left(Y_t^{[2]}\right) \right.\nonumber\\
-    &+ \left. \frac{2\beta\left(2\mu + 1\right)}{\left(2\beta + \sigma^2\right)\sinh(Y_t^{[2]})}\right)\mathrm{d}t.
+    \mathrm{d}Y_t^{[1]} &= -\left(\alpha_0 + \frac{\sigma^2}{2}\right)\left(Y_t^{[1]} - \cosh^{-1}\left(\frac{2\alpha_0\left(2\mu + 1\right)}{2\alpha_0 + \sigma^2}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \\
+    \mathrm{d}Y_t^{[2]} &= \left(\alpha_0 + \frac{\sigma^2}{2}\right) \left(Y_t^{[2]} - \cosh^{-1}\left(\frac{2\alpha_0\left(2\mu + 1\right)}{2\alpha_0 + \sigma^2}\right) - \coth\left(Y_t^{[2]}\right) \right.\nonumber\\
+    &+ \left. \frac{2\alpha_0\left(2\mu + 1\right)}{\left(2\alpha_0 + \sigma^2\right)\sinh(Y_t^{[2]})}\right)\mathrm{d}t.
 \end{align}
 The flow is then found in the usual manner: The flow from the linear part is obtained as the solution to the OU SDE, and the non-linear ODE along with its inverse etc. is solved with a fourth-order Runge-kutta. Then construct the Strang approximation of the flow as before. The maximizer of this pseudo-likelihood is then the Strang-estimator.  
 \subsubsection{Dynamic part}
@@ -428,34 +432,35 @@ with
 \end{align}
 And the non-linear ODE is constructed as the residual of this linear SDE and (\ref{eq:dynamicScaledFLamperti}). All elements are solved in the usual manner and the strang-estimator defined completely analogously to earlier.
 \subsection{The Jacobi diffusion}
+The final model is the one we get, when we use the noise from the jacobi diffusion. As in the previous sections, we consider estimation before time $t_0$ in the so-called stationary part, after which we commence with the estimation in the dynamic part.
 \subsubsection{Stationary part}
-During the non-dynamic part of the process, it follows the jacobi diffusion
+During the non-dynamic part, the process is governed the jacobi diffusion
 \begin{align}
-    \mathrm{d}X_t = -\beta\left(X_t - \mu\right)\mathrm{d}t + \sigma \sqrt{X_t\left(1 - X_t\right)}\mathrm{d}W_t.
+    \mathrm{d}X_t = -\alpha_0\left(X_t - \mu\right)\mathrm{d}t + \sigma \sqrt{X_t\left(1 - X_t\right)}\mathrm{d}W_t.
 \end{align}
-Define $Y_t := 2 \sin^{-1}\left(\sqrt{X_t}\right)$ then 
+The lamperti transform of this process is: $Y_t := 2 \sin^{-1}\left(\sqrt{X_t}\right)$. And we get by Itô's formula 
 \begin{align}
-    \mathrm{d}Y_t = -\frac{1}{\sin\left(Y_t\right)}\left(\left(\frac{\sigma^2}{2}-\beta\right)\cos(Y_t) + \beta - 2\beta\mu\right)\mathrm{d}t + \sigma \mathrm{d}W_t,
+    \mathrm{d}Y_t = -\frac{1}{\sin\left(Y_t\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(Y_t) + \alpha_0 - 2\alpha_0\mu\right)\mathrm{d}t + \sigma \mathrm{d}W_t,
 \end{align}
-by Itô's formula. The linearization around the fixpoint gives us the splitting
+The fixed point for the drift of this stochastic differential equation is $\cos^{-1}\left(\frac{2\alpha_0\left(2\mu - 1\right)}{\sigma^2 - 2\alpha_0}\right)$. We linearize around this point; this gives us the splitting
 \begin{align}
-    \mathrm{d}Y_t^{[1]} &= \left(\frac{\sigma^2}{2} - \beta\right)\left(Y_t^{[1]} - \cos^{-1}\left(\frac{2\beta\left(2\mu - 1\right)}{\sigma^2 - 2\beta}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t,\\
-    \mathrm{d}Y_t^{[2]} &= -\left(\frac{1}{\sin\left(Y_t^{[2]}\right)}\left(\left(\frac{\sigma^2}{2}-\beta\right)\cos(Y_t^{[2]}) + \beta - 2\beta\mu\right) \right. \nonumber \\
-    &+ \left. \left(\frac{\sigma^2}{2} - \beta\right)\left(Y_t^{[2]} - \cos^{-1}\left(\frac{2\beta\left(2\mu - 1\right)}{\sigma^2 - 2\beta}\right)\right) \right)\mathrm{d}t .
+    \mathrm{d}Y_t^{[1]} &= \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[1]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t,\\
+    \mathrm{d}Y_t^{[2]} &= -\left(\frac{1}{\sin\left(Y_t^{[2]}\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(Y_t^{[2]}) + \alpha_0 - 2\alpha_0\mu\right) \right. \nonumber \\
+    &+ \left. \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[2]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right) \right)\mathrm{d}t. \label{eq:jacobiODE}
 \end{align}
-and the strang-estimator is found in the usual manner.
+We solve the linear SDE by the well-known formulas (\ref{eq:OU_mean}) and (\ref{eq:OU_variance}). Given its complexity (\ref{eq:jacobiODE}), its inverse and the derivative of the inverse must be found using the fourth-order Runge-kutta method. The remaining steps in the construction of the Strang pseudo-likelihood is composing the flow from the linear SDE and the ODE in the appropriate way and the maximizing this value over the parameters.
 \subsubsection{Dynamic part}
-In the dynamic part we have the SDE
+In the dynamic part, we assume that the process can be modelled as
 \begin{align}
     \mathrm{d}X_t &= -\left(A(X_t - m)^2 + \lambda_t\right)\mathrm{d}t + \sigma \sqrt{X_t\left(1 - X_t\right)}\mathrm{d}W_t,\\
     \lambda_t &= \lambda_0 \left(1 - \frac{t - t_0}{\tau_c}\right)^\nu.
 \end{align}
-Let $Y_t := 2 \sin^{-1}\left(\sqrt{X_t}\right)$ then by Itô's formula 
+As we did in the stationary part, let $Y_t := 2 \sin^{-1}\left(\sqrt{X_t}\right)$. Then we get 
 \begin{align}
     \mathrm{d}Y_t &= - \frac{1}{\sin(Y_t)}\left(\frac{A}{2}\cos^2(Y_t) + \left(\frac{\sigma^2}{2} + 2 Am - A\right)\cos(Y_t) \right. \nonumber \\
-    &+ \left. A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t\right) + \sigma \mathrm{d}W_t
+    &+ \left. A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t\right)\mathrm{d}t + \sigma \mathrm{d}W_t,
 \end{align}
-Now, the splitting is done in the ususal manner. The linearization around the fix points yield the slope and intercept for the linear SDE
+by Itô's formula. Now, the splitting is done in the ususal manner. The linearization around the fixed point yields the slope and intercept for the linear SDE
 \begin{align}
     A_{\mathrm{linear\_part}} &= \zeta + \frac{\sigma^2}{2} - 2 Am - A,\\
     b_{\mathrm{intercept}} &= \cos^{-1}\left(\frac{\zeta}{A}\right),
@@ -464,7 +469,13 @@ where
 \begin{align}
     \zeta = A - \frac{\sigma^2}{2} - 2 A + \sqrt{\frac{\sigma^4}{4} - \sigma^2 A - 2 \sigma^2 A m - 2 A \lambda_t},
 \end{align}
-The ODE is found residually and solved using our fourth-order Runge-kutta.
+The ODE is found residually and solved using our fourth-order Runge-kutta. That is we have the SDE and ODE
+\begin{align}
+    \mathrm{d}Y_t^{[1]} &= A_{\mathrm{linear\_part}}\left(Y_t^{[1]} -  b_{\mathrm{intercept}}\right)\mathrm{d}t + \sigma \mathrm{d}W_t,\\
+    \mathrm{d}Y_t^{[2]} &=- \frac{1}{\sin(Y_t^{[2]})}\left(\frac{A}{2}\cos^2(Y_t^{[2]}) + \left(\frac{\sigma^2}{2} + 2 Am - A\right)\cos(Y_t^{[2]}) \right. \nonumber \\
+    &+ \left. A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t\right) \mathrm{d}t - A_{\mathrm{linear\_part}}\left(Y_t^{[2]} -  b_{\mathrm{intercept}}\right)\mathrm{d}t  \label{eq:dynamicjacobiODE}.
+\end{align}
+Both of which can be solved as we have done so numerous times in the above sections. Likewise, we can construct the Strang estimator in the way we have done many times before.
 \section{Benchmark}
 In this section we show the results of a few benchmarks using the \code{microbenchmark} package \cite{microbenchmark}. The code was run on a machine with the following hardware and software.
 \begin{table}[ht]
