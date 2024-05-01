@@ -52,7 +52,7 @@ OU_likelihood <- function(par, data, delta){
   -mean(dnorm(x = Xupp, mean = m_part, sd = sqrt(v_part), log = TRUE))
 }
 
-OU_Score <- function(par, data, delta){
+OU_score <- function(par, data, delta){
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   N  <- length(x0)
@@ -114,6 +114,93 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma){
   # Negative log-likelihood
   -sum(stats::dnorm(fh_half_inv, mu_h, sqrt(v_part), log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
 }
+
+OU_dynamic_numeric_score <- function(par, data, delta, alpha0, mu0, sigma){
+  numDeriv::grad(OU_dynamic_likelihood,
+                 x = par,
+                 delta = delta,
+                 data = data,
+                 alpha0 = alpha0,
+                 mu0 = mu0,
+                 sigma = sigma
+  )
+}
+
+OU_dynamic_score <- function(par, data, delta, alpha0, mu0, sigma){
+  tau     <- par[1]
+  A       <- par[2]
+  #nu  <- 1
+  nu      <- if(length(par) == 3) par[3] else 1
+
+  N       <- length(data)
+  Xupp    <- data[2:N]
+  Xlow    <- data[1:(N-1)]
+  time    <- delta * (1:(N-1))
+
+  m          <- mu0 - alpha0 / (2 * A)
+  lambda0    <- -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
+  alpha_seq  <- 2 * sqrt(abs(A * lam_seq))
+  gamma2_seq <- sigma^2 / (2 * alpha_seq)
+  rho_seq    <- exp(-alpha_seq * delta)
+  mu_seq     <- m + ifelse(A >= 0, 1, -1) * sqrt(abs(lam_seq / A))
+  
+  #fh_half_tmp_low <- A * delta * (Xlow - mu_seq)
+  #fh_half_tmp_upp <- A * delta * (Xupp - mu_seq)
+  ## Calculating the Strang-based score
+
+  # eq1 <- sum(
+  #     (1 - rho_seq) / (gamma2_seq * (1 - rho_seq^2)) * 
+  #       (fh_half_tmp_upp - fh_half_tmp_low * rho_seq - mu_seq * (1 - rho_seq))
+  # )
+
+  # eq2 <- (sum(
+  #   rho_seq / (1 - rho_seq^2)
+  # ) + sum(
+  #     (fh_half_tmp_upp - fh_half_tmp_low * rho_seq - mu_seq * (1 - rho_seq)) *
+  #       (fh_half_tmp_low - mu_seq) / (gamma2_seq * (1 - rho_seq^2))
+  #   ) - sum(
+  #     rho_seq * (fh_half_tmp_upp - fh_half_tmp_low * rho_seq - mu_seq * 
+  #                  (1 - rho_seq))^2 / (gamma2_seq * (1 - rho_seq^2)^2)
+  #   )
+  # ) / N
+
+  # eq3 <- (-sum(
+  #   1 / (2 * gamma2_seq)
+  #   ) + sum(
+  #   (fh_half_tmp_upp - fh_half_tmp_low * rho_seq - mu_seq * (1 - rho_seq))^2 /
+  #     (2 * gamma2_seq^2 * (1 - rho_seq^2)))
+  #   )
+  # 
+
+  eq1 <- sum(
+      (1 - rho_seq) / (gamma2_seq * (1 - rho_seq^2)) *
+        (Xupp - Xlow * rho_seq - mu_seq * (1 - rho_seq))
+  ) / N
+  
+  eq2 <- (sum(
+    rho_seq / (1 - rho_seq^2)
+   ) + sum(
+      (Xupp - Xlow * rho_seq - mu_seq * (1 - rho_seq)) * (Xlow - mu_seq) /
+        (gamma2_seq * (1 - rho_seq^2))
+    ) - sum(
+      rho_seq * (Xupp - Xlow * rho_seq - mu_seq *(1 - rho_seq))^2 /
+        (gamma2_seq * (1 - rho_seq^2)^2)
+    )
+  ) / N
+  
+  eq3 <- (-sum(
+    1 / (2 * gamma2_seq)
+    ) + sum(
+    (Xupp - Xlow * rho_seq - mu_seq * (1 - rho_seq))^2 /
+      (2 * gamma2_seq^2 * (1 - rho_seq^2)))
+    ) / N
+
+  
+  if(length(par) == 3){return(c(eq1, eq2, eq3))}
+  c(eq1, eq3)
+}
+
 
 OU_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
   tau <- par[1]
@@ -219,13 +306,17 @@ CIR_strang_splitting <- function(par, data, delta) {
   sigma <- par[3]
   
   if((4 * beta * mu - sigma^2) < 0 | sigma < 0){return(100000)}
+  #if(beta * (beta * mu - sigma^2 / 2) < 0 | sigma < 0){return(10000)}
   diff_f <- function(t, y){beta * y / 2 + (4 * mu * beta - sigma^2) / (2 * y) + sqrt(beta * (4 * beta * mu - sigma^2))}
-  
+  #diff_f <- function(t, y){beta / 4 * y + (2 * beta * mu - sigma^2) / (2 * y) + sqrt(beta * (beta * mu - sigma^2 / 2))}
   # Solution to ODE
   f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
   
   A <- - beta
   b <- - sqrt((4 * beta * mu - sigma^2) / beta)
+  
+  #A <- -beta / 2
+  #b <- - sqrt((4 * beta * mu - 2 * sigma^2) / beta)
 
   mu_f <- exp(A * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
@@ -494,11 +585,11 @@ mean_reverting_GMB_dynamic_likelihood <- function(par, data, delta, alpha0, mu0,
   fh_half_tmp_low <-  A * delta * (Xlow - mu_seq) / 2
   fh_half_tmp_upp <-  A * delta * (Xupp - mu_seq) / 2
   
-  fh_half          <- (mu_seq * fh_half_tmp_low + Xlow)/(fh_half_tmp_low+1)
+  fh_half          <- (mu_seq * fh_half_tmp_low + Xlow) / (fh_half_tmp_low + 1)
   
-  fh_half_inv      <- (mu_seq * fh_half_tmp_upp - Xupp)/(fh_half_tmp_upp-1)
+  fh_half_inv      <- (mu_seq * fh_half_tmp_upp - Xupp) / (fh_half_tmp_upp - 1)
   
-  det_Dfh_half_inv <- 1/(fh_half_tmp_upp-1)^2
+  det_Dfh_half_inv <- 1 / (fh_half_tmp_upp - 1)^2
   
   sd.part          <- exp(-(alpha_seq - sigma^2) * delta) * sqrt(
     (fh_half - mu_seq)^2 * (1 - exp(-sigma^2 * delta)) - 
@@ -978,64 +1069,80 @@ source("source_code/tipping_simulations.R")
 # 
 # ## Additive noise model
 # true_param <- c(-0.87, -1.51, 2, 0.2)
-# # true_param <- c(0.87, -1.51, -2.69, 0.2)
-# actual_dt <- 0.01
-# tau <- 100
-# t_0 <- 50
-# sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
-# # ## Stationary part
-# # ## Parameters for stationary part
-# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) *  sqrt(abs(true_param[3] / true_param[1]))
-# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
-# stationary_part_true_param <- c(alpha0, mu0, true_param[4]) #* c(1,1,1)
-# 
-# optimize_stationary_likelihood(likelihood_fun = OU_likelihood, data = sim_res_add$X_t[sim_res_add$t < t_0],
-#                                init_par = stationary_part_true_param,
-#                                delta = actual_dt, exp_sigma = FALSE)# - stationary_part_true_param
+true_param <- c(0.87, -1.51, -2.69, 0.2, 0.5)
+actual_dt <- 0.005
+tau <- 100
+t_0 <- 50
+sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
+sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
+# ## Stationary part
+# ## Parameters for stationary part
+mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) *  sqrt(abs(true_param[3] / true_param[1]))
+alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+stationary_part_true_param <- c(alpha0, mu0, true_param[4]) #* c(1,1,1)
+
+optimize_stationary_likelihood(likelihood_fun = OU_likelihood, data = sim_res_add$X_t[sim_res_add$t < t_0],
+                               init_par = stationary_part_true_param,
+                               delta = actual_dt, exp_sigma = FALSE)# - stationary_part_true_param
 
 #
-# nleqslv::nleqslv(x = stationary_part_true_param,
-#                  fn = OU_score,
-#                  data = sim_res_add$X_t[sim_res_add$t < t_0],
-#                  delta = actual_dt)$x - stationary_part_true_param
+nleqslv::nleqslv(x = stationary_part_true_param,
+                 fn = OU_score,
+                 data = sim_res_add$X_t[sim_res_add$t < t_0],
+                 delta = actual_dt)$x#- stationary_part_true_param
 #
 # ## Dynamic part
-# dynamic_part_true_param <- c(tau, true_param[1])
-# 
+dynamic_part_true_param <- c(tau, true_param[1], true_param[5])
+
 # #
-# optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
-#                             data = sim_res_add$X_t[sim_res_add$t > t_0],
-#                             init_par = dynamic_part_true_param,
-#                             delta = actual_dt,
-#                             alpha0 = stationary_part_true_param[1],
-#                             mu0 = stationary_part_true_param[2],
-#                             sigma = stationary_part_true_param[3])
+optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
+                            data = sim_res_add$X_t[sim_res_add$t > t_0],
+                            init_par = dynamic_part_true_param,
+                            delta = actual_dt,
+                            alpha0 = stationary_part_true_param[1],
+                            mu0 = stationary_part_true_param[2],
+                            sigma = stationary_part_true_param[3])
+
+nleqslv::nleqslv(OU_dynamic_numeric_score,
+                 x = dynamic_part_true_param,
+                 data = sim_res_add$X_t[sim_res_add$t > t_0],
+                 delta = actual_dt,
+                 alpha0 = stationary_part_true_param[1],
+                 mu0 = stationary_part_true_param[2],
+                 sigma = stationary_part_true_param[3])$x
+
+nleqslv::nleqslv(OU_dynamic_score,
+                 x = dynamic_part_true_param,
+                 data = sim_res_add$X_t[sim_res_add$t > t_0],
+                 delta = actual_dt,
+                 alpha0 = stationary_part_true_param[1],
+                 mu0 = stationary_part_true_param[2],
+                 sigma = stationary_part_true_param[3])$x
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 ## Square-root noise model
-true_param <- c(0.8, 3, -1, 0.1)
-actual_dt <- 0.005
-tau <- 100
-t_0 <- 50
-sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param, tau, t_0)
-sample_n(sim_res_sqrt, min(nrow(sim_res_sqrt), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
-# #
-# ## Stationary part
-# ## Parameters for stationary part
-mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
-alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
-stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-
-CIR_quadratic_martingale(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0], actual_dt) - stationary_part_true_param
-optimize_stationary_likelihood(CIR_alt_strang_splitting, exp(2*sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0])),
-                               stationary_part_true_param, actual_dt) - stationary_part_true_param
-
-optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
-                               data = 2*sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
-                               init_par = stationary_part_true_param,
-                               delta = actual_dt, exp_sigma = FALSE) - stationary_part_true_param
+# true_param <- c(1.5, 3, -1, 0.1)
+# actual_dt <- 0.005
+# tau <- 100
+# t_0 <- 50
+# sim_res_sqrt <- simulate_squareroot_noise_tipping_model(actual_dt, true_param, tau, t_0)
+# sample_n(sim_res_sqrt, min(nrow(sim_res_sqrt), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
+# # #
+# # ## Stationary part
+# # ## Parameters for stationary part
+# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+# 
+# CIR_quadratic_martingale(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0], actual_dt)# - stationary_part_true_param
+# optimize_stationary_likelihood(CIR_alt_strang_splitting, exp(2*sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0])),
+#                                stationary_part_true_param, actual_dt)# - stationary_part_true_param
+# 
+# optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
+#                                data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
+#                                init_par = stationary_part_true_param,
+#                                delta = actual_dt, exp_sigma = FALSE)# - stationary_part_true_param
 # 
 # ## Dynamic part
 # 

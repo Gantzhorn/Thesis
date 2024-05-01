@@ -19,7 +19,7 @@ Note that the first integral on the right hand side merely is a Riemann integral
     \mathrm{d}X_t = b(X_t, t)\mathrm{d}t + \sigma(X_t, t)\mathrm{d}W_t, \quad X_{t_0} = x_0 \label{eq:firstSDE},
 \end{align}
 and this is the general form of an SDE. \\
-To better understand stochastic differential equations we need to introduce a bit more nomenclature: The solution, $X_t$, is called an Itô process, and the values it can take is its state space. We refer to the functions $b(X_t, t)$ and $\sigma(X_t, t)$ as the drift- and diffusion coefficients respectively. For ease of language we sometimes leave out the "coefficient" part. In our applications the drift and diffusion depend on some parameter vector, $\theta\in\mathbb{R}^p$ or some subset thereof. For typographical reasons though, we mostly suppress this dependence in the notation. Additionally, we say that term with the diffusion coefficient is the noise term or stochastic term and the term with the drift is the deterministic term or deterministic part. We say that the noise is additive, if the function $\sigma(X_t, t)$ is constant and multiplicative otherwise. Lastly, the stochastic differential equation has autonomous drift or diffusion, when they do not directly depend on time; the system as a whole is autonomous, if both parts are autonomous.\\
+To better understand stochastic differential equations we need to introduce a bit more nomenclature: The solution, $X_t$, is called an Itô process, and the values it can take is its state space. We refer to the functions $b(X_t, t)$ and $\sigma(X_t, t)$ as the drift- and diffusion coefficients respectively. For ease of language we sometimes leave out the "coefficient" part. In our applications the drift and diffusion depend on some parameter vector, $\theta\in\Theta\subseteq\mathbb{R}^p$. For typographical reasons though, we mostly suppress this dependence in the notation. Additionally, we say that term with the diffusion coefficient is the noise term or stochastic term and the term with the drift is the deterministic term or deterministic part. We say that the noise is additive, if the function $\sigma(X_t, t)$ is constant and multiplicative otherwise. Lastly, the stochastic differential equation has autonomous drift or diffusion, when they do not directly depend on time; the system as a whole is autonomous, if both parts are autonomous.\\
 Although, the representation in (\ref{eq:firstSDE}) is the most common in the litterature and the one we use for the most part, we have to note that is merely a representation of (\ref{eq:itoIntegralEquation}). If one formally divides by $\mathrm{d}t$ though, we end up with a term, where we take the derivative of the Wiener process. Even though this process has almost surely continuous sample paths, they are nowhere differentiable \cite[theorem 11.22 and theorem 11.35]{Hansen2022}.\\
 Now, to motivate the arguably most important result in the study of stochastic differential equations, we consider integrating the Wiener process with respect to itself
 \begin{align}
@@ -44,14 +44,20 @@ Finally, we note another result that is pivotal for the understanding of Itô pr
 \begin{align}
     \frac{\partial p(X_t, t | X_s, s)}{\partial t} = -\frac{\partial}{\partial x}\left(b(X_t, t)p(X_t, t | X_s, s)\right) + \frac{1}{2}\frac{\partial^2}{\partial x^2}\left(\sigma^2(X_t, t)p(X_t, t | X_s, s)\right),\label{eq:fokkerPlanck} 
 \end{align}
-with initial condition $p(x_t, t|x_s, s) = \delta(x_t - x_s)$ at time $t = s$; $\delta$ is the dirac delta function. We refer to this PDE as the Kolmogorov forward equation. As a result of giving us the transition density the Kolmogorov forward equation also lets us calculate any conditional moment, if it exists. In practice, however, (\ref{eq:fokkerPlanck}) is often untractable - meaning that we are unable to find the closed form solution for the transition density. Instead, we aim to approximate it. Closely related to it though is the so-called infinitesemal generator 
+with initial condition $p(x_t, t|x_s, s) = \delta(x_t - x_s)$ at time $t = s$; $\delta$ is the dirac delta function. We refer to this PDE as the Kolmogorov forward equation. As a result of giving us the transition density the Kolmogorov forward equation also lets us calculate any conditional moment, if it exists. Sometimes we are interested in the score-function
+\begin{align}
+    U(\theta; X_t, t | X_s, s) = \frac{\partial}{\partial\theta}p(X_t, t | X_s, s), \label{transitionScore}
+\end{align}
+because we in principle can derive score equations for maximum likelihood estimation. In practice, however, (\ref{eq:fokkerPlanck}) is often untractable - meaning that we are unable to find the closed form solution for the transition density and thereby also the score. In this situation, we instead aim to approximate the transition density. \\
+Closely related to the density is the so-called infinitesemal generator 
 \begin{align}
     \mathcal{L}\varphi(x) = b(x, t) \frac{\partial\varphi}{\partial x} + \frac{1}{2}\sigma^2(x, t)\frac{\partial^2\varphi}{\partial x^2} \label{eq:infinitesemalGeneratorDefinition},
 \end{align}
 which is an operator on some sufficiently regular function, $\varphi$. We say that $\varphi$ and $\lambda$ are the eigen functions and -values for the process respectively, if 
 \begin{align}
-    \mathcal{L}\varphi = -\lambda\varphi,
+    \mathcal{L}\varphi = -\lambda\varphi.
 \end{align} 
+These concept might seem 
 and under mild regulatory conditions \cite[theorem 1.16]{StatisticalMethodsForSDE} then gives a method to derive the conditional moments as
 \begin{align}
     \mathbb{E}\left[\varphi(X_{t}) \middle | X_{s}\right] = \exp\left(-\lambda \left(t - s\right)\right)\varphi \label{eq:momentConditions}, \quad t\geq s.
@@ -188,35 +194,56 @@ where $\sigma^2(X_t, t)$ is a function that dictates how the noise enters the sy
 \end{align}
 That is we use the particular form of (\ref{eq:lambda_t}) in (\ref{eq:dynamicsOriginal}). We imagine that our systems exists in some stationary state with $\lambda_t = \lambda_0$ before time $t_0$, after which a ramping starts. Apart from the stochastic part, the model is the saddle-node bifurcation \cite{Strogatz2019_gv}; we study the effects of picking different functions for $\sigma^2(X_t, t)$. More specifically, we consider functions belonging to the class of stochastic differential equations named pearson diffusions. Along with the addition of the $\nu$-parameter, this is an apparent way to extend the model with additive noise presented in \cite[equation (1)]{Ditlevsen2023}. The practical motivations for this class of diffusions will later become clear as we see that the diffusions have readily available tools that allow efficient inference.
 \subsection{Inference for stochastic differential equations}
-Regardless of ones exact method, inference about parameters in stochastic differential equations are often done by leveraging the markov property of Itô processes. This means that in order to estimate the parameters, it is sufficient to have the transition density or approximations thereof. Getting the transtion density involves solving the Fokker-Planck equation, which for the most part is intractable, thus one employ one or more approximation methods.\\
+Regardless of ones exact method, inference about parameters in stochastic differential equations are often done by leveraging the markov property of Itô processes. This means that in order to estimate the parameters, it is sufficient to have the transition density or approximations thereof. Getting the transtion density involves solving the Fokker-Planck equation (\ref{eq:fokkerPlanck}). As we mentioned, this is for mostly not possible, thus we employ one or more approximation methods.\\
 To this end, inference is traditionally done qua the Euler-maruyama scheme. In this thesis, we only used the estimator based on this scheme in the initial development; it is fairly easy to derive, implement and it is computationally quite efficient. Yet, the estimator is biased even for moderately large stepsizes, and quite notably so in non-linear models \cite{SplittingSchemes}. Instead, we consider two other means of estimation 
 \subsubsection{The Strang likelihood}
-The Strang based estimator is a method based on splitting schemes. Other similar methods exists. However, for one-step predictions of transition densities Strang is proven to be superior; compare \cite[Proposition 3.4 and 3.6]{SplittingSchemes}. For one dimensional diffusions with additive noise, splitting schemes work by splitting the process into a linear SDE and a non-linear ODE
+The Strang based estimator is a method based on splitting schemes. Other similar methods exists. Though, the one-step predictions of transition densities given by the Strang splitting scheme is proven to be superior; compare \cite[Proposition 3.4 and 3.6]{SplittingSchemes}. We first consider the Strang splitting schemes on a general one-dimensional SDE with additive noise. Later we comment on the possible ways to use this method even for models with multiplicative noise.\\
+\textbf{Models with additive noise}\\
+General one-dimensional stochastic differential equations with additive noise can be written as
 \begin{align}
-    \mathrm{d}X_t^{(1)} &= -\beta(\theta)\left(X_t^{(1)} - \mu(\theta)\right)\mathrm{d}t + \sigma \mathrm{d}W_t, &&X_t^{(1)} = x_0, \\
-    \mathrm{d}X_t^{(2)} &= N\left(X_t^{(2)}\right)\mathrm{d}t, &&X_t^{(2)} = x_0, \label{ODE_Split}
+    \mathrm{d}X_t = b(X_t, \theta)\mathrm{d}t + \sigma\mathrm{d}W_t, \label{eq:generalAdditiveNoiseSDE}
 \end{align}
-where $N$ is some non-linear function that also might depend on the parameters. Evidently, the choice of splitting is not unique, and asymptotically any splitting is equivalent. Yet, the choice might have an impact with finite samples. Additionally, one can imagine that some splittings are numerically more well-behaved. For the most part, we use the heuristic provided in \cite[section 2.3 and 2.5]{SplittingSchemes}. That is, we find the linear SDE as the linearization around the fixed points of the drift; the ODE is then the residual of the original SDE and our linear SDE. In the one dimensional case, the solution with stepsize, $\Delta t$, to the linear SDE is given by the flow
+where we have highlighted the dependence of some parameter, $\theta\in\subseteq\Theta\mathbb{R}^p$ in the drift. When we have additive noise splitting schemes work by decomposing the process into a linear SDE and a non-linear ODE in the following way
 \begin{align}
-    \varphi_{\Delta t}^{(1)}(x) = \exp\left(-\beta\left(\theta\right) \Delta t\right)\left(x - \mu\left(\theta\right)\right) + \mu\left(\theta\right) + \xi_{\Delta t},
+    \mathrm{d}X_t^{(1)} &= -\beta(\theta)\left(X_t^{(1)} - \mu(\theta)\right)\mathrm{d}t + \sigma \mathrm{d}W_t, &&X_t^{(1)} = x_0, \label{SDE_split}\\
+    \mathrm{d}X_t^{(2)} &= N\left(X_t^{(2)}; \theta\right)\mathrm{d}t, &&X_t^{(2)} = x_0, \label{ODE_Split}
+\end{align}
+where $N$ is some non-linear function that probably depends on the parameters. Evidently, this splitting is not unique. However, it turns out that any splitting of (\ref{eq:generalAdditiveNoiseSDE}) yields approximations of the transition densities that are equivalent asymptotically \cite{{SplittingSchemes}}. Yet, our choice might still have an impact on the quality of the estimator for finite samples. Additionally, in practice it is not difficult to imagine that some splittings are numerically more well-behaved than others. So we still have to carefully consider our splitting choice. The one we use or the most part is the heuristic provided in \cite[section 2.3 and 2.5]{SplittingSchemes}. That is, (\ref{SDE_split}) should be constructed as the linearization around the fixed points of the drift. This means, we use $b(X_t, \theta)$ from (\ref{eq:generalAdditiveNoiseSDE}) and solve the following equation
+\begin{align}
+     b(X_t, \theta) = 0,
+\end{align}
+in terms of $X_t$. $\mu\left(\theta\right)$ is then defined as the solution. This value is plugged into the derivative of $b(X_t, \theta)$ 
+\begin{align}
+    \beta\left(\theta\right) = \frac{\partial}{\partial x} b(\mu\left(\theta\right), \theta).
+\end{align}
+The two components, is put together to construct (\ref{SDE_split}).
+Hereafter, (\ref{ODE_Split}) is calculated as the residual of the \ref{eq:generalAdditiveNoiseSDE} and our (\ref{SDE_split}). Recall that in the one dimensional case, the solution with stepsize, $\Delta t$, to the linear SDE is given by the flow
+\begin{align}
+    \varphi_{\Delta t}^{(1)}(x) = \exp\left(-\beta\left(\theta\right) \Delta t\right)\left(x - \mu\left(\theta\right)\right) + \mu\left(\theta\right) + \xi_{\Delta t}, \label{varphiTheoretical}
 \end{align}
 with $\xi_{\Delta t}\sim\mathcal{N}\left(0, \Omega_{\Delta t}\right)$. That is, the flow is gaussian with mean and variance
 \begin{align}
     \mu_{\Delta t}(x; \theta) &= \exp\left(-\beta\left(\theta\right) \Delta t\right)\left(x - \mu\left(\theta\right)\right) + \mu\left(\theta\right) \label{linearSDEMean}\\
     \Omega_{\Delta t} &= \frac{\sigma^2}{2\beta}\left(1 - \exp\left(-2\beta\left(\theta\right)\Delta t\right)\right), \label{linearSDEVariance}
 \end{align}
-where the latter is calculated using \cite[equation (6)]{SplittingSchemes}. For our purposes the solution to (\ref{ODE_Split}) exists and is unique; with stepsize, $\Delta t$, we denote it $\varphi_{\Delta t}^{(2)}$. The conditions for this is provided in \cite[Assumption (A1) and - (A2)]{SplittingSchemes}. Then the Strang splitting scheme gives the approximation of the transition
+which we calculated in (\ref{eq:OU_solution}). For our purposes the solution to (\ref{ODE_Split}) exists and is unique; this is ensured by the Picard-Lindelöf theorem \cite[section 2.7]{Srkk2019}, since (\ref{ODE_Split}) is ordinary differential equations that in our case will be sufficiently regular for the assumptions from the theorem to hold.
+Nevertheless, we denote the solution with stepsize, $\Delta t$, $\varphi_{\Delta t}^{(2)}$. The Strang splitting scheme then gives the approximation of the transition density as 
 \begin{align}
     X_{t_{i+1}}^{(S)} = \varphi_{\Delta t / 2}^{(2)}\left(\mu_{\Delta t}\left(\varphi_{\Delta t/2}^{(2)}\left(X_{t_{i}}^{(S)}\right); \theta\right) + \xi_{\Delta t} \; ; \theta \right). \label{eq:classicStrangSplitting}
 \end{align}
-This is a non-linear transformation of a gaussian variable; so by the density transformation theorem, the flow gives us the following negative pseudo-loglikelihood 
+Due to the fact that (\ref{varphiTheoretical}) is gaussian. (\ref{eq:classicStrangSplitting}) is a non-linear transformation of a gaussian variable; so by the density transformation theorem, the flow gives us the following negative pseudo-loglikelihood 
 \begin{align}
     l^{[S]} &= -\log\left(g\left(\left(\varphi_{\Delta t / 2}^{(2)}\right)^{-1}\left(X_{t_{i+1}}\right); \mu_{\Delta t}\left(\varphi_{\Delta t/2}^{(2)}\left(X_{t_{i}}\right); \theta \right), \Omega_{\Delta t} \right) \right) \nonumber \\
-    &- \log\left(\partial_x \left(\varphi_{\Delta t / 2}^{(2)}\right)^{-1} \right), \label{Strang_likelihood}
+    &- \log\left(\frac{\partial}{\partial x}\left(\varphi_{\Delta t / 2}^{(2)}\right)^{-1} \right), \label{Strang_likelihood}
 \end{align}
-and we say that the $\theta$ that minimizes this expression is the Strang-based estimator. In (\ref{Strang_likelihood}) $g$ is the density of the gaussian distribution with the specified mean and variance. For the above arguments to be valud, we require additive noise in the models, which we of course get by means of the lamperti-transform. In rare instances, there exists other closes form solutions to linear stochastic differential equations than the one with additive noise. This novel splitting strategy avoids using the Lamperti-transform; although it is not central to the, we still explore the option in (\ref{meanrevertingGBMSplit1}).
+and this is the Strang based pseudo likelihood. In practise, we consider the negative logarithm of this quantity; we say that the $\theta$ that minimizes this function is the Strang-based estimator.
+In (\ref{Strang_likelihood}) $g$ is the density of the gaussian distribution with the specified mean and variance. \\
+\textbf{Models with multiplicative noise}\\
+As we noted we require additive noise in the models, to get the OU process in (\ref{SDE_split}). For many models that interest us, this will not be the case in itself; but all the models we consider are reducible. This means that we can transform the processes with the lamperti-transform (\ref{eq:lampertiDefinition}) and do the estimation on the resulting SDE in the exact manner as we just described.\\
+Alternatively, we can just ignore the fact that the we do not not the exact transition density of the SDE. 
+ In rare instances, there exists other closed form solutions to linear stochastic differential equations than the one with additive noise. This novel splitting strategy avoids using the Lamperti-transform; although it is not central to the thesis, we still illustrate the option in (\ref{meanrevertingGBMSplit1}). Note that in this example, we must use a different splitting than the heuristic provided by \cite[section 2.3 and 2.5]{SplittingSchemes}, because the solution of the stochastic differential equation in the example only exists on closed-form, whenever $\mu(\lambda) = 0$. 
 \subsubsection{Approximately Optimal Martingale Estimation Equations}\label{subsubsec:approximatelyOptimalMartingaleEstimationEquation}
-Other than the strang splitting, we also estimate the parameters by means of the following approximately optimal martingale estimation functions \cite[Example 1.11]{StatisticalMethodsForSDE}.
+Other than the strang splitting, we also estimate the parameters by means of approximately optimal martingale estimation functions (AOMEF). As a means of estimation these are conceptually different from what we have done thus far: Our aim is not to approximate the transition density, but instead the score function (\ref{transitionScore}). We then use this approximation in the score equations' stead.\\ Not surprisingly, AOMEF's are based on the notion of a martingale estimaton equation. Assume we want to estimate some parameter, $\theta\in \Theta \subseteq \mathbb{R}^p$, in a one-dimensional stochastic differential equation such as (\ref{eq:firstSDE}); and say that the solution to this equation has state space, $D\subseteq \mathbb{R}$. Furthermore, let $p(x, y, \Delta t, )$ be the transition densit
 \begin{align}
     G_N^{\circ} &= \sum_{i = 1}^N 
     \left(
@@ -224,6 +251,7 @@ Other than the strang splitting, we also estimate the parameters by means of the
     \right) \left(X_{t_{i}} - \mathbb{E}\left[X_{t_{i}} \middle| X_{t_{i-1}} = x\right]\right) \nonumber \\
     &+ \frac{\partial_\theta\sigma^2\left(X_{t_{i-1}}; \theta\right)}{2\sigma^4\left(X_{t_{i - 1}}; \theta\right)\Delta t}\left(\left(X_{t_{i}} - \mathbb{E}\left[X_{t_{i}} \middle| X_{t_{i-1}} = x\right]\right)^2 - \textrm{Var}\left[X_{t_{i}} \middle| X_{t_{i-1}} = x\right]\right) \label{eq:approximatelyOptimalMartingale}
 \end{align}
+\cite[Example 1.11]{StatisticalMethodsForSDE}.
 
 \subsection{Numerical Optimization in \code{R}}
 For each part of the process, we optimize a bit differently. However, in both cases the optimization is done with \code{stats::optim} \cite{Rlang} and our optimization methods are built as a wrapper around this function. To match the optimization done in \cite{Ditlevsen2023}, we use the Nelder-Mead algorithm in the dynamic part. In the stationary part, on the other hand, we use the BFGS-algorithm for its robustness. The wrapper is implemented such that it is possible to supply any of the likelihood functions to it. In addition, one can specify any other optimization algorithm that is implemented in \code{optim}. For the dynamic part, we also have to provide the values for $\alpha_0, \mu_0, \sigma$. We do this in the form of the estimated values for these from the stationary part of the processes. This part also dynamically chooses to estimate the $\nu$-parameter dependending on the dimension of the initial values given to the optimizer. If the dimension is two then we assume $\nu = 1$, while a dimension of three allows the optimizer estimate it. With regards to the numerical stability of the implementations we do a few things. Firstly, terms including $\exp\left(x\right) - 1$ or its additive inverse show up in many of our formulas. This is for instance the case in (\ref{linearSDEVariance}). As the arguments for the exponential function often is quite close to zero in these applications, we need to take care in order to avoid catastrophic cancellation. For this purpose, we make use of the \code{base::expm1} method in \code{R}, which calls the C-function of the same name \cite{cppreference_expm1}. Had we not done this, we would risk our program failing, because (\ref{linearSDEVariance}) would due to catastrophic cancellation evaluate to zero.
