@@ -113,6 +113,7 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma){
   
   # Negative log-likelihood
   -sum(stats::dnorm(fh_half_inv, mu_h, sqrt(v_part), log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
+    # + 0.01 * N * (1/A - 1) * (A < 1)
 }
 
 OU_dynamic_numeric_score <- function(par, data, delta, alpha0, mu0, sigma){
@@ -129,7 +130,6 @@ OU_dynamic_numeric_score <- function(par, data, delta, alpha0, mu0, sigma){
 OU_dynamic_score <- function(par, data, delta, alpha0, mu0, sigma){
   tau     <- par[1]
   A       <- par[2]
-  #nu  <- 1
   nu      <- if(length(par) == 3) par[3] else 1
 
   N       <- length(data)
@@ -147,7 +147,7 @@ OU_dynamic_score <- function(par, data, delta, alpha0, mu0, sigma){
   
   #fh_half_tmp_low <- A * delta * (Xlow - mu_seq)
   #fh_half_tmp_upp <- A * delta * (Xupp - mu_seq)
-  ## Calculating the Strang-based score
+
 
   # eq1 <- sum(
   #     (1 - rho_seq) / (gamma2_seq * (1 - rho_seq^2)) * 
@@ -173,6 +173,7 @@ OU_dynamic_score <- function(par, data, delta, alpha0, mu0, sigma){
   #   )
   # 
 
+  ## Calculate the Strang-based score - divided by N for numeric stability
   eq1 <- sum(
       (1 - rho_seq) / (gamma2_seq * (1 - rho_seq^2)) *
         (Xupp - Xlow * rho_seq - mu_seq * (1 - rho_seq))
@@ -197,7 +198,7 @@ OU_dynamic_score <- function(par, data, delta, alpha0, mu0, sigma){
     ) / N
 
   
-  if(length(par) == 3){return(c(eq1, eq2, eq3))}
+  if(length(par) == 3){return(c(eq1, eq2, eq3))} # If we want to estimate nu, use all three equations.
   c(eq1, eq3)
 }
 
@@ -817,7 +818,10 @@ t_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
   if(any((sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) < 0) |
-     any(is.na(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)))){return(50000)}
+     any(is.na(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)))){
+    par <- par + runif(2, min = -1) * c(10, 0.2)
+    return(50000 + runif(1, min = -5, max = 5))
+    }
   
   fix_points <- asinh((sqrt(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) + 4 * A * m - sigma^2) /
                           (4 * A))
@@ -1029,10 +1033,12 @@ optimize_stationary_likelihood <- function(likelihood_fun,
                                            data,
                                            init_par, 
                                            delta,
-                                           exp_sigma = TRUE){
-  res_optim <- optim(init_par, fn = likelihood_fun,
-                     method = "BFGS",
-                     data = data, delta = delta)
+                                           exp_sigma = TRUE,
+                                           method = "BFGS",
+                                           ...){
+  res_optim <- stats::optim(init_par, fn = likelihood_fun,
+                     method = method,
+                     data = data, delta = delta,  ...)
   if(exp_sigma){
   res_optim$par[3] <- exp(res_optim$par[3])
   }
@@ -1042,13 +1048,13 @@ optimize_stationary_likelihood <- function(likelihood_fun,
 optimize_dynamic_likelihood <- function(likelihood_fun, data,
                                         init_par, delta,
                                         alpha0, mu0, sigma, 
-                                        method = "Nelder-Mead"){
+                                        method = "BFGS", ...){
 
   res_optim <- stats::optim(init_par, fn = likelihood_fun,
                             method = method,
                             data = data, delta = delta,
-                            alpha0 = alpha0 , mu0 = mu0, sigma = sigma)
-  res_optim$par
+                            alpha0 = alpha0 , mu0 = mu0, sigma = sigma, ...)
+  list(par = res_optim$par, objective = res_optim$value)
 }
 
 optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, M, N,
@@ -1065,11 +1071,10 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Example usage
-source("source_code/tipping_simulations.R")
-# 
-# ## Additive noise model
-# true_param <- c(-0.87, -1.51, 2, 0.2)
-true_param <- c(0.87, -1.51, -2.69, 0.2, 0.5)
+# source("source_code/tipping_simulations.R")
+# # 
+# # # ## Additive noise model
+true_param <- c(0.87, -1.51, -2.69, 0.2)
 actual_dt <- 0.005
 tau <- 100
 t_0 <- 50
@@ -1092,7 +1097,7 @@ nleqslv::nleqslv(x = stationary_part_true_param,
                  delta = actual_dt)$x#- stationary_part_true_param
 #
 # ## Dynamic part
-dynamic_part_true_param <- c(tau, true_param[1], true_param[5])
+dynamic_part_true_param <- c(tau, true_param[1])
 
 # #
 optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
@@ -1102,27 +1107,19 @@ optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
                             alpha0 = stationary_part_true_param[1],
                             mu0 = stationary_part_true_param[2],
                             sigma = stationary_part_true_param[3])
-
-nleqslv::nleqslv(OU_dynamic_numeric_score,
-                 x = dynamic_part_true_param,
-                 data = sim_res_add$X_t[sim_res_add$t > t_0],
-                 delta = actual_dt,
-                 alpha0 = stationary_part_true_param[1],
-                 mu0 = stationary_part_true_param[2],
-                 sigma = stationary_part_true_param[3])$x
-
-nleqslv::nleqslv(OU_dynamic_score,
-                 x = dynamic_part_true_param,
-                 data = sim_res_add$X_t[sim_res_add$t > t_0],
-                 delta = actual_dt,
-                 alpha0 = stationary_part_true_param[1],
-                 mu0 = stationary_part_true_param[2],
-                 sigma = stationary_part_true_param[3])$x
+# 
+# nleqslv::nleqslv(OU_dynamic_score,
+#                  x = dynamic_part_true_param,
+#                  data = sim_res_add$X_t[sim_res_add$t > t_0],
+#                  delta = actual_dt,
+#                  alpha0 = stationary_part_true_param[1],
+#                  mu0 = stationary_part_true_param[2],
+#                  sigma = stationary_part_true_param[3])$x
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 ## Square-root noise model
-# true_param <- c(1.5, 3, -1, 0.1)
+# true_param <- c(1.5, 3, -1, 0.1, 0.8)
 # actual_dt <- 0.005
 # tau <- 100
 # t_0 <- 50
@@ -1146,14 +1143,14 @@ nleqslv::nleqslv(OU_dynamic_score,
 # 
 # ## Dynamic part
 # 
-# dynamic_part_true_param <- c(tau, true_param[1])
+# dynamic_part_true_param <- c(tau, true_param[1], true_param[5])
 # optimize_dynamic_likelihood(likelihood_fun = CIR_dynamic_likelihood,
 #                             data = sim_res_sqrt$X_t[sim_res_sqrt$t > t_0],
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
 #                             alpha0 = stationary_part_true_param[1],
 #                             mu0 = stationary_part_true_param[2],
-#                             sigma = stationary_part_true_param[3]) - dynamic_part_true_param
+#                             sigma = stationary_part_true_param[3])
 # 
 # optimize_dynamic_likelihood(likelihood_fun = CIR_transform_dynamic_likelihood,
 #                             data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t > t_0]),
@@ -1162,7 +1159,6 @@ nleqslv::nleqslv(OU_dynamic_score,
 #                             alpha0 = stationary_part_true_param[1],
 #                             mu0 = stationary_part_true_param[2],
 #                             sigma = stationary_part_true_param[3])
-
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 ## Linear noise model

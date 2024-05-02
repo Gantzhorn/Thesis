@@ -299,9 +299,6 @@ t_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
   lambda0    <- -alpha0^2 / (4 * A)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
-  if(any((sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) < 0) |
-     any(is.na(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)))){return(50000)}
-  
   fix_points <- asinh((sqrt(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) + 4 * A * m - sigma^2) /
                         (4 * A))
   

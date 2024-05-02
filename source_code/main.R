@@ -8,6 +8,7 @@ thesis_theme <- ggthemes::theme_base() +
 ggplot2::theme_set(thesis_theme)
 source("source_code/tipping_simulations.R")
 source("source_code/model_fitting.R")
+source("source_code/model_diagnostics.R")
 
 # Colorblind friendly plot palette
 thesis_palette <- c("#E69F00", "#56B4E9", "#009E73", "#CCB400", "#0072B2", "#D55E00", "#CC79A7")
@@ -67,7 +68,7 @@ ggplot(xs_all, aes(x = t, y = X_t, color = Model)) +
 
 # Create plot of path for figures in "Saddle-node bifurcation and Tipping Point Estimation
 # Choose parameters appropriate for all but jacobi diffusion
-true_param <- c(0.15, 10, -2, 0.05)
+true_param <- c(0.2, 1.75, -2, 0.15)
 
 actual_dt <- 0.005
 tau <- 100
@@ -115,7 +116,7 @@ ggplot(xs_all, aes(x = t, y = X_t, color = Model)) +
   ) +
   guides(color = guide_legend(override.aes = list(linewidth = 5))) +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-  ylim(true_param[2] - 1, true_param[2] + sqrt(true_param[3] / true_param[1]) + 1)
+  ylim(true_param[2] - 1, true_param[2] + sqrt(abs(true_param[3] / true_param[1])) + 1)
 
 # Experiment with different estimation methods on simulated data
 
@@ -447,4 +448,211 @@ ggsave(filename = "double_well_plot_combined.jpeg", plot = double_well_plot_comb
        width = 10,
        height = 5,
        dpi = 300)
-       
+
+
+### Estimation on the AMOC
+
+AMOC_data <- readr::read_table("data/AMOCdata.txt")
+
+AMOC_data <- dplyr::rename_all(AMOC_data, ~ gsub('"', '',.))
+
+AMOC_data <- mutate(AMOC_data, AMOC3 = AMOC0 - 3 * GM)
+
+AMOC_data |> select(-GM) |>  pivot_longer(cols = -time, names_to = "AMOC_type", values_to = "Value") |> 
+  ggplot(aes(x = time, y = Value, col = AMOC_type)) + geom_step() + facet_wrap(~AMOC_type) +
+  scale_color_manual(values = thesis_palette)
+
+actual_dt <- 1 / 12 # Observations every month
+t_0 <- 1924 # Use same baseline data as paper.
+
+# Stationary part
+stationary_part_starting_param <- c(1, 1, 1)
+
+
+stationary_part_estim_param <-  optimize_stationary_likelihood(
+              likelihood_fun = t_diffusion_strang_splitting,
+              data = asinh(AMOC_data$AMOC2[AMOC_data$time < t_0]),
+              init_par = stationary_part_starting_param,
+              delta = actual_dt,
+              exp_sigma = TRUE)
+
+
+
+# Dynamic part
+dynamic_part_starting_param <- c(100, 1) + runif(2, min = -1) * c(30, 0.3)
+#dynamic_part_starting_param <- c(83.619117, 1.202179)
+dynamic_part_estim_param <- optimize_dynamic_likelihood(
+                  likelihood_fun = t_transform_dynamic_likelihood,
+                  data = asinh(AMOC_data$AMOC2[AMOC_data$time >= t_0]),
+                  init_par = dynamic_part_starting_param,
+                  delta = actual_dt,
+                  alpha0 = stationary_part_estim_param[1],
+                  mu0 = stationary_part_estim_param[2],
+                  sigma = stationary_part_estim_param[3],
+                  method = "BFGS",
+                  control = list(reltol = sqrt(.Machine$double.eps) / 100000))
+
+t_transform_dynamic_likelihood(par = c(100,1),
+                               data = asinh(AMOC_data$AMOC2[AMOC_data$time >= t_0]),
+                               delta = actual_dt,
+                               alpha0 = stationary_part_estim_param[1],
+                               mu0 = stationary_part_estim_param[2],
+                               sigma = stationary_part_estim_param[3])
+
+library(dplyr)
+library(ggplot2)
+
+# Define the parameter ranges
+par1_values <- seq(95, 200, length.out = 100)  # from 90 to 200
+par2_values <- seq(0.5, 1.3, length.out = 100)  # from 0.7 to 1.3
+
+# Create a grid of parameter combinations
+param_grid <- expand.grid(par1 = par1_values, par2 = par2_values)
+
+# Function to apply
+evaluate_function <- function(par1, par2) {
+  t_transform_dynamic_likelihood(
+    par = c(par1, par2),
+    data = asinh(AMOC_data$AMOC2[AMOC_data$time >= t_0]),
+    delta = actual_dt,
+    alpha0 = stationary_part_estim_param[1],
+    mu0 = stationary_part_estim_param[2],
+    sigma = stationary_part_estim_param[3]
+  )
+}
+
+# Apply the function to each row in the parameter grid
+param_grid$result <- mapply(evaluate_function, param_grid$par1, param_grid$par2)
+
+ggplot(param_grid, aes(x = par1, y = par2, fill = result)) +
+  geom_tile() +
+  labs(title = "Heatmap of t_transform_dynamic_likelihood",
+       x = "Parameter 1 (par1)",
+       y = "Parameter 2 (par2)",
+       fill = "Function Value") +
+  scale_fill_gradient(low = "blue", high = "red")
+
+dynamic_part_estim_param
+# Simulate from the model to construct parametric bootstrap confidence intervals
+numSim <- 1000
+
+# Define parameters - note that we shift the year to index 0.
+T_0 <- t_0 - 1870
+tau_estim <- dynamic_part_estim_param[1]
+A_estim <- dynamic_part_estim_param[2]
+alpha_0_estim <- stationary_part_estim_param[1]
+mu0_estim <- stationary_part_estim_param[2]
+sigma_estim <- stationary_part_estim_param[3]
+
+lambda_0_estim <- -alpha_0_estim^2 / (4 * A_estim)
+m_estim <- mu0_estim - alpha_0_estim / (2 * A_estim)
+
+tc_estim <- tau_estim + t_0
+sim_param <- c(A_estim, m_estim, lambda_0_estim, sigma_estim)
+time_to_tipping <- tc_estim - max(AMOC_data$time)
+
+original_estim <- tibble(true_value = c(A_estim, alpha_0_estim, lambda_0_estim,  m_estim, mu0_estim, sigma_estim, tau_estim, tc_estim))
+
+estim_matrix <- matrix(data = NA, nrow = numSim, ncol = 8)
+#tc_vector <- numeric(numSim)
+
+for (i in 1:numSim){
+if(i %% 5 == 1){cat("Currently grinding", i, "....\n" )}
+sim_t <- simulate_t_distribution_tipping_model(step_length = actual_dt, par = sim_param, tau = tau_estim,
+                                      t_0 = T_0, beyond_tipping = -time_to_tipping, seed = i)
+
+
+# Stationary part
+sim_t_stationary_estim <-  optimize_stationary_likelihood(
+  likelihood_fun = t_diffusion_strang_splitting,
+  data = asinh(sim_t$X_t[sim_t$t < T_0]),
+  init_par = stationary_part_starting_param,
+  delta = actual_dt,
+  exp_sigma = TRUE,
+  method = "BFGS"
+  )
+
+# Dynamic part
+sim_t_dynamic_estim <- optimize_dynamic_likelihood(
+  likelihood_fun = t_transform_dynamic_likelihood,
+  data = asinh(sim_t$X_t[sim_t$t >= T_0]),
+  init_par = dynamic_part_starting_param,
+  delta = actual_dt,
+  alpha0 = sim_t_stationary_estim[1],
+  mu0 = sim_t_stationary_estim[2],
+  sigma = sim_t_stationary_estim[3],
+  method = "BFGS",
+  control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+
+
+
+estim_matrix[i, 1] <- sim_t_dynamic_estim[2]
+
+estim_matrix[i, 2] <- sim_t_stationary_estim[1]
+estim_matrix[i, 3] <- -sim_t_stationary_estim[1]^2 / (4 * sim_t_dynamic_estim[2])
+estim_matrix[i, 4] <- sim_t_stationary_estim[2] - sim_t_stationary_estim[1] / (2 * sim_t_dynamic_estim[2])
+estim_matrix[i, 5] <- sim_t_stationary_estim[2]
+estim_matrix[i, 6] <- sim_t_stationary_estim[3]
+estim_matrix[i, 7] <- sim_t_dynamic_estim[1]
+estim_matrix[i, 8] <- T_0 + sim_t_dynamic_estim[1] + 1870 # Shift time back
+print(estim_matrix[i, 8])
+}
+
+estim_tibble <- as_tibble(estim_matrix)
+
+names(estim_tibble) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
+
+if(!file.exists("data/estim_tibble.csv")){
+  utils::write.table(estim_tibble, file="data/estim_tibble.csv", sep = ",", row.names = FALSE)
+} else{
+  estim_tibble <- read_csv("data/estim_tibble.csv")
+}
+
+original_estim <- original_estim |> mutate(parameter = names(estim_tibble))
+
+estim_tibble_long <- estim_tibble %>%
+  pivot_longer(cols = everything(), names_to = "parameter", values_to = "value")
+
+estim_tibble_plot <- estim_tibble_long |> ggplot(aes(x = value)) +
+  geom_histogram(bins = 30, fill = thesis_palette[5], alpha = 0.7, col = "black") + 
+  geom_vline(data = original_estim, mapping = aes(xintercept = true_value), linewidth = 1) +
+  facet_wrap(~parameter, scales = "free_x", ncol = 4) +
+  labs(x = "Estimate", y = "Count") +
+  theme(strip.text.x = element_text(size = 12, face = "bold"),
+        panel.spacing = unit(1.5, "lines"))
+
+ggplot2::ggsave(filename = "tex_files/figures/estim_tibble_plot.jpeg",
+                plot = estim_tibble_plot,
+                width = 15,
+                height = 7.5,
+                dpi = 300)
+
+  
+qqplot_before_t0 <- tibble::tibble(obsSample =
+                 t_diffusion_strang_splitting_resid(stationary_part_estim_param,
+                 data = asinh(AMOC_data$AMOC2[AMOC_data$time < t_0]),
+                 delta = actual_dt)) |>
+                 ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
+                 ggplot2::geom_qq() + ggplot2::geom_qq_line() + 
+                 xlab("Theoretical Quantiles") + ylab("Sample Quantiles")  
+
+
+qqplot_after_t0 <-  tibble::tibble(obsSample =
+                 t_transform_dynamic_likelihood_resid(dynamic_part_estim_param,
+                 data = asinh(AMOC_data$AMOC2[AMOC_data$time >= t_0]),
+                 delta = actual_dt,
+                 alpha0 = stationary_part_estim_param[1],
+                 mu0 = stationary_part_estim_param[2],
+                 sigma = stationary_part_estim_param[3])) |>
+                 ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
+                 ggplot2::geom_qq() + ggplot2::geom_qq_line() + 
+                 xlab("Theoretical Quantiles") + ylab("Sample Quantiles")
+
+qqplot_combined <- gridExtra::grid.arrange(qqplot_before_t0, qqplot_after_t0, ncol = 2)
+
+
+ggplot2::ggsave(filename = "tex_files/figures/qqplot_combined.jpeg",
+                plot = qqplot_combined,
+                width = 15,
+                height = 7.5,
+                dpi = 300)
