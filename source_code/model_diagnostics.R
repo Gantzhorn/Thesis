@@ -193,7 +193,7 @@ CIR_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0
 
 # Methods that are based on the linear noise process
 
-mean_reverting_GMB_Kessler_likelihood_resid <- function(par, data, delta){
+mean_reverting_GBM_Kessler_likelihood_resid <- function(par, data, delta){
   beta <- par[1]
   mu <- par[2]
   sigma <- exp(par[3])
@@ -215,7 +215,7 @@ mean_reverting_GMB_Kessler_likelihood_resid <- function(par, data, delta){
   qnorm(pnorm(Xupp, mean = mu_ks, sd = sd_ks))
 }
 
-mean_reverting_GMB_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma){
+mean_reverting_GBM_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
   nu      <- if(length(par) == 3) par[3] else 1
@@ -600,12 +600,12 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
 # GBM_stationary_part_estimated_param_martingale <- nleqslv::nleqslv(x = stationary_part_true_param,
-#                                                                    fn = mean_reverting_GMB_martingale,
+#                                                                    fn = mean_reverting_GBM_martingale,
 #                  data = sim_res_linear$X_t[sim_res_linear$t < t_0],
 #                  delta = actual_dt)$x #- stationary_part_true_param
 # # 
 # tibble::tibble(obsSample =
-#                  mean_reverting_GMB_Kessler_likelihood_resid(GBM_stationary_part_estimated_param_martingale,
+#                  mean_reverting_GBM_Kessler_likelihood_resid(GBM_stationary_part_estimated_param_martingale,
 #                  data = sim_res_linear$X_t[sim_res_linear$t < t_0],
 #                  delta = actual_dt)) |>
 #                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
@@ -615,7 +615,7 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 # # ## Dynamic part
 # dynamic_part_true_param <- c(tau, true_param[1])
 # # 
-# GBM_dynamic_part_estimated_param_strang <- optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GMB_dynamic_likelihood,
+# GBM_dynamic_part_estimated_param_strang <- optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GBM_dynamic_likelihood,
 #                             data = sim_res_linear$X_t[sim_res_linear$t > t_0],
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
@@ -625,7 +625,7 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 # # 
 # 
 # tibble::tibble(obsSample =
-#                  mean_reverting_GMB_dynamic_likelihood_resid(GBM_dynamic_part_estimated_param_strang,
+#                  mean_reverting_GBM_dynamic_likelihood_resid(GBM_dynamic_part_estimated_param_strang,
 #                  data= sim_res_linear$X_t[sim_res_linear$t > t_0],
 #                  delta = actual_dt,
 #                  alpha0 = GBM_stationary_part_estimated_param_martingale[1],

@@ -109,23 +109,23 @@ In the stationary part we assume the process can be modelled by the square-root 
 \end{align}
 We first introduce estimators based on the Strang splitting scheme, and then we consider an estimator based on martingale estimating equations.\\\\
 \noindent \textbf{The Strang-based Estimator}\\
-To obtain the strang estimator, we first use The lamperti transformation of (\ref{eq:squarerootAppendix}), which by table \ref{table:ergodicDiffusions} is $Y_t := 2\sqrt{X_t}$. To confirm this and get the resulting SDE see
+To obtain the strang estimator, we first use the lamperti transformation of (\ref{eq:squarerootAppendix}), which by table \ref{table:ergodicDiffusions} is $Y_t := 2\sqrt{X_t}$. To confirm this and get the resulting SDE see
 \begin{align}
-    \mathrm{d}Y_t = - \frac{1}{Y_t}\left(\alpha_0 \frac{Y_t^2}{2} - 2 \alpha_0 \mu_0 + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \label{eq:lampertiSquarerootAppendix}
+    \mathrm{d}Y_t = - \frac{2}{Y_t}\left(\alpha_0 \frac{Y_t^2}{4} - \alpha_0 \mu_0 + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \label{eq:lampertiSquarerootAppendix}
 \end{align}
 by Itô's formula. Then, we use the heuristic from \cite[section 2.3 and 2.5]{SplittingSchemes}. First we calculate the fixed point of the drift. That is, we solve the equation
 \begin{align}
-    f(y) := - \frac{1}{y}\left(\alpha_0 \frac{y^2}{2} - 2 \alpha_0 \mu_0 + \frac{\sigma^2}{2}\right) = 0
+    f(y) := - \frac{2}{y}\left(\alpha_0 \frac{y^2}{4} - \alpha_0 \mu_0 + \frac{\sigma^2}{2}\right) = 0
 \end{align}
-in terms of $y$. This is $y^* = \pm \sqrt{\frac{\alpha_0\mu_0 - \sigma^2}{\alpha_0}}$. In our case, however, $Y_t$ is non-negative by definition; thus we only want the positive solution. Therefore, we let the Ornstein-Uhlenbeck part be the linearization around the positive fixed point
+in terms of $y$. By the quadratic formula this is $y^* = \pm 2\sqrt{\frac{\alpha_0\mu_0 - \sigma^2 / 2}{\alpha_0}}$. In our case, however, $Y_t$ is non-negative by definition; thus we only want the positive solution. Therefore, we let the Ornstein-Uhlenbeck part be the linearization around the positive fixed point
 \begin{align}
-    \mathrm{d}Y_t^{[1]} &= -\alpha_0 \left(Y_t^{[1]} - \sqrt{\frac{4\alpha_0 \mu_0 - \sigma^2}{\alpha_0}}\right) + \sigma \mathrm{d}W_t , \label{eq:squarerootStationarySplit1} \\
-    \mathrm{d}Y_t^{[2]} &= \frac{\alpha_0 Y_t^{[2]}}{2} + \frac{4\alpha_0 \mu_0 - \sigma^2}{2 Y_t} + \sqrt{\alpha_0\left(4\alpha_0\mu_0 - \sigma^2\right)}. \label{eq:squarerootStationarySplit2}
+    \mathrm{d}Y_t^{[1]} &= -\alpha_0 \left(Y_t^{[1]} - 2\sqrt{\frac{\alpha_0\mu_0 - \sigma^2 / 2}{\alpha_0}}\right)\mathrm{d}t + \sigma \mathrm{d}W_t , \label{eq:squarerootStationarySplit1} \\
+    \mathrm{d}Y_t^{[2]} &= \left(\frac{\alpha_0 Y_t^{[2]}}{2} + \frac{2\alpha_0 \mu_0 - \sigma^2}{Y_t} - 2\sqrt{\alpha_0\left(\alpha_0\mu_0 - \sigma^2 / 2\right)}\right)\mathrm{d}t. \label{eq:squarerootStationarySplit2}
 \end{align}
 As always, the deterministic ODE in (\ref{eq:squarerootStationarySplit2}) is the residual of (\ref{eq:lampertiSquarerootAppendix}) and (\ref{eq:squarerootStationarySplit1}).
 Equation (\ref{eq:squarerootStationarySplit1}) represents an Ornstein-Uhlenbeck process, which with stepsize, $\Delta t$, has a gaussian flow with mean 
 \begin{align}
-    \mu_{\Delta t}(x) = \exp\left(-\alpha_0 \Delta t\right) \left(x + \sqrt{\frac{4\alpha_0\mu_0 - \sigma^2}{\alpha_0}}\right) - \sqrt{\frac{4\alpha_0\mu_0 - \sigma^2}{\alpha_0}}
+    \mu_{\Delta t}(x) = \exp\left(-\alpha_0 \Delta t\right) \left(x - 2\sqrt{\frac{\alpha_0\mu_0 - \sigma^2 / 2}{\alpha_0}}\right) + 2\sqrt{\frac{\alpha_0\mu_0 - \sigma^2 / 2}{\alpha_0}}
 \end{align}
 and variance
 \begin{align}

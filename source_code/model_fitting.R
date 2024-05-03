@@ -7,7 +7,7 @@
 # of tipping points in stochastic differential equations with additive-, square-root- and linear noise structure
 #-----------------------------------------------------------------------------------------------------------------------------#
 # License: MIT License (for more information, see LICENSE file in the repository).
-# Dependencies: nleqslv.
+# Dependencies: nleqslv, numDeriv.
 # Usage: See example usage in the bottom of the script
 # Acknowledgements: A few of the methods was made by me and Lucas Støjko for the mandatory project during the course:
 # "NMAK23005U Inference for Stochastic Differential Equations" at the University of Copenhagen in 2023-2024.
@@ -32,11 +32,48 @@ runge_kutta <- function(y0, h, f, n = 1) {
 }
 #-----------------------------------------------------------------------------------------------------------------------------#
 
+# General method that allows estimation allows almost completely numeric computation of the Strang method
+# where the splitting is chosen such that the linear part is the linearization around the fixed point of the drift
+numeric_strang_splitting <- function(par, data, delta, drift_lamperti_sde, exp_sigma = FALSE) {
+  x0 <- data[1:(length(data) - 1)]
+  x1 <- data[2:length(data)]
+  
+  beta  <- par[1]
+  mu    <- par[2]
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
+  
+  
+  b <- nleqslv::nleqslv(x = mu, fn = drift_lamperti_sde, par = par)$x
+  
+  A <- numDeriv::grad(func = drift_lamperti_sde, x = b, par = par)
+  
+  diff_f <- function(t, y){drift_lamperti_sde(y, par) - A * (y - b)}
+  
+  # Solution to ODE
+  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  
+  
+  mu_f <- exp(A * delta) * (f_h - b) + b
+  sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
+  
+  # Inverse of non-linear ODE
+  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  
+  # Derivative of inverse using Richardson Extrapolation.
+  inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
+  inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
+  df     <- (inv_f2 - inv_f3) / (2 * 0.01)
+  
+  # Strang likelihood
+  -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
+}
+
 # Implementation of methods that are based on the additive noise term process
-OU_likelihood <- function(par, data, delta){
+OU_likelihood <- function(par, data, delta, exp_sigma = FALSE){
   alpha0 <- par[1]
   mu0    <- par[2]
-  sigma  <- par[3]
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
+
   N      <- length(data)
   
   Xupp <- data[2:N]
@@ -52,14 +89,14 @@ OU_likelihood <- function(par, data, delta){
   -mean(dnorm(x = Xupp, mean = m_part, sd = sqrt(v_part), log = TRUE))
 }
 
-OU_score <- function(par, data, delta){
+OU_score <- function(par, data, delta, exp_sigma = FALSE){
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   N  <- length(x0)
   
   alpha0 <- par[1]
   mu0    <-  par[2]
-  sigma  <- par[3]
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
   
   gamma_square <- sigma^2 / (2 * alpha0)
   rho          <- exp(-alpha0 * delta)
@@ -106,14 +143,11 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma){
   
   mu_h        <- fh_half * rho_seq + mu_seq * (1 - rho_seq)
   
-  #m_part      <- fh_half_inv - mu_h
-  
   v_part           <- gamma2_seq * (1 - rho_seq^2)
   det_Dfh_half_inv <- 1 / (fh_half_tmp_upp-1)^2
   
   # Negative log-likelihood
   -sum(stats::dnorm(fh_half_inv, mu_h, sqrt(v_part), log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
-    # + 0.01 * N * (1/A - 1) * (A < 1)
 }
 
 OU_dynamic_numeric_score <- function(par, data, delta, alpha0, mu0, sigma){
@@ -270,13 +304,13 @@ CIR_quadratic_martingale <- function(data, delta) {
   c(beta, mu, sqrt(sigma))
 }
 
-CIR_alt_strang_splitting <- function(par, data, delta) {
+CIR_alt_strang_splitting <- function(par, data, delta, exp_sigma = FALSE) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
   beta  <- par[1]
   mu    <- par[2]
-  sigma <- exp(par[3])
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
   
   if(4 * beta * mu - sigma^2 < 0){return(100000)}
   
@@ -298,26 +332,21 @@ CIR_alt_strang_splitting <- function(par, data, delta) {
   -sum(stats::dlnorm(inv_f, meanlog = mu_log, sdlog = sd_log, log = TRUE)) - sum(log(abs(df)))
 }
 
-CIR_strang_splitting <- function(par, data, delta) {
+CIR_strang_splitting <- function(par, data, delta, exp_sigma = FALSE) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
   beta  <- par[1]
   mu    <- par[2]
-  sigma <- par[3]
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
   
   if((4 * beta * mu - sigma^2) < 0 | sigma < 0){return(100000)}
-  #if(beta * (beta * mu - sigma^2 / 2) < 0 | sigma < 0){return(10000)}
-  diff_f <- function(t, y){beta * y / 2 + (4 * mu * beta - sigma^2) / (2 * y) + sqrt(beta * (4 * beta * mu - sigma^2))}
-  #diff_f <- function(t, y){beta / 4 * y + (2 * beta * mu - sigma^2) / (2 * y) + sqrt(beta * (beta * mu - sigma^2 / 2))}
+  diff_f <- function(t, y){beta / 2 * y + (2 * beta * mu - sigma^2) / y - 2 * sqrt(beta * (beta * mu - sigma^2 / 2))}
+  
   # Solution to ODE
   f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
-  
   A <- - beta
-  b <- - sqrt((4 * beta * mu - sigma^2) / beta)
-  
-  #A <- -beta / 2
-  #b <- - sqrt((4 * beta * mu - 2 * sigma^2) / beta)
+  b <- 2 * sqrt((beta * mu - sigma^2 / 2) / beta)
 
   mu_f <- exp(A * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
@@ -463,7 +492,7 @@ CIR_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Implementation of methods that are based on the linear noise term process
-mean_reverting_GMB_EM_likelihood <- function(par, data, delta){
+mean_reverting_GBM_EM_likelihood <- function(par, data, delta){
   beta  <- par[1]
   mu    <- par[2]
   sigma <- exp(par[3])
@@ -479,7 +508,7 @@ mean_reverting_GMB_EM_likelihood <- function(par, data, delta){
   -sum(stats::dnorm(Xupp, mu.part, sd.part, log = TRUE))
 }
 
-mean_reverting_GMB_Kessler_likelihood <- function(par, data, delta){
+mean_reverting_GBM_Kessler_likelihood <- function(par, data, delta){
   beta  <- par[1]
   mu    <- par[2]
   sigma <- exp(par[3])
@@ -502,7 +531,7 @@ mean_reverting_GMB_Kessler_likelihood <- function(par, data, delta){
   -sum(dnorm(Xupp, mean = mu_ks, sd = sd_ks, log = TRUE)) 
 }
 
-mean_reverting_GMB_martingale <- function(par, data, delta){
+mean_reverting_GBM_martingale <- function(par, data, delta){
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
@@ -511,13 +540,7 @@ mean_reverting_GMB_martingale <- function(par, data, delta){
   sigma <- par[3]
   
   F_i   <- exp(-beta * delta) * (x0 - mu) + mu
-  
-  # phi_i <- exp(-(2 * beta - sigma^2) * delta) * (
-  #   (x0 - mu)^2 * (1 - exp(-sigma^2 * delta)) - 
-  #     2 * mu * sigma^2 / (beta - sigma^2) * (x0 - mu) * (1 - exp(-(sigma^2 - beta) * delta)) -
-  #     mu^2 * sigma^2 / (2 * beta - sigma^2) * (1 - exp(-(sigma^2 - 2*beta) * delta))
-  # )
-  # 
+
   phi_i <- exp(-(2 * beta - sigma^2) * delta) *
     (x0^2 - (2 * beta * mu)/(beta - sigma^2) * x0 + 2 * beta^2 * mu^2/ ((beta - sigma^2) * (2 * beta - sigma^2))) + 
     2 * beta * mu / (beta - sigma^2) * (exp(-beta * delta) * (x0 - mu) + mu) - 
@@ -532,13 +555,13 @@ mean_reverting_GMB_martingale <- function(par, data, delta){
   c(eq1, eq2, eq3)
 }
 
-mean_reverting_GMB_strang <- function(par, data, delta) {
+mean_reverting_GBM_strang <- function(par, data, delta, exp_sigma = FALSE) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
   beta  <- par[1]
-  mu    <-  par[2]
-  sigma <- exp(par[3])
+  mu    <- par[2]
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
   
   if((sigma^2 + 2 * beta) / (2 * beta * mu) < 0 | (2 * beta + sigma^2) / (2 * beta * mu) < 0){return(50000)}
   
@@ -565,7 +588,7 @@ mean_reverting_GMB_strang <- function(par, data, delta) {
   -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
 }
 
-mean_reverting_GMB_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
+mean_reverting_GBM_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
   nu      <- if(length(par) == 3) par[3] else 1
@@ -603,7 +626,7 @@ mean_reverting_GMB_dynamic_likelihood <- function(par, data, delta, alpha0, mu0,
   -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
 }
 
-mean_reverting_GMB_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
+mean_reverting_GBM_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
   nu      <- if(length(par) == 3) par[3] else 1
@@ -648,7 +671,7 @@ mean_reverting_GMB_transform_dynamic_likelihood <- function(par, data, delta, al
   loglik
 }
 
-mean_reverting_GMB_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
+mean_reverting_GBM_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
   tau <- par[1]
   A  <- par[2]
   nu <- if(length(par) == 3) par[3] else 1
@@ -696,13 +719,13 @@ mean_reverting_GMB_dynamic_simulation_likelihood <- function(par, data, times, M
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Implementation of methods that are based on the process with stationary t-distribution
-t_diffusion_strang_splitting <- function(par, data, delta) {
+t_diffusion_strang_splitting <- function(par, data, delta, exp_sigma = FALSE) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
   beta  <- par[1]
   mu    <- par[2]
-  sigma <- exp(par[3])
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
   
   asinh_argument <- (2 * mu * beta / (2 * beta + sigma^2))
   
@@ -855,19 +878,18 @@ t_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma)
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Implementation of methods that are based on the process with stationary F-distribution
 
-F_diffusion_strang_splitting <- function(par, data, delta) {
+F_diffusion_strang_splitting <- function(par, data, delta, exp_sigma = FALSE) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
   beta  <- par[1]
   mu    <- par[2]
-  sigma <- exp(par[3])
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
   
   A <- - (beta + sigma^2 / 2)
-  if(any((2 * beta * (2 * mu + 1) / (2 * beta + sigma^2) - 1) < 0)){return(50000)} # Input for acosh minus 1 must be positive.
   b <- acosh(2 * beta * (2 * mu + 1) / (2 * beta + sigma^2))
   
-  diff_f <- function(t, y){-A * (y - b - cosh(y) / sinh(y) + 2 * beta * (2 * mu + 1) / ((2 * beta + sigma^2) * sinh(y)))}
+  diff_f <- function(t,y){-A * (y - cosh(y) / sinh(y) - b) + beta * (2 * mu + 1) / sinh(y)}
   
   # Solution to ODE
   f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
@@ -882,7 +904,7 @@ F_diffusion_strang_splitting <- function(par, data, delta) {
   inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
   inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
   df     <- (inv_f2 - inv_f3) / (2 * 0.01)
-  
+  browser()
   # Strang likelihood
   loglik <- -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
   if(is.nan(loglik)){return(50000)}
@@ -938,13 +960,13 @@ F_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma)
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Implementation of methods that are based on the jacobi diffusion
 
-jacobi_diffusion_strang_splitting <- function(par, data, delta) {
+jacobi_diffusion_strang_splitting <- function(par, data, delta, exp_sigma = FALSE) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
   beta  <- par[1]
   mu    <- par[2]
-  sigma <- exp(par[3])
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
   
   if(abs(beta * (2 * mu - 1) / (sigma^2 / 2 - beta))>1){return(50000)}
   
@@ -1038,7 +1060,7 @@ optimize_stationary_likelihood <- function(likelihood_fun,
                                            ...){
   res_optim <- stats::optim(init_par, fn = likelihood_fun,
                      method = method,
-                     data = data, delta = delta,  ...)
+                     data = data, delta = delta, exp_sigma = exp_sigma, ...)
   if(exp_sigma){
   res_optim$par[3] <- exp(res_optim$par[3])
   }
@@ -1074,39 +1096,39 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 # source("source_code/tipping_simulations.R")
 # # 
 # # # ## Additive noise model
-true_param <- c(0.87, -1.51, -2.69, 0.2)
-actual_dt <- 0.005
-tau <- 100
-t_0 <- 50
-sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
-sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
-# ## Stationary part
-# ## Parameters for stationary part
-mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) *  sqrt(abs(true_param[3] / true_param[1]))
-alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
-stationary_part_true_param <- c(alpha0, mu0, true_param[4]) #* c(1,1,1)
-
-optimize_stationary_likelihood(likelihood_fun = OU_likelihood, data = sim_res_add$X_t[sim_res_add$t < t_0],
-                               init_par = stationary_part_true_param,
-                               delta = actual_dt, exp_sigma = FALSE)# - stationary_part_true_param
-
-#
-nleqslv::nleqslv(x = stationary_part_true_param,
-                 fn = OU_score,
-                 data = sim_res_add$X_t[sim_res_add$t < t_0],
-                 delta = actual_dt)$x#- stationary_part_true_param
-#
-# ## Dynamic part
-dynamic_part_true_param <- c(tau, true_param[1])
-
+# true_param <- c(0.87, -1.51, -2.69, 0.2)
+# actual_dt <- 0.005
+# tau <- 100
+# t_0 <- 50
+# sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
+# sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
+# # ## Stationary part
+# # ## Parameters for stationary part
+# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) *  sqrt(abs(true_param[3] / true_param[1]))
+# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+# stationary_part_true_param <- c(alpha0, mu0, true_param[4]) #* c(1,1,1)
+# 
+# optimize_stationary_likelihood(likelihood_fun = OU_likelihood, data = sim_res_add$X_t[sim_res_add$t < t_0],
+#                                init_par = stationary_part_true_param,
+#                                delta = actual_dt, exp_sigma = FALSE)# - stationary_part_true_param
+# 
 # #
-optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
-                            data = sim_res_add$X_t[sim_res_add$t > t_0],
-                            init_par = dynamic_part_true_param,
-                            delta = actual_dt,
-                            alpha0 = stationary_part_true_param[1],
-                            mu0 = stationary_part_true_param[2],
-                            sigma = stationary_part_true_param[3])
+# nleqslv::nleqslv(x = stationary_part_true_param,
+#                  fn = OU_score,
+#                  data = sim_res_add$X_t[sim_res_add$t < t_0],
+#                  delta = actual_dt)$x#- stationary_part_true_param
+# #
+# # ## Dynamic part
+# dynamic_part_true_param <- c(tau, true_param[1])
+# 
+# # #
+# optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
+#                             data = sim_res_add$X_t[sim_res_add$t > t_0],
+#                             init_par = dynamic_part_true_param,
+#                             delta = actual_dt,
+#                             alpha0 = stationary_part_true_param[1],
+#                             mu0 = stationary_part_true_param[2],
+#                             sigma = stationary_part_true_param[3])
 # 
 # nleqslv::nleqslv(OU_dynamic_score,
 #                  x = dynamic_part_true_param,
@@ -1119,7 +1141,7 @@ optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 ## Square-root noise model
-# true_param <- c(1.5, 3, -1, 0.1, 0.8)
+# true_param <- c(1, 2, -1, 0.05)
 # actual_dt <- 0.005
 # tau <- 100
 # t_0 <- 50
@@ -1175,17 +1197,17 @@ optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
-# nleqslv::nleqslv(x = stationary_part_true_param, fn = mean_reverting_GMB_martingale,
+# nleqslv::nleqslv(x = stationary_part_true_param, fn = mean_reverting_GBM_martingale,
 #                  data = sim_res_linear$X_t[sim_res_linear$t < t_0],
 #                  delta = actual_dt)$x - stationary_part_true_param
 # 
-# optimize_stationary_likelihood(mean_reverting_GMB_strang, log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
+# optimize_stationary_likelihood(mean_reverting_GBM_strang, log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
 #                                init_par = stationary_part_true_param, delta = actual_dt,
 #                                exp_sigma = TRUE) - stationary_part_true_param
 # # 
 # ## Dynamic part
 # dynamic_part_true_param <- c(tau, true_param[1], true_param[5])
-# optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GMB_dynamic_likelihood,
+# optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GBM_dynamic_likelihood,
 #                             data = sim_res_linear$X_t[sim_res_linear$t > t_0],
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
@@ -1193,7 +1215,7 @@ optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
 #                             mu0 = stationary_part_true_param[2],
 #                             sigma = stationary_part_true_param[3]) - dynamic_part_true_param
 
-# optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GMB_transform_dynamic_likelihood,
+# optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GBM_transform_dynamic_likelihood,
 #                             data = log(sim_res_linear$X_t[sim_res_linear$t > t_0]),
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
@@ -1204,7 +1226,7 @@ optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 ## t-distributed stationary distribution model
-# 
+#
 # true_param <- c(0.1, -2, -3, 0.1)
 # actual_dt <- 0.005
 # tau <- 100
@@ -1213,9 +1235,9 @@ optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
 # sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = t_0)
-
-# Stationary part
-# Parameters for stationary part
+# 
+# # Stationary part
+# # Parameters for stationary part
 # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
@@ -1258,9 +1280,9 @@ optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
 # F_sim_dynamic <- simulate_F_distribution_tipping_model(actual_dt, true_param, t_0 = t_0, tau = tau)
 # 
 # sample_n(F_sim_dynamic, 10000) |> ggplot(aes(x = t, y = X_t)) + geom_step()
-# 
-# ## Stationary part
-# # Parameters for stationary part
+# # 
+# # ## Stationary part
+# # # Parameters for stationary part
 # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # 
