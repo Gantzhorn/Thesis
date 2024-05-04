@@ -406,8 +406,8 @@ This stochastic differential equation's drift has the fixed point $\cosh^{-1}\le
 Therefore Continuing with the same heuristic of linearizing around the fix-points of the drift, we get the splitting
 \begin{align}
     \mathrm{d}Y_t^{[1]} &= -\left(\alpha_0 + \frac{\sigma^2}{2}\right)\left(Y_t^{[1]} - \cosh^{-1}\left(\frac{2\alpha_0\left(2\mu + 1\right)}{2\alpha_0 + \sigma^2}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \\
-    \mathrm{d}Y_t^{[2]} &= \left(\alpha_0 + \frac{\sigma^2}{2}\right) \left(Y_t^{[2]} - \cosh^{-1}\left(\frac{2\alpha_0\left(2\mu + 1\right)}{2\alpha_0 + \sigma^2}\right) - \coth\left(Y_t^{[2]}\right) \right.\nonumber\\
-    &+ \left. \frac{2\alpha_0\left(2\mu + 1\right)}{\left(2\alpha_0 + \sigma^2\right)\sinh(Y_t^{[2]})}\right)\mathrm{d}t.
+    \mathrm{d}Y_t^{[2]} &= \left(\alpha_0 + \frac{\sigma^2}{2}\right) \left(Y_t^{[2]} - \cosh^{-1}\left(\frac{2\alpha_0\left(2\mu + 1\right)}{2\alpha_0 + \sigma^2}\right) - \coth\left(Y_t^{[2]}\right) \right)\mathrm{d}t\nonumber\\
+    &+ \frac{\alpha_0\left(2\mu + 1\right)}{\sinh(Y_t^{[2]})}\mathrm{d}t.
 \end{align}
 The flow is then found in the usual manner: The flow from the linear part is obtained as the solution to the OU SDE, and the non-linear ODE along with its inverse etc. is solved with a fourth-order Runge-kutta. Then construct the Strang approximation of the flow as before. The maximizer of this pseudo-likelihood is then the Strang-estimator.  
 \subsubsection{Dynamic part}
@@ -446,7 +446,7 @@ The fixed point for the drift of this stochastic differential equation is $\cos^
 \begin{align}
     \mathrm{d}Y_t^{[1]} &= \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[1]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t,\\
     \mathrm{d}Y_t^{[2]} &= -\left(\frac{1}{\sin\left(Y_t^{[2]}\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(Y_t^{[2]}) + \alpha_0 - 2\alpha_0\mu\right) \right. \nonumber \\
-    &+ \left. \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[2]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right) \right)\mathrm{d}t. \label{eq:jacobiODE}
+    &- \left. \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[2]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right) \right)\mathrm{d}t. \label{eq:jacobiODE}
 \end{align}
 We solve the linear SDE by the well-known formulas (\ref{eq:OU_mean}) and (\ref{eq:OU_variance}). Given its complexity (\ref{eq:jacobiODE}), its inverse and the derivative of the inverse must be found using the fourth-order Runge-kutta method. The remaining steps in the construction of the Strang pseudo-likelihood is composing the flow from the linear SDE and the ODE in the appropriate way and the maximizing this value over the parameters.
 \subsubsection{Dynamic part}

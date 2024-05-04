@@ -179,11 +179,6 @@ CIR_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0
   # Inverse of non-linear ODE
   inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
   
-  # Derivative of inverse using Richardson Extrapolation.
-  # inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
-  # inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
-  # df     <- (inv_f2 - inv_f3) / (2 * 0.01)
-  
   # Strang likelihood
   qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
 }
