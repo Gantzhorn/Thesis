@@ -17,14 +17,13 @@
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Helper functions
-runge_kutta <- function(y0, h, f, n = 1) {
+runge_kutta <- function(y0, h, func, n = 1) {
   h <- h / n
-  
   for(i in 1:n) {
-    k1 <- f(0, y0)
-    k2 <- f(0.5 * h, y0 + 0.5 * h * k1)
-    k3 <- f(0.5 * h, y0 + 0.5 * h * k2)
-    k4 <- f(h, y0 + h * k3)
+    k1 <- func(0, y0)
+    k2 <- func(0.5 * h, y0 + 0.5 * h * k1)
+    k3 <- func(0.5 * h, y0 + 0.5 * h * k2)
+    k4 <- func(h, y0 + h * k3)
     
     y0 <- y0 + h * (k1 + 2 * k2 + 2 * k3 + k4) / 6
   }
@@ -34,7 +33,11 @@ runge_kutta <- function(y0, h, f, n = 1) {
 
 # General method that allows estimation allows almost completely numeric computation of the Strang method
 # where the splitting is chosen such that the linear part is the linearization around the fixed point of the drift
-numeric_strang_splitting <- function(par, data, delta, drift_lamperti_sde, exp_sigma = FALSE) {
+numeric_strang_splitting <- function(par,
+                                     data,
+                                     delta,
+                                     drift_lamperti_sde,
+                                     exp_sigma = FALSE) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
   
@@ -65,8 +68,8 @@ numeric_strang_splitting <- function(par, data, delta, drift_lamperti_sde, exp_s
   df     <- (inv_f2 - inv_f3) / (2 * 0.01)
   
   # Strang likelihood
-  -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE), na.rm = TRUE) - 
-    sum(log(abs(df)), na.rm = TRUE)
+  -mean(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE), na.rm = TRUE) - 
+    mean(log(abs(df)), na.rm = TRUE)
 }
 
 # Implementation of methods that are based on the additive noise term process
@@ -1088,7 +1091,7 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Example usage
-# source("source_code/tipping_simulations.R")
+source("source_code/tipping_simulations.R")
 
 # Additive noise model
 # true_param <- c(0.87, -1.51, -2.69, 0.2)
@@ -1263,14 +1266,14 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 #                             sigma = stationary_part_true_param[3],
 #                             method = "BFGS")
 # 
-optimize_dynamic_likelihood(likelihood_fun = t_transform_dynamic_likelihood,
-                  data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0]),
-                  init_par = dynamic_part_true_param,
-                  delta = actual_dt,
-                  alpha0 = stationary_part_true_param[1],
-                  mu0 = stationary_part_true_param[2],
-                  sigma = stationary_part_true_param[3],
-                  control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+# optimize_dynamic_likelihood(likelihood_fun = t_transform_dynamic_likelihood,
+#                   data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0]),
+#                   init_par = dynamic_part_true_param,
+#                   delta = actual_dt,
+#                   alpha0 = stationary_part_true_param[1],
+#                   mu0 = stationary_part_true_param[2],
+#                   sigma = stationary_part_true_param[3],
+#                   control = list(reltol = sqrt(.Machine$double.eps) / 1000))
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 
