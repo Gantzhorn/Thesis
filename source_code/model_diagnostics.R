@@ -327,10 +327,9 @@ F_diffusion_strang_splitting_resid <- function(par, data, delta) {
   sigma <- exp(par[3])
   
   A <- - (beta + sigma^2 / 2)
-  if(any((2 * beta * (2 * mu + 1) / (2 * beta + sigma^2) - 1) < 0)){return(50000)} # Input for acosh minus 1 must be positive.
   b <- acosh(2 * beta * (2 * mu + 1) / (2 * beta + sigma^2))
   
-  diff_f <- function(t, y){-A * (y - b - cosh(y) / sinh(y) + 2 * beta * (2 * mu + 1) / ((2 * beta + sigma^2) * sinh(y)))}
+  diff_f <- function(t,y){-A * (y - b - cosh(y) / sinh(y)) + beta * (2 * mu + 1) / sinh(y)}
   
   # Solution to ODE
   f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
