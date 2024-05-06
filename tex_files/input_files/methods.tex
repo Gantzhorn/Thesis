@@ -237,10 +237,10 @@ Nevertheless, we denote the solution with stepsize, $\Delta t$, $\varphi_{\Delta
 \end{align}
 Due to the fact that (\ref{varphiTheoretical}) is gaussian, (\ref{eq:classicStrangSplitting}) is a non-linear transformation of a gaussian variable; so by the density transformation theorem, the flow gives us the following negative pseudo-loglikelihood 
 \begin{align}
-    l^{[S]}(\mathbf{X}; \theta) &= -\sum_{i = 0}^{N - 1}\log\left(g\left(\left(\varphi_{\Delta t / 2}^{(2)}\right)^{-1}\left(X_{t_{i+1}}\right); \mu_{\Delta t}\left(\varphi_{\Delta t/2}^{(2)}\left(X_{t_{i}}\right); \theta \right), \Omega_{\Delta t} \right) \right) \nonumber \\
-    &- \sum_{i = 0}^{N - 1}\log\left(\frac{\partial}{\partial x}\left(\varphi_{\Delta t / 2}^{(2)}\right)^{-1}\left(X_{t_{i + 1}}\right) \right), \label{Strang_likelihood}
+    l^{[S]}(\mathbf{x}; \theta) &= -\sum_{i = 0}^{N - 1}\log\left(g\left(\left(\varphi_{\Delta t / 2}^{(2)}\right)^{-1}\left(x_{t_{i+1}}\right); \mu_{\Delta t}\left(\varphi_{\Delta t/2}^{(2)}\left(x_{t_{i}}\right); \theta \right), \Omega_{\Delta t} \right) \right) \nonumber \\
+    &- \sum_{i = 0}^{N - 1}\log\left(\frac{\partial}{\partial x}\left(\varphi_{\Delta t / 2}^{(2)}\right)^{-1}\left(x_{t_{i + 1}}\right) \right), \label{eq:Strang_likelihood}
 \end{align}
-where $N$ is the number of samples. This is the Strang based pseudo-likelihood, and we say that the $\theta$ that minimizes this function is the Strang-based estimator. In (\ref{Strang_likelihood}) $g$ is the density of the gaussian distribution with the specified mean and variance. To get the inverse of the solution to the ODE, we use the property $\left(\varphi_{\Delta t}^{(2)}\right)^{-1} = \left(\varphi_{-\Delta t}^{(2)}\right)$ \cite[Remark below equation (9)]{SplittingSchemes}, and solve ODE corresponding to the right hand side with the Runge-kutta method. Finally, to get the derivative we use Richardson extrapolation. For a function, $f$, the derivative can be approximated as
+where $N$ is the number of samples. This is the Strang based pseudo-likelihood, and we say that the $\theta$ that minimizes this function is the Strang-based estimator. In (\ref{eq:Strang_likelihood}) $g$ is the density of the gaussian distribution with the specified mean and variance. To get the inverse of the solution to the ODE, we use the property $\left(\varphi_{\Delta t}^{(2)}\right)^{-1} = \left(\varphi_{-\Delta t}^{(2)}\right)$ \cite[Remark below equation (9)]{SplittingSchemes}, and solve ODE corresponding to the right hand side with the Runge-kutta method. Finally, to get the derivative we use Richardson extrapolation. For a function, $f$, the derivative can be approximated as
 \begin{align}
     f'(x) = \frac{f(x + h) - f(x - h)}{2h}, \qquad h > 0,
 \end{align}
