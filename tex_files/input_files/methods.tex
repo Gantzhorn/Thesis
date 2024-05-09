@@ -337,6 +337,46 @@ This gives us the estimation equations for one-dimension stochastic differential
     &+ \frac{\frac{\partial}{\partial\theta}\sigma^2\left(X_{t_{i-1}}; \theta\right)}{2\sigma^4\left(X_{t_{i - 1}}; \theta\right)\Delta t}\left(\left(X_{t_{i}} - \mathbb{E}\left[X_{t_{i}} \middle| X_{t_{i-1}} = x\right]\right)^2 - \textrm{Var}\left[X_{t_{i}} \middle| X_{t_{i-1}} = x\right]\right),\label{eq:approximatelyOptimalMartingale}
 \end{align}
 and even with the numerous assumptions and simplifications made thus far, this approximately optimal martingale estimation equation still gives a consistent estimator of $\theta$ \cite[p.19]{StatisticalMethodsForSDE}. In appendix \ref{sec:AppendixEstim} we derive estimators that are based on these methods for two of the pearson diffusions.
+\subsubsection{Parameter estimation in the stochastic normal form}
+We now switch our attention to the concrete estimation and present the estimators that we use on (\ref{eq:standardStochasticForm}). Firstly, as the two forms in our models only differ by the sign in front of drift, we just carry the negative in the parameters $A$ and $\lambda_0$, whenever we want to estimate in positive branch of the model. Having a scaling-coefficient, $A$, which is negative is of course odd, but this is merely such that we can use the same methods for both versions of (\ref{eq:standardStochasticForm}). That is we always consider $A$ and $\lambda_0$ positive and negative, respectively. As in \cite{Ditlevsen2023} split (\ref{eq:standardStochasticForm}) into two parts. What we will refer to as the stationary part and the dynamic part. This corresponds to the time before and after ramping start, i.e. the before and after $t_0$, respectively. The estimation we do depends on which part we are in; though the way we do the estimation in which carry out the estimation, we need the estimates from the stationary part to do estimation in the dynamic part. For ease of notation we assume that we have have uniform temporal resolution. \\
+\textbf{Estimation in the stationary part of the processes}\\
+Regardless of the specific noise term, we use the same overall procedure. At times before ramping, i.e. $t < t_0$, our models is governed by
+\begin{align}
+    \mathrm{d}X_t = -\left(A(X - m)^2 + \lambda_0\right)\mathrm{d}t + \sigma\sqrt{\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, 
+\end{align}
+A taylor expansion of the drift around the fixed point \ref{eq:fixedPoint} gives
+\begin{align}
+    \mathrm{d}X_t = -\alpha_0\left(X_t - \mu_0\right)\mathrm{d}t + \sigma\sqrt{\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, 
+\end{align}
+where $\alpha_0 = 2\sqrt{-\lambda_0 A}$ and $\mu_0 = m + \sqrt{-\frac{\lambda_0}{A}}$.\\ We then estimate the parameters $\theta_{\mathrm{stationary}} = (\alpha_0, \mu_0, \sigma)^\top$ with the samples, $x_{0}, \dots, x_{t_0}$, from the stationary part of the process. Depending on the stochastic term, this could be done through Strang-based estimators, approximately optimal martingale estimation equations or even maximum likelihood estimation. We present an overview of the estimators and where one can refer to for their derivations, when we have discussed estimation in the dynamic part of the processes.\\
+\textbf{Estimation in the dynamic part of the processes}\\
+In their dynamic part the dynamics the approximation from the taylor expansion is no longer is adequate to do inference with as the dynamics are too non-linear. We assume we have samples $x_{t_0+\Delta t}, \dots x_{N}$ from the process, $X_t$, that solves the following SDE
+\begin{align}
+    \mathrm{d}X_t = -\left(A(X_t - m)^2 + \lambda_t\right) + \sigma\sqrt{\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, 
+\end{align}
+and because $t>t_0$
+\begin{align}
+    \lambda_t = \lambda_0\left(1 - \frac{t - t_0}{\tau_c}\right)^\nu, \qquad \nu >0.
+\end{align} 
+Yet, for computational efficiency and easy of implementation we assume that $\lambda_t$ is constant between observations. For fine temporal resolutions this approximation is obviously rather good as $\lambda_t$ is smooth. A solution to this in a coarser setting could be to linearly interpolate the values of $\lambda_t$ between consecutive observations; though, we do not pursue this option here. Instead, see that given $\theta_{\mathrm{stationary}}$, we only need to estimate $\theta_{\mathrm{dynamic}} = (A, \tau_c, \nu)$, The remaining parameters we get by using the relations given by the first-order taylor expansion of the stationary part: $\lambda_0 = -\frac{\alpha_0^2}{4A}$ and $m = \mu_0 - \frac{\alpha_0}{2A}$ as plug-in estimators.
+\subsubsection{Overview of all estimators}
+For sake of brevity this section present a small tabulation with references to the estimates that we use and references to where they can be found in the appendix.
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{llll}\hline
+    \textbf{Model} & \textbf{Stationary part} & \textbf{Dynamic-} & \textbf{References}\\ \hline
+    OU & MLE & Strang & \cite[equation (S3), (S9-S10)]{DitlevsenSupplementary} \\
+    Square-root & AOMEF, Strang & Strang\textsuperscript{2} & (\ref{eq:squarerootMartingaleEquation}, \ref{eq:squarerootStationarySplit1}) and (\ref{eq:squareRootSplit1}, \ref{eq:lampertiSquarerootSplitting1})\\
+    Mean-rev. GBM & AOMEF, Strang\textsuperscript{2} & Strang\textsuperscript{2} & (\ref{eq:GBMapproxOptimalMartingaleEstimationEquation}, \ref{meanrevertingGBMSplit1}, \ref{eq:GBM_LinearSDE_split}) and (\ref{eq:GBMSplit1}, \ref{eq:GBMLampertiBasedStrang}) \\
+    Skew t-diffusion & Strang & Strang & \ref{eq:StrangTDiffusion} and \ref{eq:StrangTDiffusionDynamic}\\
+    Scaled F-diffusion & Strang & Strang & \ref{eq:scaledFStrang} and \ref{eq:dynamicScaledFLamperti}\\
+    Jacobi-diffusion & Strang & Strang & \ref{eq:JacobiLampertiSDE} and \ref{eq:JacobiLampertiDynamicSDE}\\
+    \hline
+    \end{tabular}
+    \caption{Overview of the estimators.}
+    \label{table:Estimators}
+\end{table}\\
+Note that in table \ref{table:Estimators} Strang with a superscript denotes multiple applications. The references in "References"-column are given in the order left-to-right the estimators appear in the table.
 
 \subsection{Numerical Optimization in \code{R}}
 Numeric optimization is central in applications of machine learning and statistics. In this section, we mention the methods used in the thesis and some motivation for the choices that was made. Also, we introduce a numerical Strang-based negative log-likelihood based on the heuristics of \cite{SplittingSchemes}, where the user only needs to specify the drift of the lamperti-transformed SDE.
