@@ -22,7 +22,7 @@ OU_likelihood_resid <- function(par, data, delta){
   mu0 <- par[2]
   sigma <- par[3]
   N <- length(data)
-  
+
   Xupp <- data[2:N]
   Xlow <- data[1:(N - 1)]
   
@@ -31,7 +31,7 @@ OU_likelihood_resid <- function(par, data, delta){
   
   v_part <- gamma2 * (1 - rho0^2)
   m_part <- Xlow * rho0 + mu0 * (1 - rho0)
-  
+
   qnorm(p = pnorm(Xupp, mean = m_part, sd = sqrt(v_part)))
 }
 
@@ -94,11 +94,11 @@ CIR_strang_splitting_resid <- function(par, data, delta) {
   mu <- par[2]
   sigma <- par[3]
   
-  A <- - (sigma^2 + 2 * beta) / 2
-  b <- - log((2 * beta + sigma^2) / (2 * beta * mu))
+  A <- - beta
+  b <- 2 * sqrt((beta * mu - sigma^2 / 2) / beta)
   
-  diff_f <- function(t, y){-beta + beta * mu * exp(-y) - sigma^2 / 2 + (sigma^2 + 2 * beta) / 2 * y +
-      (sigma^2 + 2 * beta) / 2 * log((sigma^2 + 2 * beta) / (2 * beta * mu))}
+  diff_f <- function(t, y){beta / 2 * y + (2 * beta * mu - sigma^2) / y -
+      2 * sqrt(beta * (beta * mu - sigma^2 / 2))}
   
   f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
 
@@ -152,20 +152,19 @@ CIR_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0
   nu      <- if(length(par) == 3) par[3] else 1
   
   N       <- length(data)
-  x1    <- data[2:N]
-  x0    <- data[1:(N-1)]
+  x1      <- data[2:N]
+  x0      <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
   m          <- mu0 - alpha0 / (2 * A)
   lambda0    <- -alpha0^2 / (4 * A)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
-  if(any((-A*(sigma^2 + 4 * lam_seq))<0)){return(50000)}
+  inner_sqrt_argument <- - A * (lam_seq + sigma^2 / 4)
   
-  A_linear_part <- 1 / (2 * m + sqrt(-A*(sigma^2 + 4 * lam_seq))) * 
-    (lam_seq * (1 - 4 * A^2) + sigma^2 * (1 / 4 - A^2)) - A * sqrt(-A*(sigma^2 + 4 * lam_seq))
+  A_linear_part <- - sqrt(4 * inner_sqrt_argument)
   
-  b <- sqrt(4 * m + 2 * sqrt(-A*(sigma^2 + 4 * lam_seq)))
+  b <- 2 * sqrt((A * m + sqrt(inner_sqrt_argument)) / A)
   
   diff_f <- function(t, y){-2 / y * (A * (y^2 / 4 - m)^2 + lam_seq + sigma^2 / 4) - 
       A_linear_part * (y - b)}
@@ -191,7 +190,7 @@ CIR_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0
 mean_reverting_GBM_Kessler_likelihood_resid <- function(par, data, delta){
   beta <- par[1]
   mu <- par[2]
-  sigma <- exp(par[3])
+  sigma <- par[3]
   
   N <- length(data)
   
@@ -208,6 +207,37 @@ mean_reverting_GBM_Kessler_likelihood_resid <- function(par, data, delta){
   sd_ks <- sqrt(var_ks)
   
   qnorm(pnorm(Xupp, mean = mu_ks, sd = sd_ks))
+}
+
+mean_reverting_GBM_strang_resid <- function(par, data, delta, exp_sigma = FALSE) {
+  x0 <- data[1:(length(data) - 1)]
+  x1 <- data[2:length(data)]
+  
+  beta  <- par[1]
+  mu    <- par[2]
+  sigma <- par[3]
+  
+  A <- - (sigma^2 + 2 * beta) / 2
+  b <- - log((2 * beta + sigma^2) / (2 * beta * mu))
+  
+  diff_f <- function(t, y){-beta + beta * mu * exp(-y) - sigma^2 / 2 - A * (y - b)}
+  
+  
+  # Solution to non-linear ODE
+  f_h    <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  mu_f   <- exp(A * delta) * (f_h - b) + b
+  sd_f   <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
+  
+  # Inverse to non-linear ODE
+  inv_f  <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  
+  # Derivative of inverse using Richardson Extrapolation
+  inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
+  inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
+  df     <- (inv_f2 - inv_f3) / (2 * 0.01) 
+  
+  # Strang likelihood
+  qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
 }
 
 mean_reverting_GBM_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma){
@@ -248,6 +278,43 @@ mean_reverting_GBM_dynamic_likelihood_resid <- function(par, data, delta, alpha0
   qnorm(pnorm(fh_half_inv, mean = mu.part, sd = sd.part))
 }
 
+mean_reverting_GBM_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma){
+  tau     <-  par[1]
+  A       <-  par[2]
+  nu      <- if(length(par) == 3) par[3] else 1
+  
+  N       <- length(data)
+  x1    <- data[2:N]
+  x0    <- data[1:(N-1)]
+  time    <- delta * (1:(N-1))
+  
+  m          <- mu0 - alpha0 / (2 * A)
+  lambda0    <- -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
+
+  sqrt_argument <- pmax(sigma^4 / 4 - A * (2 * m * sigma^2 + 4 * lam_seq), 0.001)
+  
+  exp_b <- max((2 * m * A - 1 / 2 * sigma^2 +
+                  sqrt(sqrt_argument)) / (2 * A), 0.001)
+  b <- log(exp_b)
+  
+  A_linear_part <- - 1 / exp_b * (A * exp_b^2 - lam_seq - A * m^2)
+  
+  diff_f <- function(t, y){-((A * (exp(y) - m)^2 + lam_seq) / exp(y) + 1 / 2 * sigma^2) - 
+      A_linear_part * (y - b)}
+  
+  # Solution to ODE
+  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  
+  mu_f <- exp(A_linear_part * delta) * (f_h - b) + b
+  sd_f <- sigma * sqrt(expm1(2 * A_linear_part * delta) / (2 * A_linear_part))
+  
+  # Inverse of non-linear ODE
+  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  
+  qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
+}
+
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 # Methods that are based on the t-distributed stationary process
@@ -257,7 +324,7 @@ t_diffusion_strang_splitting_resid <- function(par, data, delta) {
   
   beta  <- par[1]
   mu    <- par[2]
-  sigma <- exp(par[3])
+  sigma <- par[3]
   
   asinh_argument <- (2 * mu * beta / (2 * beta + sigma^2))
   
@@ -294,11 +361,10 @@ t_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
   lambda0    <- -alpha0^2 / (4 * A)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
-  fix_points <- asinh((sqrt(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) + 4 * A * m - sigma^2) /
-                        (4 * A))
+  A_linear_part <- -sqrt(sigma^4 / 4 - 2 * A * (2 * lam_seq + m * sigma^2))
   
-  A_linear_part <- - sigma^2 + sqrt(sigma^4 / 4 - 2 * A * (2 * lam_seq + m * sigma^2))
-  b <- fix_points
+  b <- asinh((sqrt(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) + 4 * A * m - sigma^2) /
+               (4 * A))
   
   diff_f <- function(t, y){-1 / cosh(y) * (A * (sinh(y) - m)^2 + lam_seq + sigma^2 / 2 * sinh(y)) -
       A_linear_part * (y - b)}
@@ -324,7 +390,7 @@ F_diffusion_strang_splitting_resid <- function(par, data, delta) {
   
   beta  <- par[1]
   mu    <- par[2]
-  sigma <- exp(par[3])
+  sigma <- par[3]
   
   A <- - (beta + sigma^2 / 2)
   b <- acosh(2 * beta * (2 * mu + 1) / (2 * beta + sigma^2))
@@ -357,16 +423,13 @@ F_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
   lambda0    <- -alpha0^2 / (4 * A)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
-  sqrt_arg <-  pmax(sigma^4 / 4 + m^2 - sigma^2 * m - A * (sigma^2 + 4 * lam_seq + 4 * A * m^2), 0.01)
+  sqrt_argument <- sigma^4 / 4 - A * (sigma^2 * (2 * m + 1) + 4 * lam_seq)
+  b <- acosh(((A * (2 * m + 1) - sigma^2 / 2) + sqrt(sqrt_argument)) / A)
+  A_linear_part <- -sqrt(sqrt_argument)
   
-  # zeta <- (m + A - sigma^2 / 2) + sqrt(sqrt_arg)
-  zeta <- (m + A - sigma^2 / 2) - sqrt(sqrt_arg)
-  fix_points <- acosh(max(zeta / A, 1.01))
-  
-  A_linear_part <- - zeta + (m + A - sigma^2 / 2) 
-  b <- fix_points
-  diff_f <- function(t, y){-1 / sinh(y) * (A / 2 * cosh(y)^2 + (sigma^2 / 2 - m - A) * cosh(y) + 
-                                             2 * lam_seq + m + (2 * m^2 + 1 / 2) * A) -  
+  diff_f <- function(t, y){-1 / sinh(y) * (
+    A / 2 * cosh(y)^2 + (sigma^2 / 2 - A * (2 * m + 1)) * cosh(y) +
+      2 * lam_seq + 2 * A * m^2 + A / 2 + 2 * A * m) -
       A_linear_part * (y - b)}
   
   # Solution to ODE
@@ -390,7 +453,7 @@ jacobi_diffusion_strang_splitting_resid <- function(par, data, delta) {
   
   beta  <- par[1]
   mu    <- par[2]
-  sigma <- exp(par[3])
+  sigma <- par[3]
   
   if(abs(beta * (2 * mu - 1) / (sigma^2 / 2 - beta))>1){return(50000)}
   
@@ -428,16 +491,12 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
   lambda0    <- -alpha0^2 / (4 * A)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
-  sqrt_arg <- sigma^4 / 4 - sigma^2 * A - 2 * sigma^2 * A * m - 2 * A * lam_seq
-  zeta <- (A - sigma^2 / 2 - 2 * A) + sqrt(max(sqrt_arg, 0.01))
+  sqrt_argument <- sigma^4 / 4 + sigma^2 * A * (2 * m - 1) - 4 * A * lam_seq
   
-  
-  if(any(sqrt_arg < 0) || any(is.na(sqrt_arg))){return(50000)}
-  
-  fix_points <- acos(zeta / A)
-  
-  A_linear_part <- zeta + sigma^2 / 2 - 2 * A * m - A
-  b <- fix_points
+  acos_argument <- (-A * (2 * m - 1) - sigma^2 / 2 - sqrt(sqrt_argument)) / A
+
+  A_linear_part <- -sqrt(sqrt_argument)
+  b <- acos(acos_argument)
   
   diff_f <- function(t, y){-1 / sin(y) * 
       (A / 2 * cos(y)^2 + (sigma^2 / 2 + 2 * A * m - A) * cos(y) +
@@ -465,21 +524,21 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 
 # Additive noise model
 
-# true_param <- c(-0.87, -1.51, 2.69, 0.3)
-# actual_dt <- 0.001
+# true_param <- c(0.87, -1.51, -2.69, 0.3)
+# actual_dt <- 1/12
 # tau <- 100
 # t_0 <- 50
 # sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
 # sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
-# ## Stationary part
-# ## Parameters for stationary part
+## Stationary part
+## Parameters for stationary part
 # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
 # OU_par <- optimize_stationary_likelihood(likelihood_fun = OU_likelihood, data = sim_res_add$X_t[sim_res_add$t < t_0],
 #                                init_par = stationary_part_true_param,
-#                                delta = actual_dt, exp_sigma = FALSE)# - stationary_part_true_param
+#                                delta = actual_dt, exp_sigma = FALSE)$par
 # 
 # tibble::tibble(obsSample = OU_likelihood_resid(par = OU_par,
 #          data = sim_res_add$X_t[sim_res_add$t < t_0],
@@ -494,7 +553,7 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #                             delta = actual_dt,
 #                             alpha0 = OU_par[1],
 #                             mu0 = OU_par[2],
-#                             sigma = OU_par[3])# - dynamic_part_true_param
+#                             sigma = OU_par[3])$par
 # #
 # tibble::tibble(obsSample = OU_dynamic_likelihood_resid(OU_dynamic_par,
 #                             data = sim_res_add$X_t[sim_res_add$t > t_0],
@@ -508,7 +567,7 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 # # Square-root noise model
-# true_param <- c(-1, 3, 2, 0.15)
+# true_param <- c(1, 3, -2, 0.1)
 # actual_dt <- 0.01
 # tau <- 100
 # t_0 <- 50
@@ -532,7 +591,7 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 # CIR_stationary_part_estimated_param_strang <- optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
 #                                data = 2*sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
 #                                init_par = stationary_part_true_param,
-#                                delta = actual_dt, exp_sigma = FALSE)
+#                                delta = actual_dt, exp_sigma = FALSE)$par
 # 
 # tibble::tibble(obsSample = CIR_strang_splitting_resid(CIR_stationary_part_estimated_param_strang,
 #                            2*sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
@@ -546,41 +605,42 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #                             data = sim_res_sqrt$X_t[sim_res_sqrt$t > t_0],
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
-#                             alpha0 = CIR_stationary_part_estimated_param_martingale[1],
-#                             mu0 = CIR_stationary_part_estimated_param_martingale[2],
-#                             sigma = CIR_stationary_part_estimated_param_martingale[3])
+#                             alpha0 = CIR_stationary_part_estimated_param_strang[1],
+#                             mu0 = CIR_stationary_part_estimated_param_strang[2],
+#                             sigma = CIR_stationary_part_estimated_param_strang[3])$par
 # 
 # tibble::tibble(obsSample = CIR_dynamic_likelihood_resid(CIR_dynamic_part_estimated_param_strang,
-#                                                                   data = sim_res_sqrt$X_t[sim_res_sqrt$t > t_0],
-#                                                                   delta = actual_dt,
-#                                                                   alpha0 = CIR_stationary_part_estimated_param_martingale[1],
-#                                                                   mu0 = CIR_stationary_part_estimated_param_martingale[2],
-#                                                                   sigma = CIR_stationary_part_estimated_param_martingale[3])) |>
+#                 data = sim_res_sqrt$X_t[sim_res_sqrt$t > t_0],
+#                 delta = actual_dt,
+#                 alpha0 = CIR_stationary_part_estimated_param_strang[1],
+#                 mu0 = CIR_stationary_part_estimated_param_strang[2],
+#                 sigma = CIR_stationary_part_estimated_param_strang[3])) |>
 #   ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #   ggplot2::geom_qq() + ggplot2::geom_qq_line()
-# 
-# CIR_dynamic_part_estimated_param_strang_alt <- optimize_dynamic_likelihood(likelihood_fun = CIR_transform_dynamic_likelihood,
-#                                                data = sim_res_sqrt$X_t[sim_res_sqrt$t > t_0],
-#                                                init_par = dynamic_part_true_param,
-#                                                delta = actual_dt,
-#                                                alpha0 = CIR_stationary_part_estimated_param_martingale[1],
-#                                                mu0 = CIR_stationary_part_estimated_param_martingale[2],
-#                                                sigma = CIR_stationary_part_estimated_param_martingale[3])
-# 
+
+# CIR_dynamic_part_estimated_param_strang_alt <- 
+#   optimize_dynamic_likelihood(likelihood_fun = CIR_transform_dynamic_likelihood,
+#                               data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t > t_0]),
+#                               init_par = dynamic_part_true_param,
+#                               delta = actual_dt,
+#                               alpha0 = CIR_stationary_part_estimated_param_strang[1],
+#                               mu0 = CIR_stationary_part_estimated_param_strang[2],
+#                               sigma = CIR_stationary_part_estimated_param_strang[3])$par
+#
 # tibble::tibble(obsSample = CIR_transform_dynamic_likelihood_resid(CIR_dynamic_part_estimated_param_strang_alt,
-#                              data = sim_res_sqrt$X_t[sim_res_sqrt$t > t_0],
+#                              data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t > t_0]),
 #                              delta = actual_dt,
-#                              alpha0 = CIR_stationary_part_estimated_param_martingale[1],
-#                              mu0 = CIR_stationary_part_estimated_param_martingale[2],
-#                              sigma = CIR_stationary_part_estimated_param_martingale[3])) |>
+#                              alpha0 = CIR_stationary_part_estimated_param_strang[1],
+#                              mu0 = CIR_stationary_part_estimated_param_strang[2],
+#                              sigma = CIR_stationary_part_estimated_param_strang[3])) |>
 #     ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #     ggplot2::geom_qq() + ggplot2::geom_qq_line()
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 # # Linear noise model
-# true_param <- c(-0.05, 100, 2, 0.01, 0.65)
-# actual_dt <- 0.001
+# true_param <- c(0.5, 5, -2, 0.025)
+# actual_dt <- 1 / 12
 # tau <- 150
 # t_0 <- 50
 # sim_res_linear <- simulate_linear_noise_tipping_model(actual_dt, true_param, tau, t_0)
@@ -592,32 +652,45 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-# 
+
 # GBM_stationary_part_estimated_param_martingale <- nleqslv::nleqslv(x = stationary_part_true_param,
 #                                                                    fn = mean_reverting_GBM_martingale,
 #                  data = sim_res_linear$X_t[sim_res_linear$t < t_0],
-#                  delta = actual_dt)$x #- stationary_part_true_param
-# # 
+#                  delta = actual_dt)$x
+#
 # tibble::tibble(obsSample =
 #                  mean_reverting_GBM_Kessler_likelihood_resid(GBM_stationary_part_estimated_param_martingale,
 #                  data = sim_res_linear$X_t[sim_res_linear$t < t_0],
 #                  delta = actual_dt)) |>
 #                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
-# #   
-# # 
-# # ## Dynamic part
+
+# GBM_stationary_part_estimated_param_strang <- 
+#   optimize_stationary_likelihood(mean_reverting_GBM_strang, log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
+#                                init_par = stationary_part_true_param, delta = actual_dt,
+#                                exp_sigma = FALSE)$par
+# 
+# tibble::tibble(obsSample = mean_reverting_GBM_strang_resid(GBM_stationary_part_estimated_param_martingale,
+#                     data = log(sim_res_linear$X_t[sim_res_linear$t < t_0]),
+#                    delta = actual_dt)) |>
+#   ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
+#   ggplot2::geom_qq() + ggplot2::geom_qq_line()
+
+
+
+# Dynamic part
 # dynamic_part_true_param <- c(tau, true_param[1])
-# # 
-# GBM_dynamic_part_estimated_param_strang <- optimize_dynamic_likelihood(likelihood_fun = mean_reverting_GBM_dynamic_likelihood,
+
+# GBM_dynamic_part_estimated_param_strang <- optimize_dynamic_likelihood(
+#                             likelihood_fun = mean_reverting_GBM_dynamic_likelihood,
 #                             data = sim_res_linear$X_t[sim_res_linear$t > t_0],
 #                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
 #                             alpha0 = GBM_stationary_part_estimated_param_martingale[1],
 #                             mu0 = GBM_stationary_part_estimated_param_martingale[2],
-#                             sigma = GBM_stationary_part_estimated_param_martingale[3])
-# # 
-# 
+#                             sigma = GBM_stationary_part_estimated_param_martingale[3])$par
+
+
 # tibble::tibble(obsSample =
 #                  mean_reverting_GBM_dynamic_likelihood_resid(GBM_dynamic_part_estimated_param_strang,
 #                  data= sim_res_linear$X_t[sim_res_linear$t > t_0],
@@ -625,7 +698,26 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #                  alpha0 = GBM_stationary_part_estimated_param_martingale[1],
 #                  mu0 = GBM_stationary_part_estimated_param_martingale[2],
 #                  sigma = GBM_stationary_part_estimated_param_martingale[3])) |>
-#                  dplyr::sample_n(size = 10000)|>
+#                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
+#                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
+
+# GBM_transform_dynamic_part_estimated_param_strang <-  optimize_dynamic_likelihood(
+#                             likelihood_fun = mean_reverting_GBM_transform_dynamic_likelihood,
+#                             data = log(sim_res_linear$X_t[sim_res_linear$t > t_0]),
+#                             init_par = dynamic_part_true_param,
+#                             delta = actual_dt,
+#                             alpha0 = GBM_stationary_part_estimated_param_martingale[1],
+#                             mu0 = GBM_stationary_part_estimated_param_martingale[2],
+#                             sigma = GBM_stationary_part_estimated_param_martingale[3])$par
+
+# tibble::tibble(obsSample =
+#                  mean_reverting_GBM_transform_dynamic_likelihood_resid(
+#                  par = GBM_transform_dynamic_part_estimated_param_strang,
+#                  data = log(sim_res_linear$X_t[sim_res_linear$t > t_0]),
+#                  delta = actual_dt,
+#                  alpha0 = GBM_stationary_part_estimated_param_martingale[1],
+#                  mu0 = GBM_stationary_part_estimated_param_martingale[2],
+#                  sigma = GBM_stationary_part_estimated_param_martingale[3])) |>
 #                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
 
@@ -633,8 +725,8 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 
 ## t-distributed stationary distribution model
 
-# true_param <- c(0.8, -1.51, -2.67, 0.05)
-# actual_dt <- 0.005
+# true_param <- c(0.8, -1.51, -2.67, 0.15)
+# actual_dt <- 1 / 12
 # tau <- 100
 # t_0 <- 50
 # sim_res_t_distribution <- simulate_t_distribution_tipping_model(actual_dt, true_param, tau, t_0)
@@ -647,14 +739,14 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-# 
+
 # stationary_part_estim_param <- optimize_stationary_likelihood(
 #   likelihood_fun = t_diffusion_strang_splitting,
 #   data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
 #   init_par = stationary_part_true_param,
 #   delta = actual_dt,
-#   exp_sigma = TRUE)
-# 
+#   exp_sigma = TRUE)$par
+
 # tibble::tibble(obsSample =
 #                  t_diffusion_strang_splitting_resid(stationary_part_estim_param,
 #                  data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
@@ -670,8 +762,8 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #                             delta = actual_dt,
 #                             alpha0 = stationary_part_estim_param[1],
 #                             mu0 = stationary_part_estim_param[2],
-#                             sigma = stationary_part_estim_param[3])
-# 
+#                             sigma = stationary_part_estim_param[3])$par
+
 # tibble::tibble(obsSample =
 #                  t_transform_dynamic_likelihood_resid(dynamic_part_estim_param,
 #                  data= asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0]),
@@ -679,7 +771,6 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #                  alpha0 = stationary_part_estim_param[1],
 #                  mu0 = stationary_part_estim_param[2],
 #                  sigma = stationary_part_estim_param[3])) |>
-#                  dplyr::sample_n(size = 10000)|>
 #                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
 
@@ -687,14 +778,14 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 
 ## F-distributed stationary distribution model
 # 
-# actual_dt <- 0.005
+# actual_dt <- 1 / 12
 # t_0 <- 50
 # tau <- 100
-# true_param <- c(0.5, 2, -2, 0.1)
+# true_param <- c(0.75, 1.5, -2.5, 0.1)
 # 
 # F_sim_dynamic <- simulate_F_distribution_tipping_model(actual_dt, true_param, t_0 = t_0, tau = tau)
 # 
-# sample_n(F_sim_dynamic, 10000) |> ggplot(aes(x = t, y = X_t)) + geom_step()
+# F_sim_dynamic |> ggplot(aes(x = t, y = X_t)) + geom_step()
 
 # ## Stationary part
 # # Parameters for stationary part
@@ -702,13 +793,13 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # 
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-# 
+
 # stationary_part_estim_param <- optimize_stationary_likelihood(
 #   likelihood_fun = F_diffusion_strang_splitting,
 #   data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
 #   init_par = stationary_part_true_param,
 #   delta = actual_dt,
-#   exp_sigma = TRUE)
+#   exp_sigma = TRUE)$par
 
 # tibble::tibble(obsSample =
 #                  F_diffusion_strang_splitting_resid(stationary_part_estim_param,
@@ -725,7 +816,7 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #                             delta = actual_dt,
 #                             alpha0 = stationary_part_estim_param[1],
 #                             mu0 = stationary_part_estim_param[2],
-#                             sigma = stationary_part_estim_param[3])
+#                             sigma = stationary_part_estim_param[3])$par
 
 # tibble::tibble(obsSample =
 #                  F_transform_dynamic_likelihood_resid(dynamic_part_estim_param,
@@ -734,7 +825,6 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #                  alpha0 = stationary_part_estim_param[1],
 #                  mu0 = stationary_part_estim_param[2],
 #                  sigma = stationary_part_estim_param[3])) |>
-#                  dplyr::sample_n(size = 10000)|>
 #                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
 
@@ -742,7 +832,7 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 
 ## Jacobi diffusion 
 # true_param <- c(5, 0.1, -1, 0.15)
-# actual_dt <- 0.005
+# actual_dt <- 1 / 12
 # tau <- 100
 # t_0 <- 50
 # 
@@ -750,20 +840,20 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 # sim_res_jacobi |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = t_0)
-# 
+
 # # Stationary part
 # # Parameters for stationary part
 # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-# 
+
 # stationary_part_estim_param <- optimize_stationary_likelihood(
 #   likelihood_fun = jacobi_diffusion_strang_splitting,
 #   data = 2 * asin(sqrt(sim_res_jacobi$X_t[sim_res_jacobi$t<t_0])),
 #   init_par = stationary_part_true_param,
 #   delta = actual_dt,
-#   exp_sigma = TRUE)
-# 
+#   exp_sigma = TRUE)$par
+
 # tibble::tibble(obsSample =
 #                  jacobi_diffusion_strang_splitting_resid(stationary_part_estim_param,
 #                  data = 2 * asin(sqrt(sim_res_jacobi$X_t[sim_res_jacobi$t<t_0])),
@@ -778,7 +868,7 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #                             delta = actual_dt,
 #                             alpha0 = stationary_part_estim_param[1],
 #                             mu0 = stationary_part_estim_param[2],
-#                             sigma = stationary_part_estim_param[3])
+#                             sigma = stationary_part_estim_param[3])$par
 
 # tibble::tibble(obsSample =
 #                  jacobi_diffusion_transform_dynamic_likelihood_resid(dynamic_part_estim_param,
@@ -787,7 +877,6 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #                  alpha0 = stationary_part_estim_param[1],
 #                  mu0 = stationary_part_estim_param[2],
 #                  sigma = stationary_part_estim_param[3])) |>
-#                  dplyr::sample_n(size = 10000)|>
 #                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
 

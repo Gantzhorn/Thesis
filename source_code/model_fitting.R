@@ -348,13 +348,16 @@ CIR_strang_splitting <- function(par, data, delta, exp_sigma = FALSE) {
   if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
   
   if((4 * beta * mu - sigma^2) < 0 | sigma < 0){return(100000)}
+  
+  A <- - beta
+  b <- 2 * sqrt((beta * mu - sigma^2 / 2) / beta)
+  
   diff_f <- function(t, y){beta / 2 * y + (2 * beta * mu - sigma^2) / y -
       2 * sqrt(beta * (beta * mu - sigma^2 / 2))}
   
   # Solution to ODE
   f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
-  A <- - beta
-  b <- 2 * sqrt((beta * mu - sigma^2 / 2) / beta)
+
 
   mu_f <- exp(A * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
@@ -524,8 +527,6 @@ mean_reverting_GBM_Kessler_likelihood <- function(par, data, delta){
   
   Xupp <- data[2:N]
   Xlow <- data[1:(N - 1)]
-  
-  
   
   mu_ks  <- exp(-beta * delta) * (Xlow - mu) + mu
   
@@ -929,17 +930,6 @@ F_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma)
   lambda0    <- -alpha0^2 / (4 * A)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
-  #sqrt_arg <-  pmax(sigma^4 / 4 + m^2 - sigma^2 * m - A * (sigma^2 + 4 * lam_seq + 4 * A * m^2), 0.01)
-  
-  #zeta <- (m + A - sigma^2 / 2) - sqrt(sqrt_arg)
-  #fix_points <- acosh(max(zeta / A, 1.01))
-  
-  #A_linear_part <- - zeta + (m + A - sigma^2 / 2) 
-  #b <- fix_points
-  #diff_f <- function(t, y){-1 / sinh(y) * (A / 2 * cosh(y)^2 + (sigma^2 / 2 - m - A) * cosh(y) + 
-                                             # 2 * lam_seq + m + (2 * m^2 + 1 / 2) * A) -  
-      #A_linear_part * (y - b)}
-  
   sqrt_argument <- sigma^4 / 4 - A * (sigma^2 * (2 * m + 1) + 4 * lam_seq)
   b <- acosh(((A * (2 * m + 1) - sigma^2 / 2) + sqrt(sqrt_argument)) / A)
   A_linear_part <- -sqrt(sqrt_argument)
@@ -1014,31 +1004,24 @@ jacobi_diffusion_transform_dynamic_likelihood <- function(par, data, delta, alph
   nu      <- if(length(par) == 3) par[3] else 1
   
   N       <- length(data)
-  x1    <- data[2:N]
-  x0    <- data[1:(N-1)]
+  x1      <- data[2:N]
+  x0      <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
   m          <- mu0 - alpha0 / (2 * A)
   lambda0    <- -alpha0^2 / (4 * A)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
-  # sqrt_arg <- sigma^4 / 4 - sigma^2 * A - 2 * sigma^2 * A * m - 2 * A * lam_seq
-  # zeta <- (A - sigma^2 / 2 - 2 * A) + sqrt(max(sqrt_arg, 0.01))
-  # fix_points <- acos(zeta / A)
-  
   sqrt_argument <- sigma^4 / 4 + sigma^2 * A * (2 * m - 1) - 4 * A * lam_seq
   
   acos_argument <- (-A * (2 * m - 1) - sigma^2 / 2 - sqrt(sqrt_argument)) / A
   
-  if(any(sqrt_argument < 0) || any(is.na(sqrt_argument)) ||
-                                   any(abs(acos_argument) > 1)){return(50000)}
+  # if(any(sqrt_argument < 0) || any(is.na(sqrt_argument)) ||
+  #                                  any(abs(acos_argument) > 1)){return(50000)}
 
   
   A_linear_part <- -sqrt(sqrt_argument)
   b <- acos(acos_argument)
-  
-  # A_linear_part <- zeta + sigma^2 / 2 - 2 * A * m - A
-  # b <- fix_points
   
   diff_f <- function(t, y){-1 / sin(y) * 
       (A / 2 * cos(y)^2 + (sigma^2 / 2 + 2 * A * m - A) * cos(y) +
@@ -1195,7 +1178,7 @@ source("source_code/tipping_simulations.R")
 # 
 # optimize_dynamic_likelihood(likelihood_fun = CIR_transform_dynamic_likelihood,
 #                             data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t > t_0]),
-#                             init_par =c(90, 0.5),
+#                             init_par = dynamic_part_true_param,
 #                             delta = actual_dt,
 #                             alpha0 = stationary_part_true_param[1],
 #                             mu0 = stationary_part_true_param[2],
@@ -1249,31 +1232,31 @@ source("source_code/tipping_simulations.R")
 
 ## t-distributed stationary distribution model
 #
-true_param <- c(0.5, -2, -3, 0.35)
-actual_dt <- 0.01
-tau <- 80
-t_0 <- 50
-sim_res_t_distribution <- simulate_t_distribution_tipping_model(actual_dt, true_param, tau, t_0)
-sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) +
-  ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
-  ggplot2::geom_vline(xintercept = t_0)
+# true_param <- c(0.5, -2, -3, 0.35)
+# actual_dt <- 0.01
+# tau <- 80
+# t_0 <- 50
+# sim_res_t_distribution <- simulate_t_distribution_tipping_model(actual_dt, true_param, tau, t_0)
+# sim_res_t_distribution |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) +
+#   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
+#   ggplot2::geom_vline(xintercept = t_0)
 
 # # Stationary part
 # # Parameters for stationary part
-mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
-alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
-stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-
-optimize_stationary_likelihood(
-              likelihood_fun = t_diffusion_strang_splitting,
-              data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
-              init_par = stationary_part_true_param,
-              delta = actual_dt,
-              exp_sigma = TRUE,
-              control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+# 
+# optimize_stationary_likelihood(
+#               likelihood_fun = t_diffusion_strang_splitting,
+#               data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
+#               init_par = stationary_part_true_param,
+#               delta = actual_dt,
+#               exp_sigma = TRUE,
+#               control = list(reltol = sqrt(.Machine$double.eps) / 1000))
 
 # Dynamic part
-dynamic_part_true_param <- c(tau, true_param[1])
+# dynamic_part_true_param <- c(tau, true_param[1])
 # optimize_dynamic_likelihood(likelihood_fun = t_dynamic_likelihood,
 #                             data = sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0],
 #                             init_par = dynamic_part_true_param,
@@ -1283,21 +1266,21 @@ dynamic_part_true_param <- c(tau, true_param[1])
 #                             sigma = stationary_part_true_param[3],
 #                             method = "BFGS")
 #
-optimize_dynamic_likelihood(likelihood_fun = t_transform_dynamic_likelihood,
-                  data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0]),
-                  init_par = dynamic_part_true_param,
-                  delta = actual_dt,
-                  alpha0 = stationary_part_true_param[1],
-                  mu0 = stationary_part_true_param[2],
-                  sigma = stationary_part_true_param[3],
-                  control = list(reltol = sqrt(.Machine$double.eps) / 10))
+# optimize_dynamic_likelihood(likelihood_fun = t_transform_dynamic_likelihood,
+#                   data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0]),
+#                   init_par = dynamic_part_true_param,
+#                   delta = actual_dt,
+#                   alpha0 = stationary_part_true_param[1],
+#                   mu0 = stationary_part_true_param[2],
+#                   sigma = stationary_part_true_param[3],
+#                   control = list(reltol = sqrt(.Machine$double.eps) / 10))
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 ## F-distributed stationary distribution model
-
-# true_param <- c(1.5, 1, -2, 0.1)
-# actual_dt <- 0.005
+# 
+# true_param <- c(0.5, 1, -2, 0.1)
+# actual_dt <- 0.01
 # t_0 <- 100
 # tau <- 100
 # 
@@ -1305,12 +1288,12 @@ optimize_dynamic_likelihood(likelihood_fun = t_transform_dynamic_likelihood,
 # F_sim_dynamic <- simulate_F_distribution_tipping_model(actual_dt, true_param, t_0 = t_0, tau = tau)
 # 
 # F_sim_dynamic |> ggplot(aes(x = t, y = X_t)) + geom_step()
- 
-## Stationary part
-# Parameters for stationary part
+# 
+# ## Stationary part
+# # Parameters for stationary part
 # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
-# 
+
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
 # optimize_stationary_likelihood(
@@ -1330,7 +1313,7 @@ optimize_dynamic_likelihood(likelihood_fun = t_transform_dynamic_likelihood,
 #                             mu0 = stationary_part_true_param[2],
 #                             sigma = stationary_part_true_param[3],
 #                             control = list(reltol = sqrt(.Machine$double.eps) / 100))
-
+# 
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 ## Jacobi diffusion 
