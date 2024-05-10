@@ -586,11 +586,8 @@ stationary_part_estim_param <-  optimize_stationary_likelihood(
               delta = actual_dt,
               exp_sigma = TRUE)$par
 
-
-
 # Dynamic part
-dynamic_part_starting_param <- c(100, 1)# + runif(2, min = -1) * c(30, 0.3)
-#dynamic_part_starting_param <- c(83.619117, 1.202179)
+dynamic_part_starting_param <- c(100, 1) 
 dynamic_part_estim_param <- optimize_dynamic_likelihood(
                   likelihood_fun = t_transform_dynamic_likelihood,
                   data = asinh(AMOC_data$AMOC2[AMOC_data$time >= t_0]),
@@ -602,45 +599,6 @@ dynamic_part_estim_param <- optimize_dynamic_likelihood(
                   method = "BFGS",
                   control = list(reltol = sqrt(.Machine$double.eps) / 100000))$par
 
-# t_transform_dynamic_likelihood(par = dynamic_part_estim_param,
-#                                data = asinh(AMOC_data$AMOC2[AMOC_data$time >= t_0]),
-#                                delta = actual_dt,
-#                                alpha0 = stationary_part_estim_param[1],
-#                                mu0 = stationary_part_estim_param[2],
-#                                sigma = stationary_part_estim_param[3])
-
-# Define the parameter ranges
-par1_values <- seq(50, 200, length.out = 100)  # from 90 to 200
-par2_values <- seq(0.4, 2.5, length.out = 100)  # from 0.7 to 1.3
-
-# Create a grid of parameter combinations
-param_grid <- expand.grid(par1 = par1_values, par2 = par2_values)
-
-# Function to apply
-evaluate_function <- function(par1, par2) {
-  t_transform_dynamic_likelihood(
-    par = c(par1, par2),
-    data = asinh(AMOC_data$AMOC2[AMOC_data$time >= t_0]),
-    delta = actual_dt,
-    alpha0 = stationary_part_estim_param[1],
-    mu0 = stationary_part_estim_param[2],
-    sigma = stationary_part_estim_param[3]
-  )
-}
-
-# Apply the function to each row in the parameter grid
-param_grid$result <- mapply(evaluate_function, param_grid$par1, param_grid$par2)
-
-param_grid_filtered <- param_grid[param_grid$result < -700, ]
-ggplot(param_grid_filtered, aes(x = par1, y = par2, fill = result)) +
-  geom_tile() +
-  labs(title = "Heatmap of objective",
-       x = "tau_c",
-       y = "A",
-       fill = "Objective") +
-  scale_fill_gradient(low = "blue", high = "red")
-
-dynamic_part_estim_param
 # Simulate from the model to construct parametric bootstrap confidence intervals
 numSim <- 1000
 

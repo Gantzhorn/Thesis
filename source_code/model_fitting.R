@@ -152,8 +152,8 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma){
   det_Dfh_half_inv <- 1 / (fh_half_tmp_upp-1)^2
   
   # Negative log-likelihood
-  -sum(stats::dnorm(fh_half_inv, mu_h, sqrt(v_part), log = TRUE), na.rm = TRUE) -
-    sum(log(abs(det_Dfh_half_inv)), na.rm = TRUE)
+  -mean(stats::dnorm(fh_half_inv, mu_h, sqrt(v_part), log = TRUE), na.rm = TRUE) -
+    mean(log(abs(det_Dfh_half_inv)), na.rm = TRUE)
 }
 
 # OU_dynamic_numeric_score <- function(par, data, delta, alpha0, mu0, sigma){
