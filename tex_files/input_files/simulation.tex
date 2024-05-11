@@ -1,1 +1,13 @@
-For the simulations we use the Scalar-weak order 2.0 Itô-Taylor method \cite[algorithm 8.5]{Srkk2019}. Apart from this, detalis on how the simulations are carried out, can be found in section \ref{appendix:simMethods} in the appendix. The schemes that we derive for the respective types of noises are shown in equations (\ref{eq:OUSim} - \ref{eq:jacobiDiffusion}). A method for each scheme is implemented in \code{R}. The methods can be called with specific parameter choices, values for $\tau_c$ and $t_0$ as well as a step length, $\Delta t$ and starting point, $X_0$. If no starting point is specified the methods picks the fix point in the stationary part of the process as the starting point. Additionally, an argument is implemented such that we can opt for stopping the process at earlier time points than $\tau_c$. This is useful, when we want to evaluate the models' ability to predict the tipping point based on the distance it has to it.
+As said in section \ref{subsubsec:Discretization} the simulations are done with the Scalar-weak order 2.0 Itô-Taylor method \cite[algorithm 8.5]{Srkk2019}. The concrete schemes that we derived for the respective types of noises are shown in equations (\ref{eq:OUSim} - \ref{eq:jacobiDiffusion}). A method for each scheme is implemented in \code{R}. All methods can be called with specific parameter choices, values for $\tau_c$ and $t_0$ as well as a temporal resolution, $\Delta t$ and starting point, $x_0$. Depending on the $\tau_c$, $t_0$, and $\Delta t$ the method dynamically picks the appropriate number of samples to draw for $\Delta W_k\sim\mathcal{N}\left(0,\Delta t\right)$. The methods allow for positive $\lambda_0$ and negative $A$, but recall that this only correspond to choosing between the positive and negative versions of (\ref{eq:standardStochasticForm}). If no starting point is specified the methods picks the fix point in the stationary part of the process as the starting point; note that this of course is done with the appropriate branch of (\ref{eq:fixedPoint}) depending on the version of (\ref{eq:standardStochasticForm}), i.e. the sign of $A$. Additionally, an argument is implemented such that we can opt for stopping the process at earlier time (or later) points in time than $\tau_c$. This is useful, when we want to evaluate the models' ability to predict the tipping point based on how far from it we have samples.
+\subsection{Overview of the estimation methods}
+\subsubsection{The stationary parts}
+
+\subsubsection{The dynamic parts}
+
+\subsection{Fitting the $\nu$-parameter}
+
+\subsection{Early warning analysis}
+
+\subsection{The numerical Strang}
+
+\subsection{Model misspecification}

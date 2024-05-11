@@ -152,8 +152,8 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma){
   det_Dfh_half_inv <- 1 / (fh_half_tmp_upp-1)^2
   
   # Negative log-likelihood
-  -mean(stats::dnorm(fh_half_inv, mu_h, sqrt(v_part), log = TRUE), na.rm = TRUE) -
-    mean(log(abs(det_Dfh_half_inv)), na.rm = TRUE)
+  -sum(stats::dnorm(fh_half_inv, mu_h, sqrt(v_part), log = TRUE), na.rm = TRUE) -
+    sum(log(abs(det_Dfh_half_inv)), na.rm = TRUE)
 }
 
 # OU_dynamic_numeric_score <- function(par, data, delta, alpha0, mu0, sigma){
@@ -561,6 +561,28 @@ mean_reverting_GBM_martingale <- function(par, data, delta){
   eq3 <- 1 / sigma^3 * sum(1 / x0^2 * ((x1 - F_i)^2 - phi_i))
   
   c(eq1, eq2, eq3)
+}
+
+mean_reverting_GBM_alt_strang <- function(par, data, delta, exp_sigma = FALSE) {
+  x0 <- data[1:(length(data) - 1)]
+  x1 <- data[2:length(data)]
+  
+  beta  <- par[1]
+  mu    <- par[2]
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
+  
+  # Solution to non-linear ODE
+  f_h    <- (x0 - mu) * exp(-beta * delta / 2) + mu
+  
+  mu_log <- log(f_h) - sigma^2 / 2 * delta
+  
+  sd_log <- sigma * sqrt(delta)
+  # Inverse to non-linear ODE
+  inv_f  <- (x1 - mu) * exp(beta * delta / 2) + mu
+  
+  # Strang likelihood
+  -sum(stats::dlnorm(inv_f, meanlog = mu_log, sdlog = sd_log, log = TRUE), na.rm = TRUE) -
+    beta * delta * ((length(data) - 1)) / 2
 }
 
 mean_reverting_GBM_strang <- function(par, data, delta, exp_sigma = FALSE) {
@@ -1187,7 +1209,7 @@ source("source_code/tipping_simulations.R")
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 ## Linear noise model
-# true_param <- c(0.15, 3, -1, 0.1)
+# true_param <- c(0.2, 3, -1, 0.2)
 # actual_dt <- 0.1
 # tau <- 100
 # t_0 <- 50
@@ -1203,10 +1225,15 @@ source("source_code/tipping_simulations.R")
 # nleqslv::nleqslv(x = stationary_part_true_param, fn = mean_reverting_GBM_martingale,
 #                  data = sim_res_linear$X_t[sim_res_linear$t < t_0],
 #                  delta = actual_dt)$x
-# # 
+#
 # optimize_stationary_likelihood(mean_reverting_GBM_strang, log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
 #                                init_par = stationary_part_true_param, delta = actual_dt,
 #                                exp_sigma = TRUE)
+# 
+# optimize_stationary_likelihood(mean_reverting_GBM_alt_strang,
+#                                sim_res_linear$X_t[sim_res_linear$t<t_0],
+#                               init_par = stationary_part_true_param, delta = actual_dt,
+#                               exp_sigma = TRUE)
 
 ## Dynamic part
 # dynamic_part_true_param <- c(tau, true_param[1])

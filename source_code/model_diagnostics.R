@@ -209,6 +209,27 @@ mean_reverting_GBM_Kessler_likelihood_resid <- function(par, data, delta){
   qnorm(pnorm(Xupp, mean = mu_ks, sd = sd_ks))
 }
 
+mean_reverting_GBM_alt_strang_resid <- function(par, data, delta, exp_sigma = FALSE) {
+  x0 <- data[1:(length(data) - 1)]
+  x1 <- data[2:length(data)]
+  
+  beta  <- par[1]
+  mu    <- par[2]
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
+  
+  # Solution to non-linear ODE
+  f_h    <- (x0 - mu) * exp(-beta * delta / 2) + mu
+  
+  mu_log <- log(f_h) - sigma^2 / 2 * delta
+  
+  sd_log <- sigma * sqrt(delta)
+  # Inverse to non-linear ODE
+  inv_f  <- (x1 - mu) * exp(beta * delta / 2) + mu
+  
+  # Strang likelihood
+  qnorm(plnorm(inv_f, meanlog = mu_log, sdlog = sd_log))
+}
+
 mean_reverting_GBM_strang_resid <- function(par, data, delta, exp_sigma = FALSE) {
   x0 <- data[1:(length(data) - 1)]
   x1 <- data[2:length(data)]
