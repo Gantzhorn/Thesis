@@ -369,7 +369,7 @@ Regardless of the specific noise term, we use the same overall procedure. At tim
 \end{align}
 A taylor expansion of the drift around the fixed point \ref{eq:fixedPoint} gives
 \begin{align}
-    \mathrm{d}X_t = -\alpha_0\left(X_t - \mu_0\right)\mathrm{d}t + \sigma\sqrt{\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, 
+    \mathrm{d}X_t = -\alpha_0\left(X_t - \mu_0\right)\mathrm{d}t + \sigma\sqrt{\left(aX_t^2 + bX_t + c\right)}\mathrm{d}W_t, \label{eq:TaylorStationary}
 \end{align}
 where $\alpha_0 = 2\sqrt{-\lambda_0 A}$ and $\mu_0 = m + \sqrt{-\frac{\lambda_0}{A}}$.\\ We then estimate the parameters $\theta_{\mathrm{stationary}} = (\alpha_0, \mu_0, \sigma)^\top$ with the samples, $x_{0}, \dots, x_{t_0}$, from the stationary part of the process. Depending on the stochastic term, this could be done through Strang-based estimators, approximately optimal martingale estimation equations or even maximum likelihood estimation. We present an overview of the estimators and where one can refer to for their derivations, when we have discussed estimation in the dynamic part of the processes.\\
 \textbf{Estimation in the dynamic part of the processes}\\
@@ -411,9 +411,9 @@ The method works the same as the less automated versions with regards to solving
 \subsection{Model assessment}
 For this part, we briefly introduce the metrics used for evaluating the quality of our estimators in a simulation setting. Additionally, we show the method that we use to diagnose the fit of a particular method to data, and how we contruct confidence intervals for the estimators.
 \subsubsection{Diagnostics and confidence intervals}
-When we are in a simulation setting, we assess our estimation methods using the mean of the absolute relative error over a number of simulations, $M$, each with sample size, $N$. This is for the $i$th-coordinate in our parameter vector defined as
+When we are in a simulation setting, we assess our estimation methods using the absolute relative error. With sample size $N$, this is for the $i$th-coordinate in our parameter vector defined as
 \begin{align}
-    \mathrm{ARE}\left(\theta_N^{(i)}\right) = \frac{1}{M}\sum_{j = 1}^M\frac{\left|\theta_{N,j}^{(i)} - \theta_{0,j}^{(i)}\right|}{\theta_{0,j}^{(i)}}.
+    \mathrm{ARE}\left(\theta_N^{(i)}\right) = \frac{\left|\theta_N^{(i)} - \theta^{(i)}\right|}{\theta^{(i)}}. \label{eq:ARE}
 \end{align}
 Of course, we are not able to calculate this quantity when we do not have access to the ground-truth parameters, so it is only relevant in a simulation setting\\ In addtion, we cannot use regular residuals to diagnose the fit, as each data point have different distributions depending on the previous point. Instead, we assess the fit qua so-called uniform residuals. These are constructed using the transition density, $p_\theta(x|\Delta t, x_0)$. Though, as is quite clear by now, this is rarely something we can compute. However, we can for instance use the approximation given from the Strang scheme in its stead. As this also gives us an approximation for the conditional distribution function, $F_\theta(x|\Delta t, x_0)$, and as $F_\theta(X_{t_{i}}|\Delta t, X_{t_{i - 1}})\sim \mathrm{Unif}(0,1)$ if $X_{t_{i}}|X_{t_{i - 1}} \sim p_\theta$. Still, it is sometimes difficult to detect outliers in the uniform distribution, so we introduce another transformation - this time with the quantile function of the standard gaussian distribution. Then by the quantile transformation theorem, the double-transformed samples should follow a standard gaussian, if the model is properly specified. To see whether this is the case, we use ordinary Q-Q plots.\\
 As the approximately optimal martingale estimation functions approximate the score function, we do not have any approximation of the transition density here and cannot use uniform residuals. Even still with some creativity, we can do diagnostics, but only of the square-root process. If we let $X_t$ be governed by the square-root process, then

@@ -991,7 +991,7 @@ jacobi_diffusion_strang_splitting <- function(par, data, delta, exp_sigma = FALS
   mu    <- par[2]
   if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
   
-  if(abs(beta * (2 * mu - 1) / (sigma^2 / 2 - beta))>1){return(50000)}
+  if(abs(beta * (2 * mu - 1) / (sigma^2 / 2 - beta))>1){return(50000+runif(1, min = -1, max = 1))}
   
   A <- 1/2 * sigma^2 - beta
   
@@ -1002,7 +1002,7 @@ jacobi_diffusion_strang_splitting <- function(par, data, delta, exp_sigma = FALS
   # Solution to ODE
   f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
   
-  if(any(is.na(f_h))){return(50000)}
+  #if(any(is.na(f_h))){return(50000)}
   
   mu_f <- exp(A * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))

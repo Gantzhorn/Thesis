@@ -1,5 +1,5 @@
 library(tidyverse)
-
+library(tictoc)
 
 source("source_code/tipping_simulations.R")
 source("source_code/model_fitting.R")
@@ -177,7 +177,7 @@ for (nu in nu_values) {
 nu_plot_data <- as_tibble(nu_plot_data) |> pivot_longer(-c(t, lambda, nu), values_to = "Value", names_to = "Fixed_type")
 
 nu_plot <- ggplot(nu_plot_data, aes(x = t, y = Value, color = nu, linetype = Fixed_type)) +
-  geom_line(linewidth = 1) +
+  geom_line(linewidth = 1.5) +
   geom_hline(yintercept = m_nu_plot, linetype = "dashed") +
   labs(x = "Time (t)",
        y = expression(mu),
@@ -185,7 +185,8 @@ nu_plot <- ggplot(nu_plot_data, aes(x = t, y = Value, color = nu, linetype = Fix
   scale_color_manual(values = thesis_palette) +
   scale_linetype(guide = "none") + 
   guides(color = guide_legend(override.aes = list(linewidth = 5))) +
-  theme(plot.margin = unit(c(0, 0, 0, 0.5), "cm"))
+  theme(plot.margin = unit(c(0, 0, 0, 0.5), "cm"),  panel.border = element_blank())
+  
 
 ggsave(nu_plot, path = paste0(getwd(), "/tex_files/figures"), filename = "nu_plot.jpeg",
        height = 6, width = 10, dpi = 300, units = "in", device = "jpeg",
@@ -375,208 +376,358 @@ ggsave(bifurcation_diagram, path = paste0(getwd(), "/tex_files/figures"), filena
 ###------------------------Simulation studies------------------------------###
 ###------------------------------------------------------------------------###
 
+
+colwise_median <- function(estimates) {
+  #filtered_estimates <- estimates[apply(estimates, 1, function(x) all(x <= 5)), ]
+  apply(estimates, 2, function(x) quantile(x, probs = 0.5))
+}
+
 # General study of performance
 # Parameters where all work
 true_param <- c(1.5, 0.4, -0.2, 0.1)
 mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-actual_dt <- 1/12
-tau <- 10
+actual_dts <- c(1/5, 1/10, 1/25, 1/100, 1/250) 
+tau <- 0.5
 t_0 <- 30
-numSim <- 100
+numSim <- 50
 
-OU_likelihood_estim <- matrix(NA, nrow = numSim, ncol = 3)
-
-OU_score_estim <- matrix(NA, nrow = numSim, ncol = 3)
-
-sqrt_martingale_estim <- matrix(NA, nrow = numSim, ncol = 3)
-
-sqrt_strang_estim <- matrix(NA, nrow = numSim, ncol = 3)
-
-linear_martingale_estim <- matrix(NA, nrow = numSim, ncol = 3)
-
-linear_alt_strang_estim <- matrix(NA, nrow = numSim, ncol = 3)
-
-linear_strang_estim <- matrix(NA, nrow = numSim, ncol = 3)
-
-t_strang_estim <- matrix(NA, nrow = numSim, ncol = 3)
-
-F_strang_estim <- matrix(NA, nrow = numSim, ncol = 3)
-
-Jacobi_strang_estim <- matrix(NA, nrow = numSim, ncol = 3)
+col_wise_median_OU_like <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
+col_wise_median_OU_score <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
+col_wise_median_sqrt_eq <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
+col_wise_median_sqrt_strang <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
+col_wise_median_linear_eq <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
+col_wise_median_linear_alt_strang <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
+col_wise_median_linear_strang <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
+col_wise_median_t_strang <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
+col_wise_median_F_strang <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
+col_wise_median_Jacobi_Strang <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
 
 
 set.seed(110524)
-for (i in 1:numSim){
-  cat("Grinding iteration", i, "\n")
-  success <- FALSE
-  while(!success){
-  tryCatch({
+for (j in seq_along(actual_dts)){
+  
+  OU_likelihood_estim <- matrix(NA, nrow = numSim, ncol = 4)
+  OU_score_estim <- matrix(NA, nrow = numSim, ncol = 4)
+  sqrt_martingale_estim <- matrix(NA, nrow = numSim, ncol = 4)
+  sqrt_strang_estim <- matrix(NA, nrow = numSim, ncol = 4)
+  linear_martingale_estim <- matrix(NA, nrow = numSim, ncol = 4)
+  linear_alt_strang_estim <- matrix(NA, nrow = numSim, ncol = 4)
+  linear_strang_estim <- matrix(NA, nrow = numSim, ncol = 4)
+  t_strang_estim <- matrix(NA, nrow = numSim, ncol = 4)
+  F_strang_estim <- matrix(NA, nrow = numSim, ncol = 4)
+  Jacobi_strang_estim <- matrix(NA, nrow = numSim, ncol = 4)
+  
+  for (i in 1:numSim){
+    cat("Grinding iteration", i, "\n")
+    success <- FALSE
+    while(!success){
+    tryCatch({
+      
+    seed <- sample.int(100000, 1)
+    random_noise_start_value <- runif(3, min = .9, 1.1)
     
-  seed <- sample.int(100000, 1)
-  random_noise_start_value <- runif(3, min = .8, 1.2)
-  
-  # OU model
-  sim_res_add <- simulate_additive_noise_tipping_model(step_length = actual_dt,
-                                        par = true_param,
-                                        tau = tau, t_0 = t_0,
-                                        beyond_tipping = 0, seed = seed)
-  
-  OU_likelihood_estim[i, ] <- abs(optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
-                                 data = sim_res_add$X_t[sim_res_add$t < t_0],
-                                 init_par = stationary_part_true_param * random_noise_start_value,
-                                 delta = actual_dt, exp_sigma = FALSE,
-                                 control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
-                                   stationary_part_true_param) /stationary_part_true_param
-  
-  OU_score_estim[i, ] <- abs(nleqslv::nleqslv(x = stationary_part_true_param * random_noise_start_value,
-                   fn = OU_score,
-                   data = sim_res_add$X_t[sim_res_add$t < t_0],
-                   delta = actual_dt)$x -
-                     stationary_part_true_param) / stationary_part_true_param
-  
-  # Sqrt-model
-  sim_res_sqrt <- simulate_squareroot_noise_tipping_model(step_length = actual_dt,
-                                          par = true_param, tau = tau, t_0 = t_0,
-                                          beyond_tipping = 0, seed = seed)
-  
-  sqrt_martingale_estim[i, ] <- abs(CIR_quadratic_martingale(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0], actual_dt) -
-                                      stationary_part_true_param) /stationary_part_true_param
-
-  sqrt_strang_estim[i, ] <- abs(optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
-                                 data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
-                                 init_par = stationary_part_true_param * random_noise_start_value,
-                                 delta = actual_dt, exp_sigma = TRUE,
-                                 control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
-                                  stationary_part_true_param) / stationary_part_true_param
-  
-  # Linear noise model
-  sim_res_linear <- simulate_linear_noise_tipping_model(step_length = actual_dt,
-                                      par = true_param, tau = tau, t_0 = t_0,
-                                      beyond_tipping = 0, seed = seed)
-  
-  linear_martingale_estim[i, ] <- abs(nleqslv::nleqslv(x = stationary_part_true_param * random_noise_start_value,
-                   fn = mean_reverting_GBM_martingale,
-                   data = sim_res_linear$X_t[sim_res_linear$t < t_0],
-                   delta = actual_dt)$x -
-                     stationary_part_true_param) /stationary_part_true_param
-
-  linear_strang_estim[i, ] <- abs(optimize_stationary_likelihood(mean_reverting_GBM_strang, 
-                                 log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
-                                 init_par = stationary_part_true_param * random_noise_start_value,
-                                 delta = actual_dt,
-                                 exp_sigma = FALSE,
-                                 control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
-    stationary_part_true_param) /stationary_part_true_param
-
-  linear_alt_strang_estim[i, ] <- abs(optimize_stationary_likelihood(mean_reverting_GBM_alt_strang,
-                                sim_res_linear$X_t[sim_res_linear$t<t_0],
-                                init_par = stationary_part_true_param * random_noise_start_value,
-                                delta = actual_dt,
-                                exp_sigma = FALSE,
-                                control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
-                                  stationary_part_true_param) / stationary_part_true_param
-  
-  
-  # t-diffusion model
-  sim_res_t_distribution <- simulate_t_distribution_tipping_model(step_length = actual_dt,
-                                        par = true_param, tau = tau, t_0 = t_0,
-                                        beyond_tipping = 0, seed = seed)
-  
-  t_strang_estim[i, ] <- abs(optimize_stationary_likelihood(
-                likelihood_fun = t_diffusion_strang_splitting,
-                data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
-                init_par = stationary_part_true_param * random_noise_start_value,
-                delta = actual_dt,
-                exp_sigma = TRUE,
-                control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
-                  stationary_part_true_param) / stationary_part_true_param
-  
-  # F-diffusion model
-  F_sim_dynamic <- simulate_F_distribution_tipping_model(step_length = actual_dt,
-                                        par = true_param, tau = tau, t_0 = t_0,
-                                        beyond_tipping = 0, seed = seed)
-  
- F_strang_estim[i, ] <-  abs(optimize_stationary_likelihood(
-    likelihood_fun = F_diffusion_strang_splitting,
-    data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
-    init_par = stationary_part_true_param * random_noise_start_value,
-    delta = actual_dt,
-    exp_sigma = TRUE,
-    control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
-      stationary_part_true_param) / stationary_part_true_param
-  
-  # Jacobi model
-  sim_res_jacobi <- simulate_jacobi_diffusion_tipping_model(step_length = actual_dt,
-                                          par = true_param, tau = tau, t_0 = t_0,
+    
+    # Jacobi model
+    sim_res_jacobi <- simulate_jacobi_diffusion_tipping_model(step_length = actual_dts[j],
+                                                              par = true_param, tau = tau, t_0 = t_0,
+                                                              beyond_tipping = 0, seed = seed)
+    
+    jacobi_result <- optimize_stationary_likelihood(
+      likelihood_fun = jacobi_diffusion_strang_splitting,
+      data = 2 * asin(sqrt(sim_res_jacobi$X_t[sim_res_jacobi$t<t_0])),
+      init_par = stationary_part_true_param * random_noise_start_value,
+      delta = actual_dts[j],
+      exp_sigma = TRUE, 
+      control = list(reltol = sqrt(.Machine$double.eps) / 10))
+    if(jacobi_result$objective >= 0){stop("Jacobi failed")}
+    Jacobi_strang_estim[i, 1:3] <- abs(jacobi_result$par - stationary_part_true_param) /
+      stationary_part_true_param
+    
+    Jacobi_strang_estim[i, 4] <- microbenchmark::microbenchmark(optimize_stationary_likelihood(
+      likelihood_fun = jacobi_diffusion_strang_splitting,
+      data = 2 * asin(sqrt(sim_res_jacobi$X_t[sim_res_jacobi$t<t_0])),
+      init_par = stationary_part_true_param * random_noise_start_value,
+      delta = actual_dts[j],
+      exp_sigma = TRUE, 
+      control = list(reltol = sqrt(.Machine$double.eps) / 10)), times = 1, unit = "us")$time / 1e9
+    
+    
+    # OU model
+    sim_res_add <- simulate_additive_noise_tipping_model(step_length = actual_dts[j],
+                                          par = true_param,
+                                          tau = tau, t_0 = t_0,
                                           beyond_tipping = 0, seed = seed)
 
-  Jacobi_strang_estim[i, ] <- abs(optimize_stationary_likelihood(
-    likelihood_fun = jacobi_diffusion_strang_splitting,
-    data = 2 * asin(sqrt(sim_res_jacobi$X_t[sim_res_jacobi$t<t_0])),
-    init_par = stationary_part_true_param * random_noise_start_value,
-    delta = actual_dt,
-    exp_sigma = TRUE, 
-    control = list(reltol = sqrt(.Machine$double.eps)/10))$par - 
-      stationary_part_true_param) / stationary_part_true_param
-  
-  success <- TRUE
-  }, error = function(e) {
-    cat("Error occurred at iteration", i, ":", conditionMessage(e), "\n")
+    OU_likelihood_estim[i, 1:3] <- abs(optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
+                                   data = sim_res_add$X_t[sim_res_add$t < t_0],
+                                   init_par = stationary_part_true_param * random_noise_start_value,
+                                   delta = actual_dts[j], exp_sigma = FALSE,
+                                   control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
+                                     stationary_part_true_param) /stationary_part_true_param
     
-    Sys.sleep(1)
-  })
+    OU_likelihood_estim[i, 4] <- microbenchmark::microbenchmark(
+      optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
+      data = sim_res_add$X_t[sim_res_add$t < t_0],
+      init_par = stationary_part_true_param * random_noise_start_value,
+      delta = actual_dts[j], exp_sigma = FALSE,
+      control = list(reltol = sqrt(.Machine$double.eps) / 10)),
+      times = 1, unit = "us")$time / 1e9
+    
+    OU_score_estim[i, 1:3] <- abs(nleqslv::nleqslv(x = stationary_part_true_param * random_noise_start_value,
+                     fn = OU_score,
+                     data = sim_res_add$X_t[sim_res_add$t < t_0],
+                     delta = actual_dts[j])$x -
+                       stationary_part_true_param) / stationary_part_true_param
+    
+    OU_score_estim[i, 4] <- microbenchmark::microbenchmark(
+      nleqslv::nleqslv(x = stationary_part_true_param * random_noise_start_value,
+                       fn = OU_score,
+                       data = sim_res_add$X_t[sim_res_add$t < t_0],
+                       delta = actual_dts[j])$x,
+      times = 1, unit = "us")$time / 1e9
+    
+    # Sqrt-model
+    
+    sim_res_sqrt <- simulate_squareroot_noise_tipping_model(step_length = actual_dts[j],
+                                            par = true_param, tau = tau, t_0 = t_0,
+                                            beyond_tipping = 0, seed = seed)
+
+    sqrt_martingale_estim[i, 1:3] <- abs(CIR_quadratic_martingale(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0],
+                                                                  actual_dts[j]) -
+                                        stationary_part_true_param) /stationary_part_true_param
+    
+    sqrt_martingale_estim[i, 4] <- median(microbenchmark::microbenchmark(
+      CIR_quadratic_martingale(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0], actual_dts[j]),
+      times = 1, unit = "us")$time / 1e9)
+    
+
+    sqrt_strang_estim[i, 1:3] <- abs(optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
+                                   data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
+                                   init_par = stationary_part_true_param * random_noise_start_value,
+                                   delta = actual_dts[j], exp_sigma = TRUE,
+                                   control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
+                                    stationary_part_true_param) / stationary_part_true_param
+    
+    sqrt_strang_estim[i, 4] <- microbenchmark::microbenchmark(
+      optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
+                                     data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
+                                     init_par = stationary_part_true_param * random_noise_start_value,
+                                     delta = actual_dts[j], exp_sigma = TRUE,
+                                     control = list(reltol = sqrt(.Machine$double.eps)/10)),
+                                      times = 1, unit = "us")$time / 1e9
+    # Linear noise model
+    sim_res_linear <- simulate_linear_noise_tipping_model(step_length = actual_dts[j],
+                                        par = true_param, tau = tau, t_0 = t_0,
+                                        beyond_tipping = 0, seed = seed)
+    
+
+    linear_martingale_estim[i, 1:3] <- abs(nleqslv::nleqslv(x = stationary_part_true_param * random_noise_start_value,
+                     fn = mean_reverting_GBM_martingale,
+                     data = sim_res_linear$X_t[sim_res_linear$t < t_0],
+                     delta = actual_dts[j])$x -
+                       stationary_part_true_param) /stationary_part_true_param
+
+    linear_martingale_estim[i, 4] <- microbenchmark::microbenchmark(
+      nleqslv::nleqslv(x = stationary_part_true_param * random_noise_start_value,
+                       fn = mean_reverting_GBM_martingale,
+                       data = sim_res_linear$X_t[sim_res_linear$t < t_0],
+                       delta = actual_dts[j])$x, times = 1, unit = "us")$time / 1e9
+    
+
+    linear_strang_estim[i, 1:3] <- abs(optimize_stationary_likelihood(mean_reverting_GBM_strang, 
+                                   log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
+                                   init_par = stationary_part_true_param * random_noise_start_value,
+                                   delta = actual_dts[j],
+                                   exp_sigma = FALSE,
+                                   control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
+      stationary_part_true_param) /stationary_part_true_param
+    
+    linear_strang_estim[i, 4] <- microbenchmark::microbenchmark(
+      optimize_stationary_likelihood(mean_reverting_GBM_strang, 
+                       log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
+                       init_par = stationary_part_true_param * random_noise_start_value,
+                       delta = actual_dts[j],
+                       exp_sigma = FALSE,
+                       control = list(reltol = sqrt(.Machine$double.eps)/10)), times = 1, unit = "us")$time / 1e9
+
+
+    linear_alt_strang_estim[i, 1:3] <- abs(optimize_stationary_likelihood(mean_reverting_GBM_alt_strang,
+                                  sim_res_linear$X_t[sim_res_linear$t<t_0],
+                                  init_par = stationary_part_true_param * random_noise_start_value,
+                                  delta = actual_dts[j],
+                                  exp_sigma = FALSE,
+                                  control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
+                                    stationary_part_true_param) / stationary_part_true_param
+    
+    linear_alt_strang_estim[i, 4] <- microbenchmark::microbenchmark(
+      optimize_stationary_likelihood(mean_reverting_GBM_alt_strang,
+                       sim_res_linear$X_t[sim_res_linear$t<t_0],
+                       init_par = stationary_part_true_param * random_noise_start_value,
+                       delta = actual_dts[j],
+                       exp_sigma = FALSE,
+                       control = list(reltol = sqrt(.Machine$double.eps)/10)), times = 1, unit = "us")$time / 1e9
+    
+    # t-diffusion model
+    sim_res_t_distribution <- simulate_t_distribution_tipping_model(step_length = actual_dts[j],
+                                          par = true_param, tau = tau, t_0 = t_0,
+                                          beyond_tipping = 0, seed = seed)
+    
+    t_strang_estim[i, 1:3] <- abs(optimize_stationary_likelihood(
+                  likelihood_fun = t_diffusion_strang_splitting,
+                  data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
+                  init_par = stationary_part_true_param * random_noise_start_value,
+                  delta = actual_dts[j],
+                  exp_sigma = TRUE,
+                  control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
+                    stationary_part_true_param) / stationary_part_true_param
+    
+    t_strang_estim[i, 4] <- microbenchmark::microbenchmark(optimize_stationary_likelihood(
+      likelihood_fun = t_diffusion_strang_splitting,
+      data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
+      init_par = stationary_part_true_param * random_noise_start_value,
+      delta = actual_dts[j],
+      exp_sigma = TRUE,
+      control = list(reltol = sqrt(.Machine$double.eps)/10)), times = 1, unit = "us")$time / 1e9
+    
+
+    # F-diffusion model
+    F_sim_dynamic <- simulate_F_distribution_tipping_model(step_length = actual_dts[j],
+                                          par = true_param, tau = tau, t_0 = t_0,
+                                          beyond_tipping = 0, seed = seed)
+    
+   F_strang_estim[i, 1:3] <-  abs(optimize_stationary_likelihood(
+      likelihood_fun = F_diffusion_strang_splitting,
+      data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
+      init_par = stationary_part_true_param * random_noise_start_value,
+      delta = actual_dts[j],
+      exp_sigma = TRUE,
+      control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
+        stationary_part_true_param) / stationary_part_true_param
+    
+    F_strang_estim[i, 4] <- microbenchmark::microbenchmark(optimize_stationary_likelihood(
+     likelihood_fun = F_diffusion_strang_splitting,
+     data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
+     init_par = stationary_part_true_param * random_noise_start_value,
+     delta = actual_dts[j],
+     exp_sigma = TRUE,
+     control = list(reltol = sqrt(.Machine$double.eps)/10)), times = 1, unit = "us")$time / 1e9
+    
+    success <- TRUE
+    }, error = function(e) {
+      cat("Error occurred at iteration", i, ":", conditionMessage(e), "\n")
+      
+      Sys.sleep(1)
+    })
+    }
   }
+  col_wise_median_OU_like[j, ] <- colwise_median(OU_likelihood_estim)
+  
+  col_wise_median_OU_score[j, ] <- colwise_median(OU_score_estim)
+  
+  col_wise_median_sqrt_eq[j, ] <- colwise_median(sqrt_martingale_estim)
+  
+  col_wise_median_sqrt_strang[j, ] <- colwise_median(sqrt_strang_estim)
+  
+  col_wise_median_linear_eq[j, ] <- colwise_median(linear_martingale_estim)
+  
+  col_wise_median_linear_alt_strang[j, ] <- colwise_median(linear_alt_strang_estim)
+  
+  col_wise_median_linear_strang[j, ] <- colwise_median(linear_strang_estim)
+  
+  col_wise_median_t_strang[j, ] <- colwise_median(t_strang_estim)
+  
+  col_wise_median_F_strang[j, ] <- colwise_median(F_strang_estim)
+  
+  col_wise_median_Jacobi_Strang[j, ] <- colwise_median(Jacobi_strang_estim)
 }
 
-OU_likelihood_tibble <- as_tibble(OU_likelihood_estim) |>
-  mutate(Model = "Additive", Type = "Likelihood", Method = "MLE")
+OU_likelihood_tibble <- as_tibble(col_wise_median_OU_like) |>
+  mutate(delta = actual_dts, Model = "Additive", Type = "Likelihood", Method = "MLE")
 
-OU_score_tibble <- as_tibble(OU_score_estim) |>
-  mutate(Model = "Additive", Type = "Estimation equation", Method = "Score")
+OU_score_tibble <- as_tibble(col_wise_median_OU_score) |>
+  mutate(delta = actual_dts, Model = "Additive", Type = "Estimation eq.", Method = "Score")
 
-sqrt_estimation_equation_tibble <- as_tibble(sqrt_martingale_estim) |>
-  mutate(Model = "Square-root", Type = "Estimation equation", Method = "Martingale")
+sqrt_estimation_equation_tibble <- as_tibble(col_wise_median_sqrt_eq) |>
+  mutate(delta = actual_dts, Model = "Square-root", Type = "Estimation eq.", Method = "Martingale")
 
-sqrt_Strang_tibble <- as_tibble(sqrt_strang_estim) |>
-  mutate(Model = "Square-root", Type = "Likelihood", Method = "Strang")
+sqrt_Strang_tibble <- as_tibble(col_wise_median_sqrt_strang) |>
+  mutate(delta = actual_dts, Model = "Square-root", Type = "Likelihood", Method = "Strang")
 
-Linear_estimation_equation_tibble <- as_tibble(linear_martingale_estim) |>
-  mutate(Model = "Linear", Type = "Estimation equation", Method = "Martingale")
+Linear_estimation_equation_tibble <- as_tibble(col_wise_median_linear_eq) |>
+  mutate(delta = actual_dts, Model = "Linear", Type = "Estimation eq.", Method = "Martingale")
 
-Linear_alt_Strang_tibble <- as_tibble(linear_alt_strang_estim) |>
-  mutate(Model = "Linear", Type = "Likelihood", Method = "Strang (Alternative)")
+Linear_alt_Strang_tibble <- as_tibble(col_wise_median_linear_alt_strang) |>
+  mutate(delta = actual_dts, Model = "Linear", Type = "Likelihood (Alt.)", Method = "Strang (Alternative)")
 
-Linear_Strang_tibble <- as_tibble(linear_strang_estim)  |>
-  mutate(Model = "Linear", Type = "Likelihood", Method = "Strang")
+Linear_Strang_tibble <- as_tibble(col_wise_median_linear_strang)  |>
+  mutate(delta = actual_dts, Model = "Linear", Type = "Likelihood", Method = "Strang")
 
-t_diffusion_Strang_tibble <- as_tibble(t_strang_estim)  |>
-  mutate(Model = "t-diffusion", Type = "Likelihood", Method = "Strang")
+t_diffusion_Strang_tibble <- as_tibble(col_wise_median_t_strang)  |>
+  mutate(delta = actual_dts, Model = "t-diffusion", Type = "Likelihood", Method = "Strang")
 
-F_diffusion_Strang_tibble <- as_tibble(F_strang_estim)  |>
-  mutate(Model = "F-diffusion", Type = "Likelihood", Method = "Strang")
+F_diffusion_Strang_tibble <- as_tibble(col_wise_median_F_strang)  |>
+  mutate(delta = actual_dts, Model = "F-diffusion", Type = "Likelihood", Method = "Strang")
 
-Jacobi_diffusion_Strang_tibble <- as_tibble(Jacobi_strang_estim) |>
-  mutate(Model = "Jacobi-diffusion", Type = "Likelihood", Method = "Strang")
+Jacobi_diffusion_Strang_tibble <- as_tibble(col_wise_median_Jacobi_Strang) |>
+  mutate(delta = actual_dts, Model = "Jacobi-diffusion", Type = "Likelihood", Method = "Strang")
 
 Stationary_estimation_all <- bind_rows(OU_likelihood_tibble, OU_score_tibble, sqrt_estimation_equation_tibble,
-          sqrt_Strang_tibble, Linear_estimation_equation_tibble, 
+          sqrt_Strang_tibble, Linear_estimation_equation_tibble,
           Linear_alt_Strang_tibble, Linear_Strang_tibble, t_diffusion_Strang_tibble,
-          F_diffusion_Strang_tibble, Jacobi_diffusion_Strang_tibble) |> 
-  rename(alpha0 = V1, mu0 = V2, sigma = V3) |>  
+          F_diffusion_Strang_tibble, Jacobi_diffusion_Strang_tibble) |>
+  rename(alpha0 = V1, mu0 = V2, sigma = V3, running_time = V4) |> 
   mutate(Model = factor(Model), Type = factor(Type), Method = factor(Method)) |> 
-  pivot_longer(-c(Model, Type, Method), names_to = "Parameter", values_to = "Estimate")
+  pivot_longer(-c(delta, Model, Type, Method), names_to = "Parameter", values_to = "ARE") |> 
+  mutate(Model = factor(Model, levels = c("Additive", "Square-root", "Linear", 
+                                   "t-diffusion", "F-diffusion", "Jacobi-diffusion")),
+         Type = factor(Type, levels = c("Likelihood", "Estimation eq.", "Likelihood (Alt.)")))
 
-Stationary_estimation_all |> filter(Estimate < 5, Model %in% c("Additive", "Linear", "Square-root")) |> 
-  ggplot(aes(x = Parameter, y = Estimate, fill = Method)) + geom_violin() +
-  facet_wrap(~Model) + scale_y_log10() + scale_fill_manual(values = thesis_palette[3:8])
+parameter_precision_stationary <- Stationary_estimation_all %>% filter(Parameter != "running_time") |> 
+  ggplot(aes(x = t_0 * 1 / delta, y = ARE, color = Parameter, linetype = Type)) +
+  geom_line(linewidth = 1.5) +  
+  geom_point(size = 3) +
+  facet_wrap(~Model) + 
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  scale_x_log10(breaks = t_0 * 1 / actual_dts) +
+  scale_color_manual(values = thesis_palette[4:6],
+                     labels = expression(alpha*phantom(.)[0], mu*phantom(.)[0], sigma)) +
+  labs(x = "N", y = "Absolute Relative Error") +  
+  theme(strip.text = element_text(face = "bold", size = 14), panel.spacing = unit(2, "lines"),
+        axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
+        legend.text  = element_text(size = 16), axis.text = element_text(face = "bold", size = 14)) +
+  guides(color = guide_legend(override.aes = list(shape = NA, linewidth = 5)), 
+  linetype = guide_legend(override.aes = list(linewidth = 0.75))) +
+  scale_linetype_manual(values=c("solid", "dashed", "dotted"))
 
-Stationary_estimation_all |> filter(Estimate < 5,!( Model%in% c("Additive", "Linear", "Square-root"))) |> 
-  ggplot(aes(x = Parameter, y = Estimate, fill= Model)) + geom_violin() +
-  scale_y_log10() + scale_fill_manual(values = thesis_palette[3:8])
+ggsave(parameter_precision_stationary, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "parameter_precision_stationary.jpeg",
+       height = 6, width = 14, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
 
-
+estimation_duration_stationary <- Stationary_estimation_all %>%
+  filter(Parameter == "running_time") %>%
+  ggplot(aes(x = t_0 * 1 / delta, y = ARE, linetype = Type, color = Model)) +
+  geom_line(linewidth = 1.95) +  
+  geom_point(size = 3.5) +
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  scale_x_log10(breaks = t_0 * 1 / actual_dts) +
+  labs(x = "N", y = "Running time (s)") +  
+  theme(axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
+  legend.text  = element_text(size = 14), axis.text = element_text(face = "bold", size = 14),
+  panel.border = element_blank()) +
+  scale_color_manual(values = thesis_palette[1:6]) +
+  guides(color = guide_legend(override.aes = list(shape = NA, linewidth = 5)), 
+         linetype = guide_legend(override.aes = list(linewidth = 0.75))) +
+  scale_linetype_manual(values=c("solid", "dashed", "dotted"))
+  
+ggsave(estimation_duration_stationary, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "estimation_duration_stationary.jpeg",
+       height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
 
 # Precision of estimator as a function of how early we have information up to.
 # Try t-distribution

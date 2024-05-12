@@ -425,7 +425,7 @@ Naturally, the lamperti transform is the same here as in the stationary part, er
 The flows are given analagously to earlier. The slope and intercept of the linear SDE is
 \begin{align}
     A_{\mathrm{linear\_part}} &= -\sqrt{\frac{\sigma^4}{4} - A \left(\sigma^2\left(2m + 1\right) + 4\lambda_t\right)}\\
-    b_{\mathrm{intercept}} &= \cosh^{-1}\left(\frac{A\left(2m + 1\right) - \frac{\sigma^2}{2} + \sqrt{\frac{\sigma^4}{4}-A\left(\sigma^2\left(2m + 1\right) + 4 \lambda_t\right)}}{A}\right), 
+    b_{\mathrm{intercept}} &= \cosh^{-1}\left(\frac{A\left(2m + 1\right) - \frac{\sigma^2}{2} + \sqrt{\frac{\sigma^4}{4}-A\left(\sigma^2\left(2m + 1\right) + 4 \lambda_t\right)}}{A}\right), \label{eq:FscaledSplitting}
 \end{align}
 And the non-linear ODE is constructed as the residual of this linear SDE and (\ref{eq:dynamicScaledFLamperti}). All elements are solved in the usual manner and the strang-estimator defined completely analogously to earlier.
 \subsection{The Jacobi diffusion}
@@ -469,7 +469,7 @@ The ODE is found residually and solved using our fourth-order Runge-kutta. That 
     &+ \left. A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t\right) \mathrm{d}t - A_{\mathrm{linear\_part}}\left(Y_t^{[2]} -  b_{\mathrm{intercept}}\right)\mathrm{d}t  \label{eq:dynamicjacobiODE}.
 \end{align}
 Both of which can be solved as we have done so numerous times in the above sections. Likewise, we can construct the Strang estimator in the way we have done many times before.
-\section{Benchmark}
+\section{Benchmark}\label{section:benchmark}
 In this section we show the results of a few benchmarks using the \code{microbenchmark} package \cite{microbenchmark}. The code was run on a machine with the following hardware and software.
 \begin{table}[ht]
     \centering
