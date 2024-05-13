@@ -469,8 +469,9 @@ The ODE is found residually and solved using our fourth-order Runge-kutta. That 
     &+ \left. A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t\right) \mathrm{d}t - A_{\mathrm{linear\_part}}\left(Y_t^{[2]} -  b_{\mathrm{intercept}}\right)\mathrm{d}t  \label{eq:dynamicjacobiODE}.
 \end{align}
 Both of which can be solved as we have done so numerous times in the above sections. Likewise, we can construct the Strang estimator in the way we have done many times before.
+\newpage
 \section{Benchmark}\label{section:benchmark}
-In this section we show the results of a few benchmarks using the \code{microbenchmark} package \cite{microbenchmark}. The code was run on a machine with the following hardware and software.
+In this section we show the results of a few benchmarks using the \code{microbenchmark} package \cite{microbenchmark}. The figures are put in the order in which they appear in the project. The code was run on a machine with the following hardware and software.
 \begin{table}[ht]
     \centering
     \begin{tabular}{@{}ll@{}}
@@ -492,3 +493,12 @@ In this section we show the results of a few benchmarks using the \code{microben
     \caption{Hardware specifications}
     \label{tab:specs}
     \end{table}
+
+\subsection{Simulation studies}
+\begin{figure}[h!]
+    \begin{center}
+    \includegraphics[scale = .1]{figures/estimation_duration_dynamic.jpeg}
+    \caption{The median run-time from invokation to convergence in the dynamic part. The ARE of the estimators are shown in figure \ref{figure:parameter_precision_dynamic}}
+    \label{figure:estimation_duration_dynamic}
+    \end{center}
+\end{figure}

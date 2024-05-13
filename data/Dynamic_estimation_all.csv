@@ -1,0 +1,121 @@
+"delta","Model","Type","Parameter","ARE"
+0.2,"Additive","Strang","tau",0.434622276730073
+0.2,"Additive","Strang","A",0.461063936664797
+0.2,"Additive","Strang","running_time",0.0063207075
+0.1,"Additive","Strang","tau",0.316571399434961
+0.1,"Additive","Strang","A",0.439136619746508
+0.1,"Additive","Strang","running_time",0.009685205
+0.04,"Additive","Strang","tau",0.300356866891221
+0.04,"Additive","Strang","A",0.341599306519794
+0.04,"Additive","Strang","running_time",0.0145044175
+0.01,"Additive","Strang","tau",0.277411940676015
+0.01,"Additive","Strang","A",0.44726846177271
+0.01,"Additive","Strang","running_time",0.0371146665
+0.004,"Additive","Strang","tau",0.27689959837485
+0.004,"Additive","Strang","A",0.448010084616327
+0.004,"Additive","Strang","running_time",0.1058356855
+0.2,"Square-root","Strang","tau",0.340231095335821
+0.2,"Square-root","Strang","A",0.474866343704969
+0.2,"Square-root","Strang","running_time",0.0443274605
+0.1,"Square-root","Strang","tau",0.371485710584142
+0.1,"Square-root","Strang","A",0.427018751891887
+0.1,"Square-root","Strang","running_time",0.094242077
+0.04,"Square-root","Strang","tau",0.289268756822965
+0.04,"Square-root","Strang","A",0.391864134833978
+0.04,"Square-root","Strang","running_time",0.09646016
+0.01,"Square-root","Strang","tau",0.0795444196322933
+0.01,"Square-root","Strang","A",0.353835048261436
+0.01,"Square-root","Strang","running_time",0.082706368
+0.004,"Square-root","Strang","tau",0.923195248046371
+0.004,"Square-root","Strang","A",0.67335383887214
+0.004,"Square-root","Strang","running_time",0.2467274115
+0.2,"Square-root","Strang (Alt.)","tau",0.222806557600027
+0.2,"Square-root","Strang (Alt.)","A",0.454432428228157
+0.2,"Square-root","Strang (Alt.)","running_time",0.0070432365
+0.1,"Square-root","Strang (Alt.)","tau",0.191430082872902
+0.1,"Square-root","Strang (Alt.)","A",0.40179658471086
+0.1,"Square-root","Strang (Alt.)","running_time",0.010342661
+0.04,"Square-root","Strang (Alt.)","tau",0.101286704275906
+0.04,"Square-root","Strang (Alt.)","A",0.287879910682818
+0.04,"Square-root","Strang (Alt.)","running_time",0.0138425835
+0.01,"Square-root","Strang (Alt.)","tau",0.122541915133874
+0.01,"Square-root","Strang (Alt.)","A",0.614746953960695
+0.01,"Square-root","Strang (Alt.)","running_time",0.0416500575
+0.004,"Square-root","Strang (Alt.)","tau",0.140597007855183
+0.004,"Square-root","Strang (Alt.)","A",0.421450805513752
+0.004,"Square-root","Strang (Alt.)","running_time",0.1004803955
+0.2,"Linear","Strang","tau",0.219107012561541
+0.2,"Linear","Strang","A",0.459524236162324
+0.2,"Linear","Strang","running_time",0.04286149
+0.1,"Linear","Strang","tau",0.232883146159288
+0.1,"Linear","Strang","A",0.396942618875666
+0.1,"Linear","Strang","running_time",0.059066668
+0.04,"Linear","Strang","tau",0.191746290259895
+0.04,"Linear","Strang","A",0.354435802457835
+0.04,"Linear","Strang","running_time",0.0669344795
+0.01,"Linear","Strang","tau",0.150042126077676
+0.01,"Linear","Strang","A",0.498488410993119
+0.01,"Linear","Strang","running_time",0.2253565365
+0.004,"Linear","Strang","tau",0.167069082169321
+0.004,"Linear","Strang","A",0.497675401174744
+0.004,"Linear","Strang","running_time",0.5231373185
+0.2,"Linear","Strang (Alt.)","tau",0.199305473840828
+0.2,"Linear","Strang (Alt.)","A",0.467219724035491
+0.2,"Linear","Strang (Alt.)","running_time",0.008177158
+0.1,"Linear","Strang (Alt.)","tau",0.196663665484071
+0.1,"Linear","Strang (Alt.)","A",0.378880358767965
+0.1,"Linear","Strang (Alt.)","running_time",0.011216107
+0.04,"Linear","Strang (Alt.)","tau",0.0986726405971899
+0.04,"Linear","Strang (Alt.)","A",0.299494570965535
+0.04,"Linear","Strang (Alt.)","running_time",0.01583359
+0.01,"Linear","Strang (Alt.)","tau",0.133430353538851
+0.01,"Linear","Strang (Alt.)","A",0.454206073783864
+0.01,"Linear","Strang (Alt.)","running_time",0.0599852165
+0.004,"Linear","Strang (Alt.)","tau",0.102288214372764
+0.004,"Linear","Strang (Alt.)","A",0.452945537176835
+0.004,"Linear","Strang (Alt.)","running_time",0.1253361225
+0.2,"t-diffusion","Strang","tau",0.0555199995171278
+0.2,"t-diffusion","Strang","A",0.0957450671952373
+0.2,"t-diffusion","Strang","running_time",0.000597181
+0.1,"t-diffusion","Strang","tau",0.0657447469653562
+0.1,"t-diffusion","Strang","A",0.079645201493986
+0.1,"t-diffusion","Strang","running_time",0.000634535
+0.04,"t-diffusion","Strang","tau",0.0564964447170495
+0.04,"t-diffusion","Strang","A",0.0647153275553136
+0.04,"t-diffusion","Strang","running_time",0.0007243455
+0.01,"t-diffusion","Strang","tau",0.0460595444616041
+0.01,"t-diffusion","Strang","A",0.0858579840278252
+0.01,"t-diffusion","Strang","running_time",0.001024107
+0.004,"t-diffusion","Strang","tau",0.0669432072434574
+0.004,"t-diffusion","Strang","A",0.0744432511273772
+0.004,"t-diffusion","Strang","running_time",0.0021212495
+0.2,"F-diffusion","Strang","tau",0.457861716852918
+0.2,"F-diffusion","Strang","A",0.500614172074381
+0.2,"F-diffusion","Strang","running_time",0.083039962
+0.1,"F-diffusion","Strang","tau",0.410576191129225
+0.1,"F-diffusion","Strang","A",0.452991786342156
+0.1,"F-diffusion","Strang","running_time",0.158191397
+0.04,"F-diffusion","Strang","tau",0.214382282808811
+0.04,"F-diffusion","Strang","A",0.263263892670617
+0.04,"F-diffusion","Strang","running_time",0.2464300295
+0.01,"F-diffusion","Strang","tau",0.376187731676684
+0.01,"F-diffusion","Strang","A",0.516904270626792
+0.01,"F-diffusion","Strang","running_time",0.3853960725
+0.004,"F-diffusion","Strang","tau",1.00822044715938
+0.004,"F-diffusion","Strang","A",0.668944091000463
+0.004,"F-diffusion","Strang","running_time",0.5961958535
+0.2,"Jacobi-diffusion","Strang","tau",0.229914128262788
+0.2,"Jacobi-diffusion","Strang","A",0.458859738298902
+0.2,"Jacobi-diffusion","Strang","running_time",0.07862894
+0.1,"Jacobi-diffusion","Strang","tau",0.0673782128206672
+0.1,"Jacobi-diffusion","Strang","A",0.298889979558542
+0.1,"Jacobi-diffusion","Strang","running_time",0.0950513245
+0.04,"Jacobi-diffusion","Strang","tau",0.174828990381259
+0.04,"Jacobi-diffusion","Strang","A",0.452616057067799
+0.04,"Jacobi-diffusion","Strang","running_time",0.194263308
+0.01,"Jacobi-diffusion","Strang","tau",0.017597469365181
+0.01,"Jacobi-diffusion","Strang","A",0.38151203956898
+0.01,"Jacobi-diffusion","Strang","running_time",0.434449921
+0.004,"Jacobi-diffusion","Strang","tau",0.0938986430858666
+0.004,"Jacobi-diffusion","Strang","A",0.587263949667925
+0.004,"Jacobi-diffusion","Strang","running_time",1.108798667

@@ -1,6 +1,4 @@
 library(tidyverse)
-library(tictoc)
-
 source("source_code/tipping_simulations.R")
 source("source_code/model_fitting.R")
 source("source_code/model_diagnostics.R")
@@ -23,7 +21,7 @@ thesis_palette <- c("#E69F00", "#56B4E9", "#009E73", "#CCB400", "#0072B2",
 ###------------------------------------------------------------------------###
 ###----------------------------Method section------------------------------###
 ###------------------------------------------------------------------------###
-# Create plot of path for figures in "Saddle-node bifurcation and Tipping Point Estimation
+# Create plot of path for figures in "Tipping in stochastic systems"
 # Choose parameters appropriate for any of the diffusions
 true_param <- c(1.5, 0.4, -0.2, 0.1)
 actual_dt <- 1/12 * 1 / 10
@@ -90,7 +88,7 @@ ggsave(sample_paths_plot_small_scale, path = paste0(getwd(), "/tex_files/figures
        height = 8, width = 13, dpi = 300, units = "in", device = "jpeg",
        limitsize = FALSE, scale = 1)
 
-# Create plot of path for figures in "Saddle-node bifurcation and Tipping Point Estimation
+# Create plot of path for figures in "Tipping in stochastic systems"
 # Choose parameters appropriate for all but jacobi diffusion
 true_param <- c(1.5, 3, -1.75, 0.1)
 
@@ -147,52 +145,7 @@ ggsave(sample_paths_plot_big_scale, path = paste0(getwd(), "/tex_files/figures")
        limitsize = FALSE, scale = 1)
 
 
-#nu plot 
-# Parameters
-lambda_0 <- -2
-m_nu_plot <- -1.5
-A_nu_plot <- 0.8
-tau <- 100
-t_0 <- 10
-log_steps <- seq(-1.5, 1.5, length.out = 7)
-
-# Calculating nu_values using exponential function to mirror around 1
-nu_values <- round(sort(unique(c(exp(log_steps), 1/exp(log_steps)))), 2)
-
-t_values <- seq(0, tau + t_0, length.out = 500)
-
-# Initialize a data frame to hold the values
-nu_plot_data <- data.frame()
-
-# Calculate the function values for each nu
-for (nu in nu_values) {
-  lambda_t <- lambda_0 * (1 - ifelse(t_values > t_0, (t_values - t_0) / tau, 0))^nu
-  fixed_point_stable <- m_nu_plot + sqrt(-lambda_t / A_nu_plot)
-  fixed_point_unstable <- m_nu_plot - sqrt(-lambda_t / A_nu_plot)
-  # Append to the data frame
-  nu_plot_data <- rbind(nu_plot_data, data.frame(t = t_values, lambda = lambda_t,
-                                                 nu = as.factor(nu), mu_stable = fixed_point_stable,
-                                                 mu_unstable = fixed_point_unstable))
-}
-nu_plot_data <- as_tibble(nu_plot_data) |> pivot_longer(-c(t, lambda, nu), values_to = "Value", names_to = "Fixed_type")
-
-nu_plot <- ggplot(nu_plot_data, aes(x = t, y = Value, color = nu, linetype = Fixed_type)) +
-  geom_line(linewidth = 1.5) +
-  geom_hline(yintercept = m_nu_plot, linetype = "dashed") +
-  labs(x = "Time (t)",
-       y = expression(mu),
-       color = expression(nu)) + 
-  scale_color_manual(values = thesis_palette) +
-  scale_linetype(guide = "none") + 
-  guides(color = guide_legend(override.aes = list(linewidth = 5))) +
-  theme(plot.margin = unit(c(0, 0, 0, 0.5), "cm"),  panel.border = element_blank())
-  
-
-ggsave(nu_plot, path = paste0(getwd(), "/tex_files/figures"), filename = "nu_plot.jpeg",
-       height = 6, width = 10, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
-
-# Potential, flow and bifurcation plots
+# Potential, flow and bifurcation plots for "Deterministic Dynamical Systems and bifurcations
 lambda_double_well_vec <- c(0, 0.25, 2 / (3 * sqrt(3)))
 
 double_well <- function(x, lambda){
@@ -372,25 +325,72 @@ ggsave(bifurcation_diagram, path = paste0(getwd(), "/tex_files/figures"), filena
 
 
 
+# Plot of different nu-parameters
+# Parameters used in the simulation
+lambda_0 <- -2
+m_nu_plot <- -1.5
+A_nu_plot <- 0.8
+tau <- 100
+t_0 <- 10
+log_steps <- seq(-1.5, 1.5, length.out = 7)
+
+# Calculating nu_values using exponential function to mirror around 1
+nu_values <- round(sort(unique(c(exp(log_steps), 1/exp(log_steps)))), 2)
+
+t_values <- seq(0, tau + t_0, length.out = 500)
+
+# Initialize a data frame to hold the values
+nu_plot_data <- data.frame()
+
+# Calculate the function values for each nu
+for (nu in nu_values) {
+  lambda_t <- lambda_0 * (1 - ifelse(t_values > t_0, (t_values - t_0) / tau, 0))^nu
+  fixed_point_stable <- m_nu_plot + sqrt(-lambda_t / A_nu_plot)
+  fixed_point_unstable <- m_nu_plot - sqrt(-lambda_t / A_nu_plot)
+  # Append to the data frame
+  nu_plot_data <- rbind(nu_plot_data, data.frame(t = t_values, lambda = lambda_t,
+                                                 nu = as.factor(nu), mu_stable = fixed_point_stable,
+                                                 mu_unstable = fixed_point_unstable))
+}
+nu_plot_data <- as_tibble(nu_plot_data) |> pivot_longer(-c(t, lambda, nu), values_to = "Value", names_to = "Fixed_type")
+
+nu_plot <- ggplot(nu_plot_data, aes(x = t, y = Value, color = nu, linetype = Fixed_type)) +
+  geom_line(linewidth = 1.5) +
+  geom_hline(yintercept = m_nu_plot, linetype = "dashed") +
+  labs(x = "Time (t)",
+       y = expression(mu),
+       color = expression(nu)) + 
+  scale_color_manual(values = thesis_palette) +
+  scale_linetype(guide = "none") + 
+  guides(color = guide_legend(override.aes = list(linewidth = 5))) +
+  theme(plot.margin = unit(c(0, 0, 0, 0.5), "cm"),  panel.border = element_blank())
+  
+
+# ggsave(nu_plot, path = paste0(getwd(), "/tex_files/figures"), filename = "nu_plot.jpeg",
+#        height = 6, width = 10, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
+
+
 ###------------------------------------------------------------------------###
 ###------------------------Simulation studies------------------------------###
 ###------------------------------------------------------------------------###
 
+#Overview of the estimation methods
 
 colwise_median <- function(estimates) {
-  #filtered_estimates <- estimates[apply(estimates, 1, function(x) all(x <= 5)), ]
   apply(estimates, 2, function(x) quantile(x, probs = 0.5))
 }
 
 # General study of performance
-# Parameters where all work
+# Parameters where all models work
 true_param <- c(1.5, 0.4, -0.2, 0.1)
+tau <- 30
+t_0 <- 30
 mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
 alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 actual_dts <- c(1/5, 1/10, 1/25, 1/100, 1/250) 
-tau <- 0.5
-t_0 <- 30
+dynamic_part_true_param <- c(tau, true_param[1])
 numSim <- 50
 
 col_wise_median_OU_like <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
@@ -403,6 +403,15 @@ col_wise_median_linear_strang <- matrix(data = NA, nrow = length(actual_dts), nc
 col_wise_median_t_strang <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
 col_wise_median_F_strang <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
 col_wise_median_Jacobi_Strang <- matrix(data = NA, nrow = length(actual_dts), ncol = 4)
+
+col_wise_median_OU_dynamic <- matrix(data = NA, nrow = length(actual_dts), ncol = 3)
+col_wise_median_sqrt_dynamic <- matrix(data = NA, nrow = length(actual_dts), ncol = 3)
+col_wise_median_sqrt_alt_dynamic <- matrix(data = NA, nrow = length(actual_dts), ncol = 3)
+col_wise_median_linear_dynamic <- matrix(data = NA, nrow = length(actual_dts), ncol = 3)
+col_wise_median_linear_alt_dynamic <- matrix(data = NA, nrow = length(actual_dts), ncol = 3)
+col_wise_median_t_dynamic <- matrix(data = NA, nrow = length(actual_dts), ncol = 3)
+col_wise_median_F_dynamic <- matrix(data = NA, nrow = length(actual_dts), ncol = 3)
+col_wise_median_Jacobi_dynamic <- matrix(data = NA, nrow = length(actual_dts), ncol = 3)
 
 
 set.seed(110524)
@@ -419,6 +428,16 @@ for (j in seq_along(actual_dts)){
   F_strang_estim <- matrix(NA, nrow = numSim, ncol = 4)
   Jacobi_strang_estim <- matrix(NA, nrow = numSim, ncol = 4)
   
+  OU_dynamic_estim <- matrix(data = NA, nrow = numSim, ncol = 3)
+  sqrt_dynamic_estim <- matrix(data = NA, nrow = numSim, ncol = 3)
+  sqrt_alt_dynamic_estim <- matrix(data = NA, nrow = numSim, ncol = 3)
+  Linear_dynamic_estim <- matrix(data = NA, nrow = numSim, ncol = 3)
+  Linear_alt_dynamic_estim <- matrix(data = NA, nrow = numSim, ncol = 3)
+  t_dynamic_estim <- matrix(data = NA, nrow = numSim, ncol = 3)
+  F_dynamic_estim <- matrix(data = NA, nrow = numSim, ncol = 3)
+  Jacobi_dynamic_estim <- matrix(data = NA, nrow = numSim, ncol = 3)
+  
+  
   for (i in 1:numSim){
     cat("Grinding iteration", i, "\n")
     success <- FALSE
@@ -427,7 +446,7 @@ for (j in seq_along(actual_dts)){
       
     seed <- sample.int(100000, 1)
     random_noise_start_value <- runif(3, min = .9, 1.1)
-    
+    random_noise_start_value_dynamic <- runif(2, min = .9, 1.1)
     
     # Jacobi model
     sim_res_jacobi <- simulate_jacobi_diffusion_tipping_model(step_length = actual_dts[j],
@@ -442,6 +461,7 @@ for (j in seq_along(actual_dts)){
       exp_sigma = TRUE, 
       control = list(reltol = sqrt(.Machine$double.eps) / 10))
     if(jacobi_result$objective >= 0){stop("Jacobi failed")}
+    
     Jacobi_strang_estim[i, 1:3] <- abs(jacobi_result$par - stationary_part_true_param) /
       stationary_part_true_param
     
@@ -453,19 +473,41 @@ for (j in seq_along(actual_dts)){
       exp_sigma = TRUE, 
       control = list(reltol = sqrt(.Machine$double.eps) / 10)), times = 1, unit = "us")$time / 1e9
     
+    Jacobi_dynamic_estim[i, 1:2] <-  abs(optimize_dynamic_likelihood(
+                      likelihood_fun = jacobi_diffusion_transform_dynamic_likelihood,
+                      data = 2 * asin(sqrt(sim_res_jacobi$X_t[sim_res_jacobi$t>t_0])),
+                      init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+                      delta = actual_dts[j],
+                      alpha0 = jacobi_result$par[1],
+                      mu0 = jacobi_result$par[2],
+                      sigma = jacobi_result$par[3],
+                      control = list(reltol = sqrt(.Machine$double.eps) / 10))$par - dynamic_part_true_param) /
+      dynamic_part_true_param
     
+    Jacobi_dynamic_estim[i, 3] <-  microbenchmark::microbenchmark(optimize_dynamic_likelihood(
+      likelihood_fun = jacobi_diffusion_transform_dynamic_likelihood,
+      data = 2 * asin(sqrt(sim_res_jacobi$X_t[sim_res_jacobi$t>t_0])),
+      init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+      delta = actual_dts[j],
+      alpha0 = jacobi_result$par[1],
+      mu0 = jacobi_result$par[2],
+      sigma = jacobi_result$par[3],
+      control = list(reltol = sqrt(.Machine$double.eps) / 10)), times = 1, unit = "us")$time / 1e9
+
+
     # OU model
     sim_res_add <- simulate_additive_noise_tipping_model(step_length = actual_dts[j],
                                           par = true_param,
                                           tau = tau, t_0 = t_0,
                                           beyond_tipping = 0, seed = seed)
 
-    OU_likelihood_estim[i, 1:3] <- abs(optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
-                                   data = sim_res_add$X_t[sim_res_add$t < t_0],
-                                   init_par = stationary_part_true_param * random_noise_start_value,
-                                   delta = actual_dts[j], exp_sigma = FALSE,
-                                   control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
-                                     stationary_part_true_param) /stationary_part_true_param
+    OU_result <- optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
+                                                data = sim_res_add$X_t[sim_res_add$t < t_0],
+                                                init_par = stationary_part_true_param * random_noise_start_value,
+                                                delta = actual_dts[j], exp_sigma = FALSE,
+                                                control = list(reltol = sqrt(.Machine$double.eps)/10))
+    
+    OU_likelihood_estim[i, 1:3] <- abs(OU_result$par - stationary_part_true_param) /stationary_part_true_param
     
     OU_likelihood_estim[i, 4] <- microbenchmark::microbenchmark(
       optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
@@ -488,6 +530,28 @@ for (j in seq_along(actual_dts)){
                        delta = actual_dts[j])$x,
       times = 1, unit = "us")$time / 1e9
     
+    OU_dynamic_estim[i, 1:2] <-  abs(optimize_dynamic_likelihood(
+      likelihood_fun = OU_dynamic_likelihood,
+      data = sim_res_add$X_t[sim_res_add$t > t_0],
+      init_par = dynamic_part_true_param,
+      delta = actual_dts[j],
+      alpha0 = OU_result$par[1],
+      mu0 = OU_result$par[2],
+      sigma = OU_result$par[3],
+      control = list(reltol = sqrt(.Machine$double.eps) / 10))$par - dynamic_part_true_param) / 
+      dynamic_part_true_param
+    
+    OU_dynamic_estim[i, 3] <-  microbenchmark::microbenchmark(optimize_dynamic_likelihood(
+      likelihood_fun = OU_dynamic_likelihood,
+      data = sim_res_add$X_t[sim_res_add$t > t_0],
+      init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+      delta = actual_dts[j],
+      alpha0 = OU_result$par[1],
+      mu0 = OU_result$par[2],
+      sigma = OU_result$par[3],
+      control = list(reltol = sqrt(.Machine$double.eps) / 10)), times = 1, unit = "us")$time / 1e9
+
+    
     # Sqrt-model
     
     sim_res_sqrt <- simulate_squareroot_noise_tipping_model(step_length = actual_dts[j],
@@ -502,12 +566,13 @@ for (j in seq_along(actual_dts)){
       CIR_quadratic_martingale(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0], actual_dts[j]),
       times = 1, unit = "us")$time / 1e9)
     
-
-    sqrt_strang_estim[i, 1:3] <- abs(optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
-                                   data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
-                                   init_par = stationary_part_true_param * random_noise_start_value,
-                                   delta = actual_dts[j], exp_sigma = TRUE,
-                                   control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
+    sqrt_strang_result <- optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
+                                                         data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
+                                                         init_par = stationary_part_true_param * random_noise_start_value,
+                                                         delta = actual_dts[j], exp_sigma = TRUE,
+                                                         control = list(reltol = sqrt(.Machine$double.eps)/10))
+    
+    sqrt_strang_estim[i, 1:3] <- abs(sqrt_strang_result$par -
                                     stationary_part_true_param) / stationary_part_true_param
     
     sqrt_strang_estim[i, 4] <- microbenchmark::microbenchmark(
@@ -516,7 +581,53 @@ for (j in seq_along(actual_dts)){
                                      init_par = stationary_part_true_param * random_noise_start_value,
                                      delta = actual_dts[j], exp_sigma = TRUE,
                                      control = list(reltol = sqrt(.Machine$double.eps)/10)),
-                                      times = 1, unit = "us")$time / 1e9
+                                     times = 1, unit = "us")$time / 1e9
+    
+    sqrt_dynamic_estim[i, 1:2] <- abs(optimize_dynamic_likelihood(
+                likelihood_fun = CIR_transform_dynamic_likelihood,
+                data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t > t_0]),
+                init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+                delta = actual_dts[j],
+                alpha0 = sqrt_strang_result$par[1],
+                mu0 = sqrt_strang_result$par[2],
+                sigma = sqrt_strang_result$par[3],
+                control = list(reltol = sqrt(.Machine$double.eps) / 10))$par - dynamic_part_true_param) /
+      dynamic_part_true_param
+
+    sqrt_dynamic_estim[i, 3] <-  microbenchmark::microbenchmark(optimize_dynamic_likelihood(
+      likelihood_fun = CIR_transform_dynamic_likelihood,
+      data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t > t_0]),
+      init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+      delta = actual_dts[j],
+      alpha0 = sqrt_strang_result$par[1],
+      mu0 = sqrt_strang_result$par[2],
+      sigma = sqrt_strang_result$par[3],
+      control = list(reltol = sqrt(.Machine$double.eps) / 10)),
+      times = 1, unit = "us")$time / 1e9
+    
+    
+    sqrt_alt_dynamic_estim[i, 1:2] <-  abs(optimize_dynamic_likelihood(
+      likelihood_fun = CIR_dynamic_likelihood,
+      data = sim_res_sqrt$X_t[sim_res_sqrt$t > t_0],
+      init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+      delta = actual_dts[j],
+      alpha0 = sqrt_strang_result$par[1],
+      mu0 = sqrt_strang_result$par[2],
+      sigma = sqrt_strang_result$par[3],
+      control = list(reltol = sqrt(.Machine$double.eps) / 10))$par - dynamic_part_true_param) /
+      dynamic_part_true_param
+    
+    sqrt_alt_dynamic_estim[i, 3] <-  microbenchmark::microbenchmark(optimize_dynamic_likelihood(
+      likelihood_fun = CIR_dynamic_likelihood,
+      data = sim_res_sqrt$X_t[sim_res_sqrt$t > t_0],
+      init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+      delta = actual_dts[j],
+      alpha0 = sqrt_strang_result$par[1],
+      mu0 = sqrt_strang_result$par[2],
+      sigma = sqrt_strang_result$par[3],
+      control = list(reltol = sqrt(.Machine$double.eps) / 10)),
+      times = 1, unit = "us")$time / 1e9
+    
     # Linear noise model
     sim_res_linear <- simulate_linear_noise_tipping_model(step_length = actual_dts[j],
                                         par = true_param, tau = tau, t_0 = t_0,
@@ -535,14 +646,15 @@ for (j in seq_along(actual_dts)){
                        data = sim_res_linear$X_t[sim_res_linear$t < t_0],
                        delta = actual_dts[j])$x, times = 1, unit = "us")$time / 1e9
     
+    linear_strang_result <- optimize_stationary_likelihood(mean_reverting_GBM_strang, 
+                          log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
+                          init_par = stationary_part_true_param * random_noise_start_value,
+                          delta = actual_dts[j],
+                          exp_sigma = FALSE,
+                          control = list(reltol = sqrt(.Machine$double.eps)/10))
 
-    linear_strang_estim[i, 1:3] <- abs(optimize_stationary_likelihood(mean_reverting_GBM_strang, 
-                                   log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
-                                   init_par = stationary_part_true_param * random_noise_start_value,
-                                   delta = actual_dts[j],
-                                   exp_sigma = FALSE,
-                                   control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
-      stationary_part_true_param) /stationary_part_true_param
+    linear_strang_estim[i, 1:3] <- abs(linear_strang_result$par - stationary_part_true_param) /
+      stationary_part_true_param
     
     linear_strang_estim[i, 4] <- microbenchmark::microbenchmark(
       optimize_stationary_likelihood(mean_reverting_GBM_strang, 
@@ -550,16 +662,18 @@ for (j in seq_along(actual_dts)){
                        init_par = stationary_part_true_param * random_noise_start_value,
                        delta = actual_dts[j],
                        exp_sigma = FALSE,
-                       control = list(reltol = sqrt(.Machine$double.eps)/10)), times = 1, unit = "us")$time / 1e9
+                       control = list(reltol = sqrt(.Machine$double.eps)/10)),
+      times = 1, unit = "us")$time / 1e9
 
+    linear_alt_strang_result <- optimize_stationary_likelihood(mean_reverting_GBM_alt_strang,
+                                   sim_res_linear$X_t[sim_res_linear$t<t_0],
+                                   init_par = stationary_part_true_param * random_noise_start_value,
+                                   delta = actual_dts[j],
+                                   exp_sigma = FALSE,
+                                   control = list(reltol = sqrt(.Machine$double.eps)/10))
 
-    linear_alt_strang_estim[i, 1:3] <- abs(optimize_stationary_likelihood(mean_reverting_GBM_alt_strang,
-                                  sim_res_linear$X_t[sim_res_linear$t<t_0],
-                                  init_par = stationary_part_true_param * random_noise_start_value,
-                                  delta = actual_dts[j],
-                                  exp_sigma = FALSE,
-                                  control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
-                                    stationary_part_true_param) / stationary_part_true_param
+    linear_alt_strang_estim[i, 1:3] <- abs(linear_alt_strang_result$par - stationary_part_true_param) /
+      stationary_part_true_param
     
     linear_alt_strang_estim[i, 4] <- microbenchmark::microbenchmark(
       optimize_stationary_likelihood(mean_reverting_GBM_alt_strang,
@@ -568,20 +682,68 @@ for (j in seq_along(actual_dts)){
                        delta = actual_dts[j],
                        exp_sigma = FALSE,
                        control = list(reltol = sqrt(.Machine$double.eps)/10)), times = 1, unit = "us")$time / 1e9
+
+    Linear_alt_dynamic_estim[i, 1:2] <- abs(optimize_dynamic_likelihood(
+    likelihood_fun = mean_reverting_GBM_dynamic_likelihood,
+    data = sim_res_linear$X_t[sim_res_linear$t > t_0],
+    init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+    delta = actual_dts[j],
+    alpha0 = linear_alt_strang_result$par[1],
+    mu0 =  linear_alt_strang_result$par[2],
+    sigma =  linear_alt_strang_result$par[3],
+    control = list(reltol = sqrt(.Machine$double.eps) / 10))$par - dynamic_part_true_param) /
+      dynamic_part_true_param
+    
+    Linear_alt_dynamic_estim[i, 3] <- microbenchmark::microbenchmark(
+      optimize_dynamic_likelihood(
+        likelihood_fun = mean_reverting_GBM_dynamic_likelihood,
+        data = sim_res_linear$X_t[sim_res_linear$t > t_0],
+        init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+        delta = actual_dts[j],
+        alpha0 = linear_alt_strang_result$par[1],
+        mu0 =  linear_alt_strang_result$par[2],
+        sigma =  linear_alt_strang_result$par[3],
+        control = list(reltol = sqrt(.Machine$double.eps) / 10)),
+      times = 1, unit = "us")$time / 1e9
+
+    Linear_dynamic_estim[i, 1:2] <- abs(optimize_dynamic_likelihood(
+          likelihood_fun = mean_reverting_GBM_transform_dynamic_likelihood,
+          data = log(sim_res_linear$X_t[sim_res_linear$t > t_0]),
+          init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+          delta = actual_dts[j],
+          alpha0 = linear_strang_result$par[1],
+          mu0 = linear_strang_result$par[2],
+          sigma = linear_strang_result$par[3],
+          control = list(reltol = sqrt(.Machine$double.eps)/10))$par - dynamic_part_true_param) /
+      dynamic_part_true_param
+    
+    Linear_dynamic_estim[i, 3] <- microbenchmark::microbenchmark(
+      optimize_dynamic_likelihood(
+        likelihood_fun = mean_reverting_GBM_transform_dynamic_likelihood,
+        data = log(sim_res_linear$X_t[sim_res_linear$t > t_0]),
+        init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+        delta = actual_dts[j],
+        alpha0 = linear_strang_result$par[1],
+        mu0 = linear_strang_result$par[2],
+        sigma = linear_strang_result$par[3],
+        control = list(reltol = sqrt(.Machine$double.eps)/10)),
+      times = 1, unit = "us")$time / 1e9
+    
     
     # t-diffusion model
     sim_res_t_distribution <- simulate_t_distribution_tipping_model(step_length = actual_dts[j],
                                           par = true_param, tau = tau, t_0 = t_0,
                                           beyond_tipping = 0, seed = seed)
     
-    t_strang_estim[i, 1:3] <- abs(optimize_stationary_likelihood(
-                  likelihood_fun = t_diffusion_strang_splitting,
-                  data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
-                  init_par = stationary_part_true_param * random_noise_start_value,
-                  delta = actual_dts[j],
-                  exp_sigma = TRUE,
-                  control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
-                    stationary_part_true_param) / stationary_part_true_param
+    t_strang_result <- optimize_stationary_likelihood(
+      likelihood_fun = t_diffusion_strang_splitting,
+      data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
+      init_par = stationary_part_true_param * random_noise_start_value,
+      delta = actual_dts[j],
+      exp_sigma = TRUE,
+      control = list(reltol = sqrt(.Machine$double.eps)/10))
+    
+    t_strang_estim[i, 1:3] <- abs(t_strang_result$par - stationary_part_true_param) / stationary_part_true_param
     
     t_strang_estim[i, 4] <- microbenchmark::microbenchmark(optimize_stationary_likelihood(
       likelihood_fun = t_diffusion_strang_splitting,
@@ -589,7 +751,31 @@ for (j in seq_along(actual_dts)){
       init_par = stationary_part_true_param * random_noise_start_value,
       delta = actual_dts[j],
       exp_sigma = TRUE,
-      control = list(reltol = sqrt(.Machine$double.eps)/10)), times = 1, unit = "us")$time / 1e9
+      control = list(reltol = sqrt(.Machine$double.eps)/10)),
+      times = 1, unit = "us")$time / 1e9
+    
+    t_dynamic_estim[i, 1:2] <-  abs(optimize_dynamic_likelihood(
+                      likelihood_fun = t_transform_dynamic_likelihood,
+                      data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0]),
+                      init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+                      delta = actual_dts[j],
+                      alpha0 = t_strang_result$par[1],
+                      mu0 = t_strang_result$par[2],
+                      sigma = t_strang_result$par[3],
+                      control = list(reltol = sqrt(.Machine$double.eps) / 10))$par - dynamic_part_true_param) / 
+      dynamic_part_true_param
+    
+    t_dynamic_estim[i, 3] <- microbenchmark::microbenchmark(
+      optimize_dynamic_likelihood(
+        likelihood_fun = t_transform_dynamic_likelihood,
+        data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0]),
+        init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+        delta = actual_dts[j],
+        alpha0 = t_strang_result$par[1],
+        mu0 = t_strang_result$par[2],
+        sigma = t_strang_result$par[3],
+        control = list(reltol = sqrt(.Machine$double.eps) / 10)),
+      times = 1, unit = "us")$time / 1e9
     
 
     # F-diffusion model
@@ -597,14 +783,15 @@ for (j in seq_along(actual_dts)){
                                           par = true_param, tau = tau, t_0 = t_0,
                                           beyond_tipping = 0, seed = seed)
     
-   F_strang_estim[i, 1:3] <-  abs(optimize_stationary_likelihood(
+    F_strang_result <- optimize_stationary_likelihood(
       likelihood_fun = F_diffusion_strang_splitting,
       data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
       init_par = stationary_part_true_param * random_noise_start_value,
       delta = actual_dts[j],
       exp_sigma = TRUE,
-      control = list(reltol = sqrt(.Machine$double.eps)/10))$par -
-        stationary_part_true_param) / stationary_part_true_param
+      control = list(reltol = sqrt(.Machine$double.eps)/10))
+    
+   F_strang_estim[i, 1:3] <-  abs(F_strang_result$par - stationary_part_true_param) / stationary_part_true_param
     
     F_strang_estim[i, 4] <- microbenchmark::microbenchmark(optimize_stationary_likelihood(
      likelihood_fun = F_diffusion_strang_splitting,
@@ -614,6 +801,29 @@ for (j in seq_along(actual_dts)){
      exp_sigma = TRUE,
      control = list(reltol = sqrt(.Machine$double.eps)/10)), times = 1, unit = "us")$time / 1e9
     
+    F_dynamic_estim[i, 1:2] <-  abs(optimize_dynamic_likelihood(
+                    likelihood_fun = F_transform_dynamic_likelihood,
+                    data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t>t_0])),
+                    init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+                    delta = actual_dts[j],
+                    alpha0 = F_strang_result$par[1],
+                    mu0 = F_strang_result$par[2],
+                    sigma = F_strang_result$par[3],
+                    control = list(reltol = sqrt(.Machine$double.eps) / 10))$par - dynamic_part_true_param) / 
+      dynamic_part_true_param
+    
+    F_dynamic_estim[i, 3] <- microbenchmark::microbenchmark(
+      optimize_dynamic_likelihood(
+        likelihood_fun = F_transform_dynamic_likelihood,
+        data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t>t_0])),
+        init_par = dynamic_part_true_param * random_noise_start_value_dynamic,
+        delta = actual_dts[j],
+        alpha0 = F_strang_result$par[1],
+        mu0 = F_strang_result$par[2],
+        sigma = F_strang_result$par[3],
+        control = list(reltol = sqrt(.Machine$double.eps) / 10)),
+      times = 1, unit = "us")$time / 1e9
+
     success <- TRUE
     }, error = function(e) {
       cat("Error occurred at iteration", i, ":", conditionMessage(e), "\n")
@@ -623,26 +833,28 @@ for (j in seq_along(actual_dts)){
     }
   }
   col_wise_median_OU_like[j, ] <- colwise_median(OU_likelihood_estim)
-  
   col_wise_median_OU_score[j, ] <- colwise_median(OU_score_estim)
-  
   col_wise_median_sqrt_eq[j, ] <- colwise_median(sqrt_martingale_estim)
-  
   col_wise_median_sqrt_strang[j, ] <- colwise_median(sqrt_strang_estim)
-  
   col_wise_median_linear_eq[j, ] <- colwise_median(linear_martingale_estim)
-  
   col_wise_median_linear_alt_strang[j, ] <- colwise_median(linear_alt_strang_estim)
-  
   col_wise_median_linear_strang[j, ] <- colwise_median(linear_strang_estim)
-  
   col_wise_median_t_strang[j, ] <- colwise_median(t_strang_estim)
-  
   col_wise_median_F_strang[j, ] <- colwise_median(F_strang_estim)
-  
   col_wise_median_Jacobi_Strang[j, ] <- colwise_median(Jacobi_strang_estim)
+  
+  col_wise_median_OU_dynamic[j, ] <- colwise_median(OU_dynamic_estim)
+  col_wise_median_sqrt_dynamic[j, ] <- colwise_median(sqrt_dynamic_estim)
+  col_wise_median_sqrt_alt_dynamic[j, ] <-colwise_median(sqrt_alt_dynamic_estim)
+  col_wise_median_linear_dynamic[j, ] <- colwise_median(Linear_dynamic_estim)
+  col_wise_median_linear_alt_dynamic[j, ] <- colwise_median(Linear_alt_dynamic_estim)
+  col_wise_median_t_dynamic[j, ] <- colwise_median(t_dynamic_estim)
+  col_wise_median_F_dynamic[j, ] <- colwise_median(F_dynamic_estim)
+  col_wise_median_Jacobi_dynamic[j, ] <- colwise_median(Jacobi_dynamic_estim)
+  
 }
 
+## Stationary analysis
 OU_likelihood_tibble <- as_tibble(col_wise_median_OU_like) |>
   mutate(delta = actual_dts, Model = "Additive", Type = "Likelihood", Method = "MLE")
 
@@ -684,6 +896,13 @@ Stationary_estimation_all <- bind_rows(OU_likelihood_tibble, OU_score_tibble, sq
                                    "t-diffusion", "F-diffusion", "Jacobi-diffusion")),
          Type = factor(Type, levels = c("Likelihood", "Estimation eq.", "Likelihood (Alt.)")))
 
+if(!file.exists("data/Stationary_estimation_all.csv")){
+  utils::write.table(Stationary_estimation_all, file="data/Stationary_estimation_all.csv",
+                     sep = ",", row.names = FALSE)
+} else{
+  Stationary_estimation_all <- read_csv("data/Stationary_estimation_all.csv")
+}
+
 parameter_precision_stationary <- Stationary_estimation_all %>% filter(Parameter != "running_time") |> 
   ggplot(aes(x = t_0 * 1 / delta, y = ARE, color = Parameter, linetype = Type)) +
   geom_line(linewidth = 1.5) +  
@@ -702,10 +921,10 @@ parameter_precision_stationary <- Stationary_estimation_all %>% filter(Parameter
   linetype = guide_legend(override.aes = list(linewidth = 0.75))) +
   scale_linetype_manual(values=c("solid", "dashed", "dotted"))
 
-ggsave(parameter_precision_stationary, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "parameter_precision_stationary.jpeg",
-       height = 6, width = 14, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(parameter_precision_stationary, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "parameter_precision_stationary.jpeg",
+#        height = 6, width = 14, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 estimation_duration_stationary <- Stationary_estimation_all %>%
   filter(Parameter == "running_time") %>%
@@ -724,10 +943,330 @@ estimation_duration_stationary <- Stationary_estimation_all %>%
          linetype = guide_legend(override.aes = list(linewidth = 0.75))) +
   scale_linetype_manual(values=c("solid", "dashed", "dotted"))
   
-ggsave(estimation_duration_stationary, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "estimation_duration_stationary.jpeg",
+
+
+# ggsave(estimation_duration_stationary, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "estimation_duration_stationary.jpeg",
+#        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
+
+## Dynamic analysis
+OU_dynamic_tibble <- as_tibble(col_wise_median_OU_dynamic) |>
+  mutate(delta = actual_dts, Model = "Additive", Type = "Strang")
+
+sqrt_dynamic_tibble <- as_tibble(col_wise_median_sqrt_dynamic) |>
+  mutate(delta = actual_dts, Model = "Square-root", Type = "Strang")
+
+sqrt_alt_dynamic_tibble <- as_tibble(col_wise_median_sqrt_alt_dynamic) |>
+  mutate(delta = actual_dts, Model = "Square-root", Type = "Strang (Alt.)")
+
+linear_dynamic_tibble <- as_tibble(col_wise_median_linear_dynamic) |>
+  mutate(delta = actual_dts, Model = "Linear", Type = "Strang")
+
+linear_alt_dynamic_tibble <- as_tibble(col_wise_median_linear_alt_dynamic) |>
+  mutate(delta = actual_dts, Model = "Linear", Type = "Strang (Alt.)")
+
+t_dynamic_tibble <- as_tibble(col_wise_median_t_dynamic) |>
+  mutate(delta = actual_dts, Model = "t-diffusion", Type = "Strang")
+
+F_dynamic_tibble <- as_tibble(col_wise_median_F_dynamic) |>
+  mutate(delta = actual_dts, Model = "F-diffusion", Type = "Strang")
+
+Jacobi_dynamic_tibble <- as_tibble(col_wise_median_Jacobi_dynamic) |>
+  mutate(delta = actual_dts, Model = "Jacobi-diffusion", Type = "Strang")
+ 
+Dynamic_estimation_all <- bind_rows(OU_dynamic_tibble, sqrt_dynamic_tibble, sqrt_alt_dynamic_tibble,
+                                       linear_dynamic_tibble, linear_alt_dynamic_tibble,
+                                       t_dynamic_tibble, F_dynamic_tibble, Jacobi_dynamic_tibble) |>
+                rename(tau = V1, A = V2, running_time = V3) |> 
+                mutate(Model = factor(Model), Type = factor(Type)) |> 
+                pivot_longer(-c(delta, Model, Type), names_to = "Parameter", values_to = "ARE") |> 
+                mutate(Model = factor(Model, levels = c("Additive", "Square-root", "Linear", 
+                    "t-diffusion", "F-diffusion", "Jacobi-diffusion")),
+Type = factor(Type, levels = c("Strang", "Strang (Alt.)")))
+
+if(!file.exists("data/Dynamic_estimation_all.csv")){
+  utils::write.table(Dynamic_estimation_all, file="data/Dynamic_estimation_all.csv",
+                     sep = ",", row.names = FALSE)
+} else{
+  Dynamic_estimation_all <- read_csv("data/Dynamic_estimation_all.csv")
+}
+
+
+parameter_precision_dynamic <- Dynamic_estimation_all %>% filter(Parameter != "running_time") |> 
+  ggplot(aes(x = tau * 1 / delta, y = ARE, color = Parameter, linetype = Type)) +
+  geom_line(linewidth = 1.5) +  
+  geom_point(size = 3) +
+  facet_wrap(~Model) + 
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  scale_x_log10(breaks = tau * 1 / actual_dts) +
+  scale_color_manual(values = thesis_palette[4:6],
+                     labels = expression(A, tau*phantom(.)[c])) +
+  labs(x = "N", y = "Absolute Relative Error") +  
+  theme(strip.text = element_text(face = "bold", size = 14), panel.spacing = unit(2, "lines"),
+        axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
+        legend.text  = element_text(size = 16), axis.text = element_text(face = "bold", size = 14)) +
+  guides(color = guide_legend(override.aes = list(shape = NA, linewidth = 5)), 
+         linetype = guide_legend(override.aes = list(linewidth = 0.75))) +
+  scale_linetype_manual(values=c("solid", "dashed", "dotted"))
+
+ggsave(parameter_precision_dynamic, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "parameter_precision_dynamic.jpeg",
        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
        limitsize = FALSE, scale = 1)
+
+estimation_duration_dynamic <-  Dynamic_estimation_all %>% filter(Parameter == "running_time") |>
+  ggplot(aes(x = tau * 1 / delta, y = ARE, linetype = Type, color = Model)) +
+  geom_line(linewidth = 1.95) +  
+  geom_point(size = 3.5) +
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  scale_x_log10(breaks = tau * 1 / actual_dts) +
+  labs(x = "N", y = "Running time (s)") +  
+  theme(axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
+        legend.text  = element_text(size = 14), axis.text = element_text(face = "bold", size = 14),
+        panel.border = element_blank()) +
+  scale_color_manual(values = thesis_palette[1:6]) +
+  guides(color = guide_legend(override.aes = list(shape = NA, linewidth = 5)), 
+         linetype = guide_legend(override.aes = list(linewidth = 0.75))) +
+  scale_linetype_manual(values=c("solid", "dashed", "dotted"))
+
+# ggsave(estimation_duration_dynamic, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "estimation_duration_dynamic.jpeg",
+#        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
+
+
+##### Estimation of the nu-parameter
+true_param_base <- c(0.87, -1.51, -3, sqrt(0.15))
+mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+actual_dt <- c(1/3, 1/5, 1/25, 1/50, 1/100)
+tau <- 132
+t_0 <- 54
+
+nus <- c(0.75, 0.9, 1, 1/0.9, 1/0.75)
+numSim <- 50
+
+
+t_error_counts <- matrix(data = NA, nrow = length(actual_dt), ncol = length(nus))
+both_error_count <- matrix(data = NA, nrow = length(actual_dt), ncol = length(nus))
+add_error_counts <- matrix(data = NA, nrow = length(actual_dt), ncol = length(nus))
+median_add_dynamic_nus <- matrix(data = NA, nrow = length(actual_dt), ncol = length(nus))
+median_add_dynamic_A <- matrix(data = NA, nrow = length(actual_dt), ncol = length(nus))
+median_add_dynamic_tau <- matrix(data = NA, nrow = length(actual_dt), ncol = length(nus))
+median_t_dynamic_nus <- matrix(data = NA, nrow = length(actual_dt), ncol = length(nus))
+median_t_dynamic_A <- matrix(data = NA, nrow = length(actual_dt), ncol = length(nus))
+median_t_dynamic_tau <- matrix(data = NA, nrow = length(actual_dt), ncol = length(nus))
+set.seed(130524)
+
+for(n in seq_along(actual_dt)){
+t_dynamic_nus <- matrix(data = NA, nrow = numSim, ncol = length(nus))
+add_dynamic_nus <- matrix(data = NA, nrow = numSim, ncol = length(nus)) 
+t_dynamic_A <- matrix(data = NA, nrow = numSim, ncol = length(nus))
+add_dynamic_A <- matrix(data = NA, nrow = numSim, ncol = length(nus))
+t_dynamic_tau <- matrix(data = NA, nrow = numSim, ncol = length(nus))
+add_dynamic_tau <- matrix(data = NA, nrow = numSim, ncol = length(nus))
+t_error_count_vec <- numeric(length = length(nus))
+add_error_count_vec <- numeric(length = length(nus))
+both_error_count_vec <- numeric(length = length(nus))
+for (i in seq_along(nus)){
+cat("Grinding nu number: ", i, "\n")
+true_param <- c(true_param_base, nus[i])
+dynamic_part_true_param <- c(tau, true_param[1], true_param[5])
+  for(j in 1:numSim){
+    cat("Currently at: ", j, " in the simulation\n")
+    success <- FALSE
+    while(!success){
+    t_failed <- FALSE
+    OU_failed <- FALSE
+    seed <- sample.int(100000, size = 1)
+    random_noise_start <- runif(2, min = 0.9, max = 1.1)
+    sim_res_t_distribution <- simulate_t_distribution_tipping_model(
+    step_length = actual_dt[n],
+    par = true_param,
+    tau = tau, t_0 = t_0,
+    beyond_tipping = 0, seed = seed)
+  
+    sim_res_add <- simulate_additive_noise_tipping_model(
+    step_length = actual_dt[n],
+     par = true_param,
+     tau = tau, t_0 = t_0,
+     beyond_tipping = 0, seed = seed)
+    
+
+    t_dist_estim_param <- optimize_stationary_likelihood(
+    likelihood_fun = t_diffusion_strang_splitting,
+    data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
+    init_par = stationary_part_true_param,
+    delta = actual_dt[n],
+    exp_sigma = TRUE)$par
+    
+    additive_estim_param <- optimize_stationary_likelihood(
+    likelihood_fun = OU_likelihood,
+    data = sim_res_add$X_t[sim_res_add$t < t_0],
+    init_par = stationary_part_true_param,
+    delta = actual_dt[n],
+    exp_sigma = TRUE)$par
+    
+    tryCatch({
+      t_result <- optimize_dynamic_likelihood(
+        likelihood_fun = t_transform_dynamic_likelihood,
+        data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0]),
+        init_par = c(c(tau, true_param[1]) * random_noise_start, 1),
+        delta = actual_dt[n],
+        alpha0 = t_dist_estim_param[1],
+        mu0 = t_dist_estim_param[2],
+        sigma = t_dist_estim_param[3],
+        control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+      if(t_result$objective >=0){stop("t failed")}
+    t_dynamic_tau[j, i] <- abs(t_result$par[1] - tau) / tau
+    t_dynamic_A[j, i] <-   abs(t_result$par[2] - true_param[1]) / true_param[1]
+    t_dynamic_nus[j, i] <- abs(t_result$par[3]  - nus[i]) / nus[i]
+    }, error = function(e){
+      cat("t failed \n")
+      t_error_count_vec[i] <<- t_error_count_vec[i] + 1
+      t_failed <<- TRUE
+    })
+    
+    tryCatch({
+      add_result <- optimize_dynamic_likelihood(
+        likelihood_fun = OU_dynamic_likelihood,
+        data  = sim_res_add$X_t[sim_res_add$t > t_0],
+        init_par = c(c(tau, true_param[1]) * random_noise_start, 1),
+        delta = actual_dt[n],
+        alpha0 = additive_estim_param[1],
+        mu0 = additive_estim_param[2],
+        sigma = additive_estim_param[3],
+        control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+      add_dynamic_tau[j, i] <- abs(add_result$par[1] - tau) / tau
+      add_dynamic_A[j, i] <-   abs(add_result$par[2] - true_param[1]) / true_param[1]
+      add_dynamic_nus[j, i] <- abs(add_result$par[3]  - nus[i]) / nus[i]
+    }, error = function(e){
+      cat("OU failed \n")
+      add_error_count_vec[i] <<- add_error_count_vec[i] + 1
+      OU_failed <<- TRUE
+    })
+
+    if(OU_failed && t_failed){
+      print("Both failed")
+      both_error_count_vec[i] <- both_error_count_vec[i] + 1
+    }
+    if(!t_failed && !OU_failed){
+    success <- TRUE
+    }
+    }
+  }
+}
+t_error_counts[n, ] <- t_error_count_vec
+add_error_counts[n, ] <- add_error_count_vec
+both_error_count[n, ]<- both_error_count_vec
+median_add_dynamic_nus[n, ] <- colwise_median(add_dynamic_nus)
+median_t_dynamic_nus[n, ] <-  colwise_median(t_dynamic_nus)
+median_add_dynamic_tau[n, ] <- colwise_median(add_dynamic_tau)
+median_t_dynamic_tau[n, ] <-  colwise_median(t_dynamic_tau)
+median_add_dynamic_A[n, ] <-  colwise_median(add_dynamic_A)
+median_t_dynamic_A[n, ] <- colwise_median(t_dynamic_A)
+}
+
+add_dynamic_nus_tibble <- as_tibble(median_add_dynamic_nus) |> 
+  mutate(Model = "Additive", N = tau / actual_dt, Parameter = "nu")
+
+t_dynamic_nus_tibble <- as_tibble(median_t_dynamic_nus) |> 
+  mutate(Model = "t-diffusion", N = tau / actual_dt, Parameter = "nu")
+
+add_dynamic_tau_tibble <- as_tibble(median_add_dynamic_tau) |> 
+  mutate(Model = "Additive", N = tau / actual_dt, Parameter = "tau")
+
+t_dynamic_tau_tibble <- as_tibble(median_t_dynamic_tau) |> 
+  mutate(Model = "t-diffusion", N = tau / actual_dt, Parameter = "tau")
+
+add_dynamic_A_tibble <- as_tibble(median_add_dynamic_A) |> 
+  mutate(Model = "Additive", N = tau / actual_dt, Parameter = "A")
+
+t_dynamic_A_tibble <- as_tibble(median_t_dynamic_A) |> 
+  mutate(Model = "t-diffusion", N = tau / actual_dt, Parameter = "A")
+
+add_error_counts_tibble <- as_tibble(add_error_counts) |> 
+  mutate(Model = "Additive", N = tau / actual_dt)
+
+t_error_counts_tibble <- as_tibble(t_error_counts) |> 
+  mutate(Model = "t-diffusion", N = tau / actual_dt)
+
+both_error_counts_tibble <- as_tibble(both_error_count) |> 
+  mutate(Model = "Both", N = tau / actual_dt)
+
+
+error_count_tibble <- bind_rows(add_error_counts_tibble, t_error_counts_tibble, both_error_counts_tibble)
+
+names(error_count_tibble) <- c(nus, "Model", "N")
+
+error_count_tibble_long <- error_count_tibble |> 
+  pivot_longer(-c(Model, N), names_to = "nu", values_to = "Error_count") |> 
+  mutate(nu = factor(round(as.numeric(nu), 2)),
+         Model = factor(Model, levels = c("Additive", "t-diffusion", "Both")),
+  error_proportion = Error_count / (Error_count + numSim))
+
+if(!file.exists("data/error_count_nu_data.csv")){
+  utils::write.table(error_count_tibble_long, file="data/error_count_nu_data.csv",
+                     sep = ",", row.names = FALSE)
+} else{
+  error_count_tibble_long <- read_csv("data/error_count_nu_data.csv")
+}
+
+error_count_plot <- error_count_tibble_long |> ggplot(aes(x = nu, y = error_proportion, fill = Model)) +
+  geom_col(position = "dodge2", col = "black") +
+  facet_wrap(~factor(N)) +
+  scale_fill_manual(values = thesis_palette) +
+  scale_y_continuous(labels = scales::percent) + 
+  labs(x = expression(nu*phantom(.)[sim]), y = "") +  
+  theme(strip.text = element_text(face = "bold", size = 14), panel.spacing = unit(2, "lines"),
+        axis.title.x = element_text(size = 18), axis.title.y = element_text(face = "bold"),
+        legend.text  = element_text(size = 16), axis.text = element_text(size = 14)) +
+  guides(fill = guide_legend(override.aes = list(shape = NA, col = NA)))
+
+ggsave(error_count_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "error_count_plot.jpeg",
+       height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+combined_nus_tibble <- bind_rows(add_dynamic_nus_tibble, t_dynamic_nus_tibble,
+                                 add_dynamic_tau_tibble, t_dynamic_tau_tibble,
+                                 add_dynamic_A_tibble, t_dynamic_A_tibble) |> 
+  mutate(Model = factor(Model), Parameter = factor(Parameter))
+
+names(combined_nus_tibble) <- c(nus, "Model", "N", "Parameter")
+
+combined_nus_tibble_long <- combined_nus_tibble |> 
+  pivot_longer(-c(Model, N, Parameter), names_to = "nu", values_to = "ARE") |> 
+  mutate(nu = factor(round(as.numeric(nu), 2)))
+
+if(!file.exists("data/nu_estimation_ARE.csv")){
+  utils::write.table(combined_nus_tibble_long, file="data/nu_estimation_ARE.csv",
+                     sep = ",", row.names = FALSE)
+} else{
+  combined_nus_tibble_long <- read_csv("data/nu_estimation_ARE.csv")
+}
+
+combined_nus_plot <- combined_nus_tibble_long |> ggplot(aes(x = N, y = ARE, col = nu)) +
+  geom_line(linewidth = 1.5) + geom_point(size = 3) + 
+  facet_grid(Model ~ Parameter, 
+             scales = "free_y", labeller = label_parsed) +
+  scale_x_log10(breaks = tau / actual_dt) +
+  scale_color_manual(values = thesis_palette) +
+  labs(x = "N", y = "Absolute Relative Error", color = expression(nu*phantom(.)[sim])) +  
+  theme(strip.text = element_text(face = "bold", size = 16), panel.spacing = unit(2, "lines"),
+        axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
+        legend.text  = element_text(size = 14), axis.text = element_text(size = 14)) +
+  guides(color = guide_legend(override.aes = list(shape = NA, linewidth = 7.5)))
+  
+ggsave(combined_nus_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "combined_nus_plot.jpeg",
+       height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
 
 # Precision of estimator as a function of how early we have information up to.
 # Try t-distribution
@@ -792,7 +1331,7 @@ for (nu in nu_values){
           exp_sigma = TRUE)$par
         
         additive_estim_param <- optimize_stationary_likelihood(
-          likelihood_fun = t_diffusion_strang_splitting,
+          likelihood_fun = OU_likelihood,
           data = sim_res_additive$X_t[sim_res_additive$t < t_0],
           init_par = stationary_part_true_param,
           delta = actual_dt,
@@ -810,7 +1349,7 @@ for (nu in nu_values){
                        sigma = t_dist_estim_param[3])$par[1] - tau) / tau
 
         accuracy_tau_add[j, i] <- (optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
-                       data  =sim_res_additive$X_t[sim_res_additive$t > t_0],
+                       data  = sim_res_additive$X_t[sim_res_additive$t > t_0],
                        init_par = dynamic_part_true_param + noise_starting_values,
                        delta = actual_dt,
                        alpha0 = additive_estim_param[1],

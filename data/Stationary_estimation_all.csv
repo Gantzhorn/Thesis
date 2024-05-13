@@ -1,0 +1,201 @@
+"delta","Model","Type","Method","Parameter","ARE"
+0.2,"Additive","Likelihood","MLE","alpha0",0.201014129823873
+0.2,"Additive","Likelihood","MLE","mu0",0.0143523510955849
+0.2,"Additive","Likelihood","MLE","sigma",0.0455727816021206
+0.2,"Additive","Likelihood","MLE","running_time",0.001772648
+0.1,"Additive","Likelihood","MLE","alpha0",0.188286516946063
+0.1,"Additive","Likelihood","MLE","mu0",0.0122393287322161
+0.1,"Additive","Likelihood","MLE","sigma",0.0270180815137733
+0.1,"Additive","Likelihood","MLE","running_time",0.0019724675
+0.04,"Additive","Likelihood","MLE","alpha0",0.159241827440483
+0.04,"Additive","Likelihood","MLE","mu0",0.0178531365621695
+0.04,"Additive","Likelihood","MLE","sigma",0.0191096625862994
+0.04,"Additive","Likelihood","MLE","running_time",0.002825751
+0.01,"Additive","Likelihood","MLE","alpha0",0.192006983920146
+0.01,"Additive","Likelihood","MLE","mu0",0.0192504925533893
+0.01,"Additive","Likelihood","MLE","sigma",0.00834203719600426
+0.01,"Additive","Likelihood","MLE","running_time",0.007392044
+0.004,"Additive","Likelihood","MLE","alpha0",0.181159060516802
+0.004,"Additive","Likelihood","MLE","mu0",0.0141422511490437
+0.004,"Additive","Likelihood","MLE","sigma",0.00519590674682893
+0.004,"Additive","Likelihood","MLE","running_time",0.0170210725
+0.2,"Additive","Estimation eq.","Score","alpha0",0.371488332296019
+0.2,"Additive","Estimation eq.","Score","mu0",0.0172694974832977
+0.2,"Additive","Estimation eq.","Score","sigma",0.0517014851059779
+0.2,"Additive","Estimation eq.","Score","running_time",0.000746466
+0.1,"Additive","Estimation eq.","Score","alpha0",0.246490701291704
+0.1,"Additive","Estimation eq.","Score","mu0",0.0189994853130269
+0.1,"Additive","Estimation eq.","Score","sigma",0.0376876683758416
+0.1,"Additive","Estimation eq.","Score","running_time",0.000814885
+0.04,"Additive","Estimation eq.","Score","alpha0",0.16756974708708
+0.04,"Additive","Estimation eq.","Score","mu0",0.0188982504706425
+0.04,"Additive","Estimation eq.","Score","sigma",0.0164096300412794
+0.04,"Additive","Estimation eq.","Score","running_time",0.001040005
+0.01,"Additive","Estimation eq.","Score","alpha0",0.19761842564142
+0.01,"Additive","Estimation eq.","Score","mu0",0.0205109563842202
+0.01,"Additive","Estimation eq.","Score","sigma",0.00807502197151054
+0.01,"Additive","Estimation eq.","Score","running_time",0.0021874835
+0.004,"Additive","Estimation eq.","Score","alpha0",0.181116845396482
+0.004,"Additive","Estimation eq.","Score","mu0",0.0143934762977729
+0.004,"Additive","Estimation eq.","Score","sigma",0.00522112976001556
+0.004,"Additive","Estimation eq.","Score","running_time",0.0046015185
+0.2,"Square-root","Estimation eq.","Martingale","alpha0",0.327618528130883
+0.2,"Square-root","Estimation eq.","Martingale","mu0",0.0112089947371457
+0.2,"Square-root","Estimation eq.","Martingale","sigma",0.0602803610862226
+0.2,"Square-root","Estimation eq.","Martingale","running_time",5.2948e-05
+0.1,"Square-root","Estimation eq.","Martingale","alpha0",0.37918444590506
+0.1,"Square-root","Estimation eq.","Martingale","mu0",0.0100190983160891
+0.1,"Square-root","Estimation eq.","Martingale","sigma",0.030884046395719
+0.1,"Square-root","Estimation eq.","Martingale","running_time",0.0003261945
+0.04,"Square-root","Estimation eq.","Martingale","alpha0",0.308687354025891
+0.04,"Square-root","Estimation eq.","Martingale","mu0",0.0145188564998231
+0.04,"Square-root","Estimation eq.","Martingale","sigma",0.0193680157949516
+0.04,"Square-root","Estimation eq.","Martingale","running_time",0.000324475
+0.01,"Square-root","Estimation eq.","Martingale","alpha0",0.292488797215194
+0.01,"Square-root","Estimation eq.","Martingale","mu0",0.0158962542578358
+0.01,"Square-root","Estimation eq.","Martingale","sigma",0.00790862094566559
+0.01,"Square-root","Estimation eq.","Martingale","running_time",0.000266837
+0.004,"Square-root","Estimation eq.","Martingale","alpha0",0.338176205570924
+0.004,"Square-root","Estimation eq.","Martingale","mu0",0.0124774751836007
+0.004,"Square-root","Estimation eq.","Martingale","sigma",0.00521279795851981
+0.004,"Square-root","Estimation eq.","Martingale","running_time",0.0003831045
+0.2,"Square-root","Likelihood","Strang","alpha0",0.19302433086058
+0.2,"Square-root","Likelihood","Strang","mu0",0.0109117800768971
+0.2,"Square-root","Likelihood","Strang","sigma",0.0501331035411515
+0.2,"Square-root","Likelihood","Strang","running_time",0.0109847025
+0.1,"Square-root","Likelihood","Strang","alpha0",0.185255314645135
+0.1,"Square-root","Likelihood","Strang","mu0",0.00995157821780459
+0.1,"Square-root","Likelihood","Strang","sigma",0.0267907649406258
+0.1,"Square-root","Likelihood","Strang","running_time",0.0158648255
+0.04,"Square-root","Likelihood","Strang","alpha0",0.167153408867817
+0.04,"Square-root","Likelihood","Strang","mu0",0.0116761373819184
+0.04,"Square-root","Likelihood","Strang","sigma",0.0185303849804172
+0.04,"Square-root","Likelihood","Strang","running_time",0.0321371205
+0.01,"Square-root","Likelihood","Strang","alpha0",0.275239044572918
+0.01,"Square-root","Likelihood","Strang","mu0",0.0269355417078948
+0.01,"Square-root","Likelihood","Strang","sigma",0.00834028796467261
+0.01,"Square-root","Likelihood","Strang","running_time",0.148461185
+0.004,"Square-root","Likelihood","Strang","alpha0",0.202023553984366
+0.004,"Square-root","Likelihood","Strang","mu0",0.0128454874191421
+0.004,"Square-root","Likelihood","Strang","sigma",0.00535756683274165
+0.004,"Square-root","Likelihood","Strang","running_time",0.1741346555
+0.2,"Linear","Estimation eq.","Martingale","alpha0",0.034901109194048
+0.2,"Linear","Estimation eq.","Martingale","mu0",0.00895637310606646
+0.2,"Linear","Estimation eq.","Martingale","sigma",0.0378099488014789
+0.2,"Linear","Estimation eq.","Martingale","running_time",0.00071304
+0.1,"Linear","Estimation eq.","Martingale","alpha0",0.0492598131383212
+0.1,"Linear","Estimation eq.","Martingale","mu0",0.00915522290741569
+0.1,"Linear","Estimation eq.","Martingale","sigma",0.0347622935710599
+0.1,"Linear","Estimation eq.","Martingale","running_time",0.0007792455
+0.04,"Linear","Estimation eq.","Martingale","alpha0",0.0414761220367771
+0.04,"Linear","Estimation eq.","Martingale","mu0",0.0127103843223278
+0.04,"Linear","Estimation eq.","Martingale","sigma",0.0139489856721822
+0.04,"Linear","Estimation eq.","Martingale","running_time",0.000930268
+0.01,"Linear","Estimation eq.","Martingale","alpha0",0.0492432235793825
+0.01,"Linear","Estimation eq.","Martingale","mu0",0.0144829069902669
+0.01,"Linear","Estimation eq.","Martingale","sigma",0.00787704088371588
+0.01,"Linear","Estimation eq.","Martingale","running_time",0.0017757975
+0.004,"Linear","Estimation eq.","Martingale","alpha0",0.0632301481629783
+0.004,"Linear","Estimation eq.","Martingale","mu0",0.01145316836701
+0.004,"Linear","Estimation eq.","Martingale","sigma",0.00507578459843942
+0.004,"Linear","Estimation eq.","Martingale","running_time",0.003740755
+0.2,"Linear","Likelihood (Alt.)","Strang (Alternative)","alpha0",0.210691191068647
+0.2,"Linear","Likelihood (Alt.)","Strang (Alternative)","mu0",0.00992517899083098
+0.2,"Linear","Likelihood (Alt.)","Strang (Alternative)","sigma",0.0467113913798239
+0.2,"Linear","Likelihood (Alt.)","Strang (Alternative)","running_time",0.002670899
+0.1,"Linear","Likelihood (Alt.)","Strang (Alternative)","alpha0",0.191922760233459
+0.1,"Linear","Likelihood (Alt.)","Strang (Alternative)","mu0",0.00871008447337465
+0.1,"Linear","Likelihood (Alt.)","Strang (Alternative)","sigma",0.026996263372531
+0.1,"Linear","Likelihood (Alt.)","Strang (Alternative)","running_time",0.003365706
+0.04,"Linear","Likelihood (Alt.)","Strang (Alternative)","alpha0",0.157798561528293
+0.04,"Linear","Likelihood (Alt.)","Strang (Alternative)","mu0",0.0119409265371385
+0.04,"Linear","Likelihood (Alt.)","Strang (Alternative)","sigma",0.0181783518801725
+0.04,"Linear","Likelihood (Alt.)","Strang (Alternative)","running_time",0.0052872045
+0.01,"Linear","Likelihood (Alt.)","Strang (Alternative)","alpha0",0.204362469844295
+0.01,"Linear","Likelihood (Alt.)","Strang (Alternative)","mu0",0.0143498747605044
+0.01,"Linear","Likelihood (Alt.)","Strang (Alternative)","sigma",0.00802970635648263
+0.01,"Linear","Likelihood (Alt.)","Strang (Alternative)","running_time",0.017491539
+0.004,"Linear","Likelihood (Alt.)","Strang (Alternative)","alpha0",0.211815749487184
+0.004,"Linear","Likelihood (Alt.)","Strang (Alternative)","mu0",0.0105013233577677
+0.004,"Linear","Likelihood (Alt.)","Strang (Alternative)","sigma",0.00519150017250225
+0.004,"Linear","Likelihood (Alt.)","Strang (Alternative)","running_time",0.040381401
+0.2,"Linear","Likelihood","Strang","alpha0",0.215642339494756
+0.2,"Linear","Likelihood","Strang","mu0",0.0106235442767784
+0.2,"Linear","Likelihood","Strang","sigma",0.0469173128520672
+0.2,"Linear","Likelihood","Strang","running_time",0.012356074
+0.1,"Linear","Likelihood","Strang","alpha0",0.200363595274849
+0.1,"Linear","Likelihood","Strang","mu0",0.00880758792996158
+0.1,"Linear","Likelihood","Strang","sigma",0.0318953621242489
+0.1,"Linear","Likelihood","Strang","running_time",0.017311035
+0.04,"Linear","Likelihood","Strang","alpha0",0.163574903915791
+0.04,"Linear","Likelihood","Strang","mu0",0.0120868724409979
+0.04,"Linear","Likelihood","Strang","sigma",0.0206830597810974
+0.04,"Linear","Likelihood","Strang","running_time",0.0294527555
+0.01,"Linear","Likelihood","Strang","alpha0",0.212458427630891
+0.01,"Linear","Likelihood","Strang","mu0",0.0153757741230805
+0.01,"Linear","Likelihood","Strang","sigma",0.00822896748149206
+0.01,"Linear","Likelihood","Strang","running_time",0.116303391
+0.004,"Linear","Likelihood","Strang","alpha0",0.211819971559435
+0.004,"Linear","Likelihood","Strang","mu0",0.0105013569629739
+0.004,"Linear","Likelihood","Strang","sigma",0.00518562687087484
+0.004,"Linear","Likelihood","Strang","running_time",0.279563593
+0.2,"t-diffusion","Likelihood","Strang","alpha0",0.202016109042342
+0.2,"t-diffusion","Likelihood","Strang","mu0",0.0189988735145402
+0.2,"t-diffusion","Likelihood","Strang","sigma",0.0495596730843194
+0.2,"t-diffusion","Likelihood","Strang","running_time",0.026568754
+0.1,"t-diffusion","Likelihood","Strang","alpha0",0.166089408483743
+0.1,"t-diffusion","Likelihood","Strang","mu0",0.0154205698710593
+0.1,"t-diffusion","Likelihood","Strang","sigma",0.0273225929918804
+0.1,"t-diffusion","Likelihood","Strang","running_time",0.030547791
+0.04,"t-diffusion","Likelihood","Strang","alpha0",0.192359202111064
+0.04,"t-diffusion","Likelihood","Strang","mu0",0.0289950512430175
+0.04,"t-diffusion","Likelihood","Strang","sigma",0.0192953526961782
+0.04,"t-diffusion","Likelihood","Strang","running_time",0.0998333915
+0.01,"t-diffusion","Likelihood","Strang","alpha0",0.249008440807612
+0.01,"t-diffusion","Likelihood","Strang","mu0",0.0341585500277541
+0.01,"t-diffusion","Likelihood","Strang","sigma",0.00842898164239818
+0.01,"t-diffusion","Likelihood","Strang","running_time",0.4881549145
+0.004,"t-diffusion","Likelihood","Strang","alpha0",0.176645706275034
+0.004,"t-diffusion","Likelihood","Strang","mu0",0.0175749419689059
+0.004,"t-diffusion","Likelihood","Strang","sigma",0.00523329711415069
+0.004,"t-diffusion","Likelihood","Strang","running_time",0.4000167315
+0.2,"F-diffusion","Likelihood","Strang","alpha0",0.193897735753152
+0.2,"F-diffusion","Likelihood","Strang","mu0",0.0172953545340853
+0.2,"F-diffusion","Likelihood","Strang","sigma",0.0441574674163736
+0.2,"F-diffusion","Likelihood","Strang","running_time",0.0308812725
+0.1,"F-diffusion","Likelihood","Strang","alpha0",0.168016407698874
+0.1,"F-diffusion","Likelihood","Strang","mu0",0.0142281668746543
+0.1,"F-diffusion","Likelihood","Strang","sigma",0.0273707740118508
+0.1,"F-diffusion","Likelihood","Strang","running_time",0.055005394
+0.04,"F-diffusion","Likelihood","Strang","alpha0",0.166175552991321
+0.04,"F-diffusion","Likelihood","Strang","mu0",0.0218866942392331
+0.04,"F-diffusion","Likelihood","Strang","sigma",0.0154313468385994
+0.04,"F-diffusion","Likelihood","Strang","running_time",0.164374302
+0.01,"F-diffusion","Likelihood","Strang","alpha0",0.204496681936391
+0.01,"F-diffusion","Likelihood","Strang","mu0",0.0258176803817136
+0.01,"F-diffusion","Likelihood","Strang","sigma",0.00855259170832276
+0.01,"F-diffusion","Likelihood","Strang","running_time",0.7284726835
+0.004,"F-diffusion","Likelihood","Strang","alpha0",0.183772392692445
+0.004,"F-diffusion","Likelihood","Strang","mu0",0.0170841904302302
+0.004,"F-diffusion","Likelihood","Strang","sigma",0.00523791350141113
+0.004,"F-diffusion","Likelihood","Strang","running_time",0.7181401985
+0.2,"Jacobi-diffusion","Likelihood","Strang","alpha0",0.2147411255604
+0.2,"Jacobi-diffusion","Likelihood","Strang","mu0",0.00568478194056939
+0.2,"Jacobi-diffusion","Likelihood","Strang","sigma",0.0610090608031252
+0.2,"Jacobi-diffusion","Likelihood","Strang","running_time",0.0256012115
+0.1,"Jacobi-diffusion","Likelihood","Strang","alpha0",0.193767838318835
+0.1,"Jacobi-diffusion","Likelihood","Strang","mu0",0.00580113544928839
+0.1,"Jacobi-diffusion","Likelihood","Strang","sigma",0.0343796993239249
+0.1,"Jacobi-diffusion","Likelihood","Strang","running_time",0.039972966
+0.04,"Jacobi-diffusion","Likelihood","Strang","alpha0",0.160666611960291
+0.04,"Jacobi-diffusion","Likelihood","Strang","mu0",0.00556573475762631
+0.04,"Jacobi-diffusion","Likelihood","Strang","sigma",0.0212820452253634
+0.04,"Jacobi-diffusion","Likelihood","Strang","running_time",0.09190875
+0.01,"Jacobi-diffusion","Likelihood","Strang","alpha0",0.227818132073332
+0.01,"Jacobi-diffusion","Likelihood","Strang","mu0",0.00905923547043482
+0.01,"Jacobi-diffusion","Likelihood","Strang","sigma",0.0301445909841007
+0.01,"Jacobi-diffusion","Likelihood","Strang","running_time",0.4091577405
+0.004,"Jacobi-diffusion","Likelihood","Strang","alpha0",0.239048331901092
+0.004,"Jacobi-diffusion","Likelihood","Strang","mu0",0.00617048463087749
+0.004,"Jacobi-diffusion","Likelihood","Strang","sigma",0.0306747037732379
+0.004,"Jacobi-diffusion","Likelihood","Strang","running_time",0.8038467565
