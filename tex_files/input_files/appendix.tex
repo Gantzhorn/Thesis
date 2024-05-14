@@ -1,5 +1,5 @@
 \section{Source code}
-The source code for this project, licensed under the MIT License, is hosted on \href{https://github.com/Gantzhorn/Thesis}{Github}. In the repository the source code can be found in the \textit{"source\_code"}-directory. To recreate the main results from the thesis run the \code{R}-script: \textit{"main.R"}. For the code itself refer to the other \code{R}-files in the same directory. Apart from the code these also includes information about the code as well as examples on how to actually run it. 
+The source code for this project, licensed under the MIT License, is hosted on \href{https://github.com/Gantzhorn/Thesis}{Github}. In the repository the source code can be found in the \textit{"source\_code"}-directory. To recreate the main results from the thesis run the \code{R}-script: \textit{"main.R"}. The main-file has loads of boilerplate code; if one wants to understand the methods themselves it is easier to read the other \code{R}-files in the same directory. Apart from the code these also includes information about the code as well as minimal examples on how to actually run it. 
 \section{Simulation Methods}\label{appendix:simMethods}
 This section focuses on constructing the simulation schemes that support the analytical work presented in this thesis. We considered the Euler-maruyama - as well the Milstein scheme. However, as the processes are quite non-linear our final choice was the Scalar weak order 2.0 Itô–Taylor method \cite[algorithm 8.5]{Srkk2019}. In the general setup we simulate $X_0,X_{t_1},\dots, X_{t_N}$ according to the schemes by sampling $N$ random variables $\Delta W_{t_k}\sim\mathcal{N}\left(0, \Delta t_k\right)$. Note that we let $X_{t_0} = \mu_0$, i.e. mean-reverting parameter in the stationary parts of the processes.
 \noindent \textbf{Additive noise}\\
@@ -28,7 +28,7 @@ With linear noise we get the simulation scheme
 \end{align}
 \\
 \textbf{Skew t-distribution}\\
-With the skew t distribution as the Stationary distribution of the non-dynamic part of the process we get the following scheme
+For the t-diffusion based model, we get
 \begin{align}
     X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma \sqrt{\left(X_{t_k}^2 + 1\right)} \Delta W_{k} \nonumber\\
     &+ \frac{\sigma^2}{2}X_t \left(\Delta W_{k}^2 - \Delta t_k\right) - A\left(X_{t_k} - m \right)\sigma\sqrt{\left(X_{t_k}^2 + 1\right)}\Delta W_{k}\Delta t_k \nonumber\\
@@ -37,7 +37,7 @@ With the skew t distribution as the Stationary distribution of the non-dynamic p
 \end{align}
 \\
 \textbf{F-distribution}\\
-The model with the F-distribution as the stationary distribution in the non-dynamic part is sampled in the following manner
+The model with the F-diffusion based model is sampled as
 \begin{align}
     X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma\sqrt{X_{t_k}\left(X_{t_k} + 1\right)}\Delta W_k \nonumber \\
     &+ \frac{\sigma^2}{4}\left(2X_{t_k} + 1\right)\left(\Delta W_k^2 - \Delta t_k\right) - A \left(X_{t_k} - m\right)\sigma \sqrt{X_{t_k}\left(X_{t_k} + 1\right)}\Delta W_k \Delta t_k \nonumber \\
@@ -401,7 +401,7 @@ In the stationary part of the process the pearson diffusion with the scaled F-di
 \end{align}
 The lamperti-transform is $Y_t := 2 \sinh^{-1}\left(\sqrt{X_t}\right)$ and Itô's formula gives us
 \begin{align}
-    \mathrm{d}Y_t = - \frac{1}{\sinh(Y_t)}\left(\left(\alpha_0 + \frac{\sigma^2}{2}\right)\cosh(Y_t) - \alpha_0\left(2\mu + 1\right)\right) \mathrm{d}t + \sigma \mathrm{d}W_t.
+    \mathrm{d}Y_t = - \frac{1}{\sinh(Y_t)}\left(\left(\alpha_0 + \frac{\sigma^2}{2}\right)\cosh(Y_t) - \alpha_0\left(2\mu + 1\right)\right) \mathrm{d}t + \sigma \mathrm{d}W_t. \label{eq:F_diffusion_lamperti_SDE}
 \end{align}
 This stochastic differential equation's drift has the fixed point $\cosh^{-1}\left(\frac{2\alpha_0\left(2\mu + 1\right)}{2\alpha_0 + \sigma^2}\right)$.
 Therefore Continuing with the same heuristic of linearizing around the fix-points of the drift, we get the splitting
@@ -470,8 +470,8 @@ The ODE is found residually and solved using our fourth-order Runge-kutta. That 
 \end{align}
 Both of which can be solved as we have done so numerous times in the above sections. Likewise, we can construct the Strang estimator in the way we have done many times before.
 \newpage
-\section{Benchmark}\label{section:benchmark}
-In this section we show the results of a few benchmarks using the \code{microbenchmark} package \cite{microbenchmark}. The figures are put in the order in which they appear in the project. The code was run on a machine with the following hardware and software.
+\section{Benchmark and auxilliary plots}\label{section:benchmark}
+In this section we show the results of a few benchmarks using the \code{microbenchmark} package \cite{microbenchmark} along with other auxilliary figures that underpin the analysis. The figures are put in the order in which they appear in the project. The code was run on a machine with the following hardware and software.
 \begin{table}[ht]
     \centering
     \begin{tabular}{@{}ll@{}}
@@ -500,5 +500,13 @@ In this section we show the results of a few benchmarks using the \code{microben
     \includegraphics[scale = .1]{figures/estimation_duration_dynamic.jpeg}
     \caption{The median run-time from invokation to convergence in the dynamic part. The ARE of the estimators are shown in figure \ref{figure:parameter_precision_dynamic}}
     \label{figure:estimation_duration_dynamic}
+    \end{center}
+\end{figure}
+
+\begin{figure}[h!]
+    \begin{center}
+    \includegraphics[scale = .1]{figures/ARE_dist_result_plot_F.jpeg}
+    \caption{Distribution of the ARE of the parameters in the $F$-diffusion based model shown for the numeric and closed form type estimation methds. A similar result for the linear noise model is shown in figure \ref{figure:ARE_dist_linear_noise}}
+    \label{figure:ARE_dist_numeric_F_diffusion}
     \end{center}
 \end{figure}

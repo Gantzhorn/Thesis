@@ -17,6 +17,15 @@ ggplot2::theme_set(thesis_theme)
 thesis_palette <- c("#E69F00", "#56B4E9", "#009E73", "#CCB400", "#0072B2",
                     "#D55E00", "#CC79A7", "#F0E442", "#D55E87", "#6E016B")
 
+# Auxilliary methods used in the main-file
+colwise_median <- function(estimates) {
+  apply(estimates, 2, function(x) quantile(x, probs = 0.5))
+}
+
+colwise_quantile <- function(estimates, probs = 0.975) {
+  apply(estimates, 2, function(x) quantile(x, probs = probs))
+}
+
 
 ###------------------------------------------------------------------------###
 ###----------------------------Method section------------------------------###
@@ -376,10 +385,6 @@ nu_plot <- ggplot(nu_plot_data, aes(x = t, y = Value, color = nu, linetype = Fix
 ###------------------------------------------------------------------------###
 
 #Overview of the estimation methods
-
-colwise_median <- function(estimates) {
-  apply(estimates, 2, function(x) quantile(x, probs = 0.5))
-}
 
 # General study of performance
 # Parameters where all models work
@@ -1023,7 +1028,7 @@ estimation_duration_dynamic <-  Dynamic_estimation_all %>% filter(Parameter == "
   scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
                 labels = scales::trans_format("log10", scales::math_format(10^.x))) +
   scale_x_log10(breaks = tau * 1 / actual_dts) +
-  labs(x = "N", y = "Running time (s)") +  
+  labs(x = "N", y = "Running time (s)") + 
   theme(axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
         legend.text  = element_text(size = 14), axis.text = element_text(face = "bold", size = 14),
         panel.border = element_blank()) +
@@ -1268,7 +1273,7 @@ ggsave(combined_nus_plot, path = paste0(getwd(), "/tex_files/figures"),
        limitsize = FALSE, scale = 1)
 
 
-# Precision of estimator as a function of how early we have information up to.
+# Early Warning signals
 # Try t-distribution
 true_param <- c(0.8, -2, -3, 0.15)
 actual_dt <- 1 / 12
@@ -1415,6 +1420,585 @@ ggplot(combined_data, aes(x = x, y = median, fill = model)) +
   facet_wrap(~nu, scales = "free_y") + 
   xlab("Observations until time") + ylab("Relative deviation from tipping time")
 
+
+### Numeric Strang splitting
+## F-diffusion based model
+F_lamperti_drift <- function(y, par){
+  beta  <- par[1]
+  mu    <- par[2]
+  sigma <- par[3]
+  
+  - 1 / sinh(y) * ((beta + sigma^2 / 2) * cosh(y) - beta * (2 * mu + 1))
+}
+
+linear_lamperti_drift <- function(y, par){
+  beta <- par[1]
+  mu <- par[2]
+  sigma <- par[3]
+  
+  -(beta * (1 - mu * exp(-y)) + sigma^2 / 2)
+}
+
+# Choose parameters appropriate for any of the diffusions
+true_param <- c(1.5, 0.4, -0.2, 0.15)
+actual_dts <- c(1/5, 1/50, 1/150, 1/500, 1/1000)
+tau <- 1
+t_0 <- 30
+
+# ## Stationary part
+# # Parameters for stationary part
+mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+
+stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+
+numSim <- 50
+# F-diffusion setup
+
+ARE_F_closed_alpha <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+ARE_F_numeric_alpha <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+
+ARE_F_closed_mu <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+ARE_F_numeric_mu <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+
+ARE_F_closed_sigma <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+ARE_F_numeric_sigma <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+
+col_wise_median_closed_ARE_F_closed_alpha <- numeric(length(actual_dts))
+col_wise_median_closed_ARE_F_numeric_alpha <- numeric(length(actual_dts))
+col_wise_median_closed_ARE_F_closed_mu <- numeric(length(actual_dts))
+col_wise_median_closed_ARE_F_numeric_mu <- numeric(length(actual_dts))
+col_wise_median_closed_ARE_F_closed_sigma <- numeric(length(actual_dts))
+col_wise_median_closed_ARE_F_numeric_sigma <- numeric(length(actual_dts))
+
+col_wise_median_closed_F <- numeric(length(actual_dts))
+col_wise_median_numeric_F <- numeric(length(actual_dts))
+
+col_wise_upper_closed_F <- numeric(length(actual_dts))
+col_wise_upper_numeric_F <- numeric(length(actual_dts))
+
+col_wise_lower_closed_F <- numeric(length(actual_dts))
+col_wise_lower_numeric_F <- numeric(length(actual_dts))
+
+closed_form_dist_F <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+numeric_dist_F <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+
+# Linear setup
+ARE_Linear_closed_alpha <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+ARE_Linear_numeric_alpha <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+
+ARE_Linear_closed_mu <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+ARE_Linear_numeric_mu <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+
+ARE_Linear_closed_sigma <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+ARE_Linear_numeric_sigma <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+
+col_wise_median_closed_ARE_Linear_closed_alpha <- numeric(length(actual_dts))
+col_wise_median_closed_ARE_Linear_numeric_alpha <- numeric(length(actual_dts))
+col_wise_median_closed_ARE_Linear_closed_mu <- numeric(length(actual_dts))
+col_wise_median_closed_ARE_Linear_numeric_mu <- numeric(length(actual_dts))
+col_wise_median_closed_ARE_Linear_closed_sigma <- numeric(length(actual_dts))
+col_wise_median_closed_ARE_Linear_numeric_sigma <- numeric(length(actual_dts))
+
+col_wise_median_closed_Linear <- numeric(length(actual_dts))
+col_wise_median_numeric_Linear <- numeric(length(actual_dts))
+
+col_wise_upper_closed_Linear <- numeric(length(actual_dts))
+col_wise_upper_numeric_Linear <- numeric(length(actual_dts))
+
+col_wise_lower_closed_Linear <- numeric(length(actual_dts))
+col_wise_lower_numeric_Linear <- numeric(length(actual_dts))
+
+closed_form_dist_Linear <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+numeric_dist_Linear <- matrix(data = NA, nrow = numSim, ncol = length(actual_dts))
+
+# Count number of fails
+F_closed_fails <-  matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+F_numeric_fails <-matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+Linear_closed_fails <-matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+Linear_numeric_fails <-matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+
+# Count number of total function and gradient evaluations
+F_closed_function_count <-  matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+F_closed_gradient_count <-  matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+F_numeric_function_count <-  matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+F_numeric_gradient_count <-  matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+Linear_closed_function_count <-  matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+Linear_closed_gradient_count <-  matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+Linear_numeric_function_count <-  matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+Linear_numeric_gradient_count <-  matrix(data = 0, nrow = numSim, ncol = length(actual_dts))
+
+
+set.seed(14052024)
+for (j in seq_along(actual_dts)){
+cat("Grinding delta number: ", j, "\n")
+for (i in 1:numSim){
+  if(i %% 5 == 1){
+  cat("At simulation number: ", i, "\n")
+  }
+  success <- FALSE
+  while(!success){
+  F_closed_fail <- FALSE
+  F_numeric_fail <- FALSE
+  Linear_closed_fail <- FALSE
+  Linear_numeric_fail <- FALSE
+  simSeed <- sample.int(100000, 1)
+  F_sim_dynamic <- simulate_F_distribution_tipping_model(actual_dts[j], true_param, t_0 = t_0, 
+                                                         tau = tau, seed = simSeed)
+  
+  sim_res_linear <- simulate_linear_noise_tipping_model(actual_dts[j], true_param,
+                                                        tau, t_0, seed = simSeed)
+  
+  random_noise_numeric_test <- runif(3, min = 0.75, max =1.25)
+  tryCatch({
+  F_closed_res <- optimize_stationary_likelihood(
+                   likelihood_fun = F_diffusion_strang_splitting, 
+                   init_par = stationary_part_true_param * random_noise_numeric_test, 
+                   data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
+                   delta = actual_dts[j], exp_sigma = TRUE, 
+                   return_all = TRUE)
+  }, error = function(e){
+    F_closed_fails[i, j] <<- F_closed_fails[i, j] + 1
+    F_closed_fail <<- TRUE
+  }
+  )
+  ARE_F_closed_alpha[i, j] <- abs(F_closed_res$par[1] - stationary_part_true_param[1]) /
+    stationary_part_true_param[1]
+  ARE_F_closed_mu[i, j] <- abs(F_closed_res$par[2] - stationary_part_true_param[2]) /
+    stationary_part_true_param[2]
+  ARE_F_closed_sigma[i, j] <- abs(F_closed_res$par[3] - stationary_part_true_param[3]) /
+    stationary_part_true_param[3]
+  
+  F_closed_function_count[i, j] <-  unname(F_closed_res$counts[1])
+  F_closed_gradient_count[i, j] <-  unname(F_closed_res$counts[2])
+
+  
+  tryCatch({
+  F_numeric_res <- optimize_stationary_likelihood(
+                   likelihood_fun = numeric_strang_splitting,
+                   init_par = stationary_part_true_param * random_noise_numeric_test, 
+                   data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
+                   delta = actual_dts[j],
+                   drift_lamperti_sde = F_lamperti_drift,
+                   exp_sigma = FALSE, return_all = TRUE)
+  }, error = function(e){
+    F_numeric_fails[i, j] <<- F_numeric_fails[i, j] + 1
+    F_numeric_fail <<- TRUE
+  }
+  )
+  
+  ARE_F_numeric_alpha[i, j] <- abs(F_numeric_res$par[1] - stationary_part_true_param[1]) /
+    stationary_part_true_param[1]
+  ARE_F_numeric_mu[i, j] <- abs(F_numeric_res$par[2] - stationary_part_true_param[2]) /
+    stationary_part_true_param[2]
+  ARE_F_numeric_sigma[i, j] <- abs(F_numeric_res$par[3] - stationary_part_true_param[3]) /
+    stationary_part_true_param[3]
+  
+  F_numeric_function_count[i, j] <-  unname(F_numeric_res$counts[1])
+  F_numeric_gradient_count[i, j] <-  unname(F_numeric_res$counts[2])
+  
+  tryCatch({
+  Linear_closed_res <-  optimize_stationary_likelihood(
+                                   likelihood_fun =  mean_reverting_GBM_strang,
+                                   data = log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
+                                   init_par = stationary_part_true_param * random_noise_numeric_test,
+                                   delta = actual_dts[j],
+                                   exp_sigma = FALSE, return_all = TRUE)
+  }, error = function(e){
+    Linear_closed_fails[i, j] <<- Linear_closed_fails[i, j] + 1
+    Linear_closed_fail <<- TRUE
+  }
+  )
+  
+  ARE_Linear_closed_alpha[i, j] <- abs(Linear_closed_res$par[1] - stationary_part_true_param[1]) /
+    stationary_part_true_param[1]
+  ARE_Linear_closed_mu[i, j] <- abs(Linear_closed_res$par[2] - stationary_part_true_param[2]) /
+    stationary_part_true_param[2]
+  ARE_Linear_closed_sigma[i, j] <- abs(Linear_closed_res$par[3] - stationary_part_true_param[3]) /
+    stationary_part_true_param[3]
+  
+  Linear_closed_function_count[i, j] <-  unname(Linear_closed_res$counts[1])
+  Linear_closed_gradient_count[i, j] <-  unname(Linear_closed_res$counts[2])
+  
+  tryCatch({
+  Linear_numeric_res <- optimize_stationary_likelihood(
+                       likelihood_fun = numeric_strang_splitting,
+                       data = log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
+                       init_par = stationary_part_true_param * random_noise_numeric_test,
+                       delta = actual_dts[j],
+                       exp_sigma = FALSE, return_all = TRUE,
+                       drift_lamperti_sde = linear_lamperti_drift)
+  }, error = function(e){
+    Linear_numeric_fails[i, j] <<- Linear_numeric_fails[i, j] + 1
+    Linear_numeric_fail <<- TRUE
+  }
+  )
+  
+  ARE_Linear_numeric_alpha[i, j] <- abs(Linear_numeric_res$par[1] - stationary_part_true_param[1]) /
+    stationary_part_true_param[1]
+  ARE_Linear_numeric_mu[i, j] <- abs(Linear_numeric_res$par[2] - stationary_part_true_param[2]) /
+    stationary_part_true_param[2]
+  ARE_Linear_numeric_sigma[i, j] <- abs(Linear_numeric_res$par[3] - stationary_part_true_param[3]) /
+    stationary_part_true_param[3]
+  
+  Linear_numeric_function_count[i, j] <-  unname(Linear_numeric_res$counts[1])
+  Linear_numeric_gradient_count[i, j] <-  unname(Linear_numeric_res$counts[2])
+  
+  if(!F_closed_fail && !F_numeric_fail && !Linear_closed_fail && !Linear_numeric_fail){
+    success <- TRUE
+  }
+  }
+  # We have ensured everthing goes right before benchmarking the times
+  
+  closed_form_dist_F[i, j] <- microbenchmark::microbenchmark(
+         optimize_stationary_likelihood(likelihood_fun = F_diffusion_strang_splitting, 
+         init_par = stationary_part_true_param * random_noise_numeric_test, 
+         data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
+         delta = actual_dts[j], exp_sigma = TRUE), times = 1, unit = "us")$time / 1e9
+  
+  numeric_dist_F[i, j] <- microbenchmark::microbenchmark(
+    optimize_stationary_likelihood(likelihood_fun = numeric_strang_splitting,
+     init_par = stationary_part_true_param * random_noise_numeric_test, 
+     data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
+     delta = actual_dts[j],
+     drift_lamperti_sde = F_lamperti_drift,
+     exp_sigma = FALSE), times = 1, unit = "us")$time / 1e9
+  
+  closed_form_dist_Linear[i, j] <- microbenchmark::microbenchmark(
+    optimize_stationary_likelihood(
+      likelihood_fun =  mean_reverting_GBM_strang,
+      data = log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
+      init_par = stationary_part_true_param * random_noise_numeric_test,
+      delta = actual_dts[j],
+      exp_sigma = FALSE), times = 1, unit = "us")$time / 1e9
+  
+  numeric_dist_Linear[i, j] <- microbenchmark::microbenchmark(
+    optimize_stationary_likelihood(
+      likelihood_fun = numeric_strang_splitting,
+      data = log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
+      init_par = stationary_part_true_param * random_noise_numeric_test,
+      delta = actual_dts[j],
+      exp_sigma = FALSE,
+      drift_lamperti_sde = linear_lamperti_drift), times = 1, unit = "us")$time / 1e9
+  
+}
+}
+# Fail analysis
+numeric_fail_tibble <- tibble(F_closed_fails = colSums(F_closed_fails),
+       F_numeric_fails = colSums(F_numeric_fails), 
+       Linear_closed_fails = colSums(Linear_closed_fails),
+       Linear_numeric_fails = colSums(Linear_numeric_fails),
+       N = t_0 / actual_dts)
+
+# if(!file.exists("data/count_numeric_fails.csv")){
+#   utils::write.table(numeric_fail_tibble, file="data/count_numeric_fails.csv",
+#                      sep = ",", row.names = FALSE)
+# } else{
+#   numeric_fail_tibble <- read_csv("data/count_numeric_fails.csv")
+# }
+
+
+
+# Evaluate the ARE
+col_wise_median_closed_ARE_F_closed_alpha <-  colwise_median(ARE_F_closed_alpha)
+col_wise_median_closed_ARE_F_numeric_alpha <-  colwise_median(ARE_F_numeric_alpha)
+col_wise_median_closed_ARE_F_closed_mu <-  colwise_median(ARE_F_closed_mu)
+col_wise_median_closed_ARE_F_numeric_mu <-  colwise_median(ARE_F_numeric_mu)
+col_wise_median_closed_ARE_F_closed_sigma <-  colwise_median(ARE_F_closed_sigma)
+col_wise_median_closed_ARE_F_numeric_sigma <-  colwise_median(ARE_F_numeric_sigma)
+col_wise_median_closed_ARE_Linear_closed_alpha <-  colwise_median(ARE_Linear_closed_alpha)
+col_wise_median_closed_ARE_Linear_numeric_alpha <-  colwise_median(ARE_Linear_numeric_alpha)
+col_wise_median_closed_ARE_Linear_closed_mu <-  colwise_median(ARE_Linear_closed_mu)
+col_wise_median_closed_ARE_Linear_numeric_mu <-  colwise_median(ARE_Linear_numeric_mu)
+col_wise_median_closed_ARE_Linear_closed_sigma <-  colwise_median(ARE_Linear_closed_sigma)
+col_wise_median_closed_ARE_Linear_numeric_sigma <-  colwise_median(ARE_Linear_numeric_sigma)
+
+ARE_median_result <- bind_rows(
+  as_tibble(col_wise_median_closed_ARE_F_closed_alpha) %>%
+    mutate(Model = "F-diffusion", Parameter = "alpha", Type = "Closed", N = t_0 / actual_dts),
+  
+  as_tibble(col_wise_median_closed_ARE_F_numeric_alpha) %>%
+    mutate(Model = "F-diffusion", Parameter = "alpha", Type = "Numeric", N = t_0 / actual_dts),
+  
+  as_tibble(col_wise_median_closed_ARE_F_closed_mu) %>%
+    mutate(Model = "F-diffusion", Parameter = "mu", Type = "Closed", N = t_0 / actual_dts),
+  
+  as_tibble(col_wise_median_closed_ARE_F_numeric_mu) %>%
+    mutate(Model = "F-diffusion", Parameter = "mu", Type = "Numeric", N = t_0 / actual_dts),
+  
+  as_tibble(col_wise_median_closed_ARE_F_closed_sigma) %>%
+    mutate(Model = "F-diffusion", Parameter = "sigma", Type = "Closed", N = t_0 / actual_dts),
+  
+  as_tibble(col_wise_median_closed_ARE_F_numeric_sigma) %>%
+    mutate(Model = "F-diffusion", Parameter = "sigma", Type = "Numeric", N = t_0 / actual_dts),
+  
+  as_tibble(col_wise_median_closed_ARE_Linear_closed_alpha) %>%
+    mutate(Model = "Linear", Parameter = "alpha", Type = "Closed", N = t_0 / actual_dts),
+  
+  as_tibble(col_wise_median_closed_ARE_Linear_numeric_alpha) %>%
+    mutate(Model = "Linear", Parameter = "alpha", Type = "Numeric", N = t_0 / actual_dts),
+  
+  as_tibble(col_wise_median_closed_ARE_Linear_closed_mu) %>%
+    mutate(Model = "Linear", Parameter = "mu", Type = "Closed", N = t_0 / actual_dts),
+  
+  as_tibble(col_wise_median_closed_ARE_Linear_numeric_mu) %>%
+    mutate(Model = "Linear", Parameter = "mu", Type = "Numeric", N = t_0 / actual_dts),
+  
+  as_tibble(col_wise_median_closed_ARE_Linear_closed_sigma) %>%
+    mutate(Model = "Linear", Parameter = "sigma", Type = "Closed", N = t_0 / actual_dts),
+  
+  as_tibble(col_wise_median_closed_ARE_Linear_numeric_sigma) %>%
+    mutate(Model = "Linear", Parameter = "sigma", Type = "Numeric", N = t_0 / actual_dts)
+)|> mutate(Model = factor(Model), Parameter = factor(Parameter), Type = factor(Type))
+
+# if(!file.exists("data/ARE_numerical_vs_closed_form_result_median.csv")){
+#   utils::write.table(ARE_median_result, file="data/ARE_numerical_vs_closed_form_result_median.csv",
+#                      sep = ",", row.names = FALSE)
+# } else{
+#   ARE_median_result <- read_csv("data/ARE_numerical_vs_closed_form_result_median.csv")
+# }
+
+
+ARE_median_result |> ggplot(aes(x = N, y = value, col = Type)) +
+  geom_point(size = 3) + geom_line(linewidth = 1.25) + 
+  scale_x_log10(breaks = t_0 / actual_dts) + scale_y_log10() + 
+  facet_grid(Model~Parameter, scales = "free_y") + scale_color_manual(values = thesis_palette)
+
+# Distribution
+
+ARE_F_closed_alpha_tibble <- as_tibble(ARE_F_closed_alpha) %>%
+  mutate(Model = "F-diffusion", Parameter = "alpha", Type = "Closed")
+names(ARE_F_closed_alpha_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+ARE_F_numeric_alpha_tibble <- as_tibble(ARE_F_numeric_alpha) %>%
+  mutate(Model = "F-diffusion", Parameter = "alpha", Type = "Numeric")
+names(ARE_F_numeric_alpha_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+ARE_F_closed_mu_tibble <- as_tibble(ARE_F_closed_mu) %>%
+  mutate(Model = "F-diffusion", Parameter = "mu", Type = "Closed")
+names(ARE_F_closed_mu_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+ARE_F_numeric_mu_tibble <- as_tibble(ARE_F_numeric_mu) %>%
+  mutate(Model = "F-diffusion", Parameter = "mu", Type = "Numeric")
+names(ARE_F_numeric_mu_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+ARE_F_closed_sigma_tibble <- as_tibble(ARE_F_closed_sigma) %>%
+  mutate(Model = "F-diffusion", Parameter = "sigma", Type = "Closed")
+names(ARE_F_closed_sigma_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+ARE_F_numeric_sigma_tibble <- as_tibble(ARE_F_numeric_sigma) %>%
+  mutate(Model = "F-diffusion", Parameter = "sigma", Type = "Numeric")
+names(ARE_F_numeric_sigma_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+ARE_Linear_closed_alpha_tibble <- as_tibble(ARE_Linear_closed_alpha) %>%
+  mutate(Model = "Linear", Parameter = "alpha", Type = "Closed")
+names(ARE_Linear_closed_alpha_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+ARE_Linear_numeric_alpha_tibble <-  as_tibble(ARE_Linear_numeric_alpha) %>%
+  mutate(Model = "Linear", Parameter = "alpha", Type = "Numeric")
+names(ARE_Linear_numeric_alpha_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+ARE_Linear_closed_mu_tibble <- as_tibble(ARE_Linear_closed_mu) %>%
+  mutate(Model = "Linear", Parameter = "mu", Type = "Closed")
+names(ARE_Linear_closed_mu_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+ARE_Linear_numeric_mu_tibble <- as_tibble(ARE_Linear_numeric_mu) %>%
+  mutate(Model = "Linear", Parameter = "mu", Type = "Numeric")
+names(ARE_Linear_numeric_mu_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+ARE_Linear_closed_sigma_tibble <- as_tibble(ARE_Linear_closed_sigma) %>%
+  mutate(Model = "Linear", Parameter = "sigma", Type = "Closed")
+names(ARE_Linear_closed_sigma_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+ARE_Linear_numeric_sigma_tibble <- as_tibble(ARE_Linear_numeric_sigma) %>%
+  mutate(Model = "Linear", Parameter = "sigma", Type = "Numeric")
+names(ARE_Linear_numeric_sigma_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
+
+
+ARE_dist_result <- bind_rows(ARE_F_closed_alpha_tibble, ARE_F_numeric_alpha_tibble,
+          ARE_F_closed_mu_tibble, ARE_F_numeric_mu_tibble, 
+          ARE_F_closed_sigma_tibble, ARE_F_numeric_sigma_tibble, 
+          ARE_Linear_closed_alpha_tibble, ARE_Linear_numeric_alpha_tibble,
+          ARE_Linear_closed_mu_tibble, ARE_Linear_numeric_mu_tibble, 
+          ARE_Linear_closed_sigma_tibble, ARE_Linear_numeric_sigma_tibble) |> 
+  pivot_longer(cols = -c(Model, Parameter, Type), names_to = "N", values_to = "ARE") |> 
+  mutate(Model = factor(Model), Parameter = factor(Parameter), Type = factor(Type), N = as.numeric(N))
+
+# if(!file.exists("data/ARE_numerical_vs_closed_form_result.csv")){
+#   utils::write.table(ARE_dist_result, file="data/ARE_numerical_vs_closed_form_result.csv",
+#                      sep = ",", row.names = FALSE)
+# } else{
+#   ARE_dist_result <- read_csv("data/ARE_numerical_vs_closed_form_result.csv")
+# }
+
+ARE_dist_result_plot_Linear <- ARE_dist_result |> filter(Model == "Linear") |> 
+  ggplot(aes(x = Type, y = ARE, fill = Parameter)) +
+  geom_violin(scale = "width") + 
+  facet_wrap(~factor(N), ncol = 5) +
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))) + 
+  theme(axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
+        legend.text  = element_text(size = 14), axis.text = element_text(face = "bold", size = 14)) +
+  scale_fill_manual(values = thesis_palette, labels = expression(alpha*phantom(.)[0], mu*phantom(.)[0], sigma)) +
+  xlab("")
+
+# ggsave(ARE_dist_result_plot_Linear, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "ARE_dist_result_plot_Linear.jpeg",
+#        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
+
+ARE_dist_result_plot_F <- ARE_dist_result |> filter(Model == "F-diffusion") |> 
+  ggplot(aes(x = Type, y = ARE, fill = Parameter)) +
+  geom_violin(scale = "width") + 
+  facet_wrap(~factor(N), ncol = 5) + 
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))) + 
+  theme(axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
+        legend.text  = element_text(size = 14), axis.text = element_text(face = "bold", size = 14)) +
+  scale_fill_manual(values = thesis_palette, labels = expression(alpha*phantom(.)[0], mu*phantom(.)[0], sigma)) +
+  xlab("")
+
+# ggsave(ARE_dist_result_plot_F, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "ARE_dist_result_plot_F.jpeg",
+#        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
+
+
+# Evaluate the running times
+col_wise_median_closed_F <- colwise_median(closed_form_dist_F)
+col_wise_median_numeric_F <- colwise_median(numeric_dist_F)
+col_wise_median_closed_Linear <- colwise_median(closed_form_dist_Linear)
+col_wise_median_numeric_Linear <- colwise_median(numeric_dist_Linear)
+# Median tibbles
+median_closed_F_tibble <- as_tibble(col_wise_median_closed_F) %>%
+  mutate(Type = "Closed form", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Median")
+median_numeric_F_tibble <- as_tibble(col_wise_median_numeric_F) %>%
+  mutate(Type = "Numeric", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Median")
+
+median_closed_Linear_tibble <- as_tibble(col_wise_median_closed_Linear) %>%
+  mutate(Type = "Closed form", Model = "Linear", N = t_0 / actual_dts, quantile = "Median")
+median_numeric_Linear_tibble <- as_tibble(col_wise_median_numeric_Linear) %>%
+  mutate(Type = "Numeric", Model = "Linear", N = t_0 / actual_dts, quantile = "Median")
+
+# Upper quantiles
+col_wise_upper_closed_F <- colwise_quantile(closed_form_dist_F, probs = 0.9)
+col_wise_upper_numeric_F <- colwise_quantile(numeric_dist_F, probs = 0.9)
+col_wise_upper_closed_Linear <- colwise_quantile(closed_form_dist_Linear, probs = 0.9)
+col_wise_upper_numeric_Linear <- colwise_quantile(numeric_dist_Linear, probs = 0.9)
+
+upper_closed_F_tibble <- as_tibble(col_wise_upper_closed_F) %>%
+  mutate(Type = "Closed form", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Upper")
+upper_numeric_F_tibble <- as_tibble(col_wise_upper_numeric_F) %>%
+  mutate(Type = "Numeric", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Upper")
+
+upper_closed_Linear_tibble <- as_tibble(col_wise_upper_closed_Linear) %>%
+  mutate(Type = "Closed form", Model = "Linear", N = t_0 / actual_dts, quantile = "Upper")
+upper_numeric_Linear_tibble <- as_tibble(col_wise_upper_numeric_Linear) %>%
+  mutate(Type = "Numeric", Model = "Linear", N = t_0 / actual_dts, quantile = "Upper")
+
+# Lower quantiles
+col_wise_lower_closed_F <- colwise_quantile(closed_form_dist_F, probs = 0.1)
+col_wise_lower_numeric_F <- colwise_quantile(numeric_dist_F, probs = 0.1)
+col_wise_lower_closed_Linear <- colwise_quantile(closed_form_dist_Linear, probs = 0.1)
+col_wise_lower_numeric_Linear <- colwise_quantile(numeric_dist_Linear, probs = 0.1)
+
+lower_closed_F_tibble <- as_tibble(col_wise_lower_closed_F) %>%
+  mutate(Type = "Closed form", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Lower")
+lower_numeric_F_tibble <- as_tibble(col_wise_lower_numeric_F) %>%
+  mutate(Type = "Numeric", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Lower")
+
+lower_closed_Linear_tibble <- as_tibble(col_wise_lower_closed_Linear) %>%
+  mutate(Type = "Closed form", Model = "Linear", N = t_0 / actual_dts, quantile = "Lower")
+lower_numeric_Linear_tibble <- as_tibble(col_wise_lower_numeric_Linear) %>%
+  mutate(Type = "Numeric", Model = "Linear", N = t_0 / actual_dts, quantile = "Lower")
+
+# Combine all results into a single tibble
+Running_result <- bind_rows(
+  median_closed_F_tibble,
+  median_numeric_F_tibble,
+  median_closed_Linear_tibble,
+  median_numeric_Linear_tibble,
+  upper_closed_F_tibble,
+  upper_numeric_F_tibble,
+  upper_closed_Linear_tibble,
+  upper_numeric_Linear_tibble,
+  lower_closed_F_tibble,
+  lower_numeric_F_tibble,
+  lower_closed_Linear_tibble,
+  lower_numeric_Linear_tibble
+) |> pivot_wider(values_from = value, names_from = quantile)
+
+# if(!file.exists("data/Running_result_numeric.csv")){
+#   utils::write.table(ARE_dist_result, file="data/Running_result_numeric.csv",
+#                      sep = ",", row.names = FALSE)
+# } else{
+#   Running_result <- read_csv("data/Running_result_numeric.csv")
+# }
+
+Running_result_numeric_plot <- Running_result |> 
+  ggplot(aes(x = N, y = Median, col = Type, fill = Type)) + geom_line(linewidth = 1.5) + geom_point(size = 3) + 
+  geom_ribbon(aes(ymin = Lower, ymax = Upper), alpha = 0.3) + 
+  facet_wrap(~Model) +
+  scale_x_log10(breaks = t_0 / actual_dts) + scale_y_log10() + 
+  scale_fill_manual(values = thesis_palette) + scale_color_manual(values = thesis_palette) +
+  theme(strip.text = element_text(face = "bold", size = 16), panel.spacing = unit(2, "lines"),
+        axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
+        legend.text  = element_text(size = 14), axis.text = element_text(size = 14))
+
+ggsave(Running_result_numeric_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "Running_result_numeric.jpeg",
+       height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+
+# Number of iterations
+function_gradient_count_result <-  bind_rows(
+as_tibble(F_closed_function_count) |> 
+  mutate(Model = "F-diffusion", Type = "Function", Method =  "Closed form"),
+as_tibble(F_closed_gradient_count) |> 
+  mutate(Model = "F-diffusion", Type = "Gradient", Method =  "Closed form"),
+as_tibble(F_numeric_function_count) |> 
+  mutate(Model = "F-diffusion", Type = "Function", Method =  "Numeric"),
+as_tibble(F_numeric_gradient_count) |> 
+  mutate(Model = "F-diffusion", Type = "Gradient", Method =  "Numeric"),
+as_tibble(Linear_closed_function_count) |> 
+  mutate(Model = "Linear", Type = "Function", Method =  "Closed form"),
+as_tibble(Linear_closed_gradient_count) |> 
+  mutate(Model = "Linear", Type = "Gradient", Method =  "Closed form"),
+as_tibble(Linear_numeric_function_count) |> 
+  mutate(Model = "Linear", Type = "Function", Method =  "Numeric"),
+as_tibble(Linear_numeric_gradient_count) |> 
+  mutate(Model = "Linear", Type = "Gradient", Method =  "Numeric")
+) |> mutate(Model = factor(Model), Type = factor(Type), Method = factor(Method))
+names(function_gradient_count_result) <- c(t_0 / actual_dts, "Model", "Type", "Method")
+
+function_gradient_count_result_long <- function_gradient_count_result |>
+  pivot_longer(-c(Model, Type, Method), values_to = "Count", names_to = "N") |> 
+  mutate(N = as.numeric(N))
+
+
+# if(!file.exists("data/gradientAndFunctionCount.csv")){
+#   utils::write.table(function_gradient_count_result_long, file="data/gradientAndFunctionCount.csv",
+#                      sep = ",", row.names = FALSE)
+# } else{
+#   function_gradient_count_result_long <- read_csv("data/gradientAndFunctionCount.csv")
+# }
+
+summarized_function_gradient_count_result <- function_gradient_count_result_long |>
+  group_by(Model, Type, Method, N) |> 
+  summarise(Median = median(Count), upper = quantile(Count, 0.9), lower = quantile(Count, 0.1)) |> 
+  ungroup()
+
+summarized_function_gradient_count_result |>
+  ggplot(aes(x = N, y = Median, col = Method, fill = Method)) +
+  geom_line(linewidth = 1.25) +
+  scale_x_log10(breaks = t_0 / actual_dts) + 
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = .3) + 
+  facet_grid(Type~Model, scales = "free_y") + 
+  scale_fill_manual(values = thesis_palette) + 
+  scale_color_manual(values = thesis_palette) +
+  ylab("Evaluations") + xlab("N")
+  
 
 ###------------------------------------------------------------------------###
 ###-----------------------------Result-------------------------------------###

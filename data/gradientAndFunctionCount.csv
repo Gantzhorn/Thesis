@@ -1,0 +1,2001 @@
+"Model","Type","Method","N","Count"
+"F-diffusion","Function","Closed form",150,57
+"F-diffusion","Function","Closed form",1500,45
+"F-diffusion","Function","Closed form",4500,54
+"F-diffusion","Function","Closed form",15000,93
+"F-diffusion","Function","Closed form",30000,30
+"F-diffusion","Function","Closed form",150,47
+"F-diffusion","Function","Closed form",1500,44
+"F-diffusion","Function","Closed form",4500,51
+"F-diffusion","Function","Closed form",15000,73
+"F-diffusion","Function","Closed form",30000,44
+"F-diffusion","Function","Closed form",150,47
+"F-diffusion","Function","Closed form",1500,39
+"F-diffusion","Function","Closed form",4500,71
+"F-diffusion","Function","Closed form",15000,73
+"F-diffusion","Function","Closed form",30000,49
+"F-diffusion","Function","Closed form",150,41
+"F-diffusion","Function","Closed form",1500,89
+"F-diffusion","Function","Closed form",4500,97
+"F-diffusion","Function","Closed form",15000,78
+"F-diffusion","Function","Closed form",30000,30
+"F-diffusion","Function","Closed form",150,43
+"F-diffusion","Function","Closed form",1500,50
+"F-diffusion","Function","Closed form",4500,47
+"F-diffusion","Function","Closed form",15000,52
+"F-diffusion","Function","Closed form",30000,53
+"F-diffusion","Function","Closed form",150,38
+"F-diffusion","Function","Closed form",1500,76
+"F-diffusion","Function","Closed form",4500,47
+"F-diffusion","Function","Closed form",15000,57
+"F-diffusion","Function","Closed form",30000,49
+"F-diffusion","Function","Closed form",150,44
+"F-diffusion","Function","Closed form",1500,48
+"F-diffusion","Function","Closed form",4500,70
+"F-diffusion","Function","Closed form",15000,78
+"F-diffusion","Function","Closed form",30000,29
+"F-diffusion","Function","Closed form",150,42
+"F-diffusion","Function","Closed form",1500,44
+"F-diffusion","Function","Closed form",4500,75
+"F-diffusion","Function","Closed form",15000,105
+"F-diffusion","Function","Closed form",30000,51
+"F-diffusion","Function","Closed form",150,50
+"F-diffusion","Function","Closed form",1500,72
+"F-diffusion","Function","Closed form",4500,68
+"F-diffusion","Function","Closed form",15000,110
+"F-diffusion","Function","Closed form",30000,54
+"F-diffusion","Function","Closed form",150,43
+"F-diffusion","Function","Closed form",1500,64
+"F-diffusion","Function","Closed form",4500,80
+"F-diffusion","Function","Closed form",15000,57
+"F-diffusion","Function","Closed form",30000,46
+"F-diffusion","Function","Closed form",150,55
+"F-diffusion","Function","Closed form",1500,45
+"F-diffusion","Function","Closed form",4500,95
+"F-diffusion","Function","Closed form",15000,81
+"F-diffusion","Function","Closed form",30000,64
+"F-diffusion","Function","Closed form",150,52
+"F-diffusion","Function","Closed form",1500,48
+"F-diffusion","Function","Closed form",4500,77
+"F-diffusion","Function","Closed form",15000,111
+"F-diffusion","Function","Closed form",30000,73
+"F-diffusion","Function","Closed form",150,43
+"F-diffusion","Function","Closed form",1500,49
+"F-diffusion","Function","Closed form",4500,65
+"F-diffusion","Function","Closed form",15000,99
+"F-diffusion","Function","Closed form",30000,51
+"F-diffusion","Function","Closed form",150,48
+"F-diffusion","Function","Closed form",1500,74
+"F-diffusion","Function","Closed form",4500,85
+"F-diffusion","Function","Closed form",15000,53
+"F-diffusion","Function","Closed form",30000,50
+"F-diffusion","Function","Closed form",150,43
+"F-diffusion","Function","Closed form",1500,54
+"F-diffusion","Function","Closed form",4500,62
+"F-diffusion","Function","Closed form",15000,82
+"F-diffusion","Function","Closed form",30000,59
+"F-diffusion","Function","Closed form",150,49
+"F-diffusion","Function","Closed form",1500,76
+"F-diffusion","Function","Closed form",4500,50
+"F-diffusion","Function","Closed form",15000,117
+"F-diffusion","Function","Closed form",30000,73
+"F-diffusion","Function","Closed form",150,46
+"F-diffusion","Function","Closed form",1500,61
+"F-diffusion","Function","Closed form",4500,90
+"F-diffusion","Function","Closed form",15000,52
+"F-diffusion","Function","Closed form",30000,87
+"F-diffusion","Function","Closed form",150,51
+"F-diffusion","Function","Closed form",1500,53
+"F-diffusion","Function","Closed form",4500,66
+"F-diffusion","Function","Closed form",15000,98
+"F-diffusion","Function","Closed form",30000,52
+"F-diffusion","Function","Closed form",150,65
+"F-diffusion","Function","Closed form",1500,62
+"F-diffusion","Function","Closed form",4500,75
+"F-diffusion","Function","Closed form",15000,100
+"F-diffusion","Function","Closed form",30000,78
+"F-diffusion","Function","Closed form",150,45
+"F-diffusion","Function","Closed form",1500,77
+"F-diffusion","Function","Closed form",4500,63
+"F-diffusion","Function","Closed form",15000,86
+"F-diffusion","Function","Closed form",30000,50
+"F-diffusion","Function","Closed form",150,49
+"F-diffusion","Function","Closed form",1500,43
+"F-diffusion","Function","Closed form",4500,83
+"F-diffusion","Function","Closed form",15000,99
+"F-diffusion","Function","Closed form",30000,56
+"F-diffusion","Function","Closed form",150,42
+"F-diffusion","Function","Closed form",1500,62
+"F-diffusion","Function","Closed form",4500,61
+"F-diffusion","Function","Closed form",15000,71
+"F-diffusion","Function","Closed form",30000,49
+"F-diffusion","Function","Closed form",150,46
+"F-diffusion","Function","Closed form",1500,81
+"F-diffusion","Function","Closed form",4500,57
+"F-diffusion","Function","Closed form",15000,70
+"F-diffusion","Function","Closed form",30000,63
+"F-diffusion","Function","Closed form",150,52
+"F-diffusion","Function","Closed form",1500,49
+"F-diffusion","Function","Closed form",4500,57
+"F-diffusion","Function","Closed form",15000,82
+"F-diffusion","Function","Closed form",30000,64
+"F-diffusion","Function","Closed form",150,43
+"F-diffusion","Function","Closed form",1500,66
+"F-diffusion","Function","Closed form",4500,48
+"F-diffusion","Function","Closed form",15000,70
+"F-diffusion","Function","Closed form",30000,47
+"F-diffusion","Function","Closed form",150,51
+"F-diffusion","Function","Closed form",1500,79
+"F-diffusion","Function","Closed form",4500,70
+"F-diffusion","Function","Closed form",15000,81
+"F-diffusion","Function","Closed form",30000,70
+"F-diffusion","Function","Closed form",150,56
+"F-diffusion","Function","Closed form",1500,54
+"F-diffusion","Function","Closed form",4500,50
+"F-diffusion","Function","Closed form",15000,83
+"F-diffusion","Function","Closed form",30000,58
+"F-diffusion","Function","Closed form",150,41
+"F-diffusion","Function","Closed form",1500,45
+"F-diffusion","Function","Closed form",4500,54
+"F-diffusion","Function","Closed form",15000,85
+"F-diffusion","Function","Closed form",30000,63
+"F-diffusion","Function","Closed form",150,50
+"F-diffusion","Function","Closed form",1500,63
+"F-diffusion","Function","Closed form",4500,53
+"F-diffusion","Function","Closed form",15000,52
+"F-diffusion","Function","Closed form",30000,49
+"F-diffusion","Function","Closed form",150,42
+"F-diffusion","Function","Closed form",1500,44
+"F-diffusion","Function","Closed form",4500,48
+"F-diffusion","Function","Closed form",15000,89
+"F-diffusion","Function","Closed form",30000,51
+"F-diffusion","Function","Closed form",150,50
+"F-diffusion","Function","Closed form",1500,71
+"F-diffusion","Function","Closed form",4500,63
+"F-diffusion","Function","Closed form",15000,82
+"F-diffusion","Function","Closed form",30000,29
+"F-diffusion","Function","Closed form",150,45
+"F-diffusion","Function","Closed form",1500,45
+"F-diffusion","Function","Closed form",4500,51
+"F-diffusion","Function","Closed form",15000,86
+"F-diffusion","Function","Closed form",30000,60
+"F-diffusion","Function","Closed form",150,53
+"F-diffusion","Function","Closed form",1500,37
+"F-diffusion","Function","Closed form",4500,52
+"F-diffusion","Function","Closed form",15000,66
+"F-diffusion","Function","Closed form",30000,48
+"F-diffusion","Function","Closed form",150,52
+"F-diffusion","Function","Closed form",1500,49
+"F-diffusion","Function","Closed form",4500,70
+"F-diffusion","Function","Closed form",15000,103
+"F-diffusion","Function","Closed form",30000,47
+"F-diffusion","Function","Closed form",150,44
+"F-diffusion","Function","Closed form",1500,51
+"F-diffusion","Function","Closed form",4500,110
+"F-diffusion","Function","Closed form",15000,86
+"F-diffusion","Function","Closed form",30000,67
+"F-diffusion","Function","Closed form",150,41
+"F-diffusion","Function","Closed form",1500,50
+"F-diffusion","Function","Closed form",4500,53
+"F-diffusion","Function","Closed form",15000,53
+"F-diffusion","Function","Closed form",30000,75
+"F-diffusion","Function","Closed form",150,46
+"F-diffusion","Function","Closed form",1500,52
+"F-diffusion","Function","Closed form",4500,51
+"F-diffusion","Function","Closed form",15000,55
+"F-diffusion","Function","Closed form",30000,53
+"F-diffusion","Function","Closed form",150,47
+"F-diffusion","Function","Closed form",1500,76
+"F-diffusion","Function","Closed form",4500,68
+"F-diffusion","Function","Closed form",15000,83
+"F-diffusion","Function","Closed form",30000,28
+"F-diffusion","Function","Closed form",150,51
+"F-diffusion","Function","Closed form",1500,55
+"F-diffusion","Function","Closed form",4500,82
+"F-diffusion","Function","Closed form",15000,53
+"F-diffusion","Function","Closed form",30000,51
+"F-diffusion","Function","Closed form",150,42
+"F-diffusion","Function","Closed form",1500,69
+"F-diffusion","Function","Closed form",4500,101
+"F-diffusion","Function","Closed form",15000,55
+"F-diffusion","Function","Closed form",30000,62
+"F-diffusion","Function","Closed form",150,49
+"F-diffusion","Function","Closed form",1500,44
+"F-diffusion","Function","Closed form",4500,53
+"F-diffusion","Function","Closed form",15000,64
+"F-diffusion","Function","Closed form",30000,54
+"F-diffusion","Function","Closed form",150,41
+"F-diffusion","Function","Closed form",1500,46
+"F-diffusion","Function","Closed form",4500,46
+"F-diffusion","Function","Closed form",15000,48
+"F-diffusion","Function","Closed form",30000,84
+"F-diffusion","Function","Closed form",150,52
+"F-diffusion","Function","Closed form",1500,43
+"F-diffusion","Function","Closed form",4500,63
+"F-diffusion","Function","Closed form",15000,80
+"F-diffusion","Function","Closed form",30000,71
+"F-diffusion","Function","Closed form",150,45
+"F-diffusion","Function","Closed form",1500,53
+"F-diffusion","Function","Closed form",4500,83
+"F-diffusion","Function","Closed form",15000,128
+"F-diffusion","Function","Closed form",30000,78
+"F-diffusion","Function","Closed form",150,55
+"F-diffusion","Function","Closed form",1500,25
+"F-diffusion","Function","Closed form",4500,70
+"F-diffusion","Function","Closed form",15000,51
+"F-diffusion","Function","Closed form",30000,57
+"F-diffusion","Function","Closed form",150,50
+"F-diffusion","Function","Closed form",1500,49
+"F-diffusion","Function","Closed form",4500,55
+"F-diffusion","Function","Closed form",15000,65
+"F-diffusion","Function","Closed form",30000,55
+"F-diffusion","Function","Closed form",150,56
+"F-diffusion","Function","Closed form",1500,47
+"F-diffusion","Function","Closed form",4500,50
+"F-diffusion","Function","Closed form",15000,100
+"F-diffusion","Function","Closed form",30000,57
+"F-diffusion","Function","Closed form",150,46
+"F-diffusion","Function","Closed form",1500,49
+"F-diffusion","Function","Closed form",4500,50
+"F-diffusion","Function","Closed form",15000,55
+"F-diffusion","Function","Closed form",30000,52
+"F-diffusion","Function","Closed form",150,39
+"F-diffusion","Function","Closed form",1500,48
+"F-diffusion","Function","Closed form",4500,107
+"F-diffusion","Function","Closed form",15000,101
+"F-diffusion","Function","Closed form",30000,51
+"F-diffusion","Function","Closed form",150,48
+"F-diffusion","Function","Closed form",1500,57
+"F-diffusion","Function","Closed form",4500,79
+"F-diffusion","Function","Closed form",15000,148
+"F-diffusion","Function","Closed form",30000,48
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,14
+"F-diffusion","Gradient","Closed form",15000,26
+"F-diffusion","Gradient","Closed form",30000,8
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,15
+"F-diffusion","Gradient","Closed form",4500,15
+"F-diffusion","Gradient","Closed form",15000,18
+"F-diffusion","Gradient","Closed form",30000,9
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,10
+"F-diffusion","Gradient","Closed form",4500,20
+"F-diffusion","Gradient","Closed form",15000,22
+"F-diffusion","Gradient","Closed form",30000,15
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,23
+"F-diffusion","Gradient","Closed form",4500,13
+"F-diffusion","Gradient","Closed form",15000,16
+"F-diffusion","Gradient","Closed form",30000,8
+"F-diffusion","Gradient","Closed form",150,15
+"F-diffusion","Gradient","Closed form",1500,12
+"F-diffusion","Gradient","Closed form",4500,15
+"F-diffusion","Gradient","Closed form",15000,13
+"F-diffusion","Gradient","Closed form",30000,13
+"F-diffusion","Gradient","Closed form",150,15
+"F-diffusion","Gradient","Closed form",1500,7
+"F-diffusion","Gradient","Closed form",4500,15
+"F-diffusion","Gradient","Closed form",15000,14
+"F-diffusion","Gradient","Closed form",30000,15
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,14
+"F-diffusion","Gradient","Closed form",4500,19
+"F-diffusion","Gradient","Closed form",15000,21
+"F-diffusion","Gradient","Closed form",30000,8
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,12
+"F-diffusion","Gradient","Closed form",4500,19
+"F-diffusion","Gradient","Closed form",15000,11
+"F-diffusion","Gradient","Closed form",30000,13
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,20
+"F-diffusion","Gradient","Closed form",4500,9
+"F-diffusion","Gradient","Closed form",15000,15
+"F-diffusion","Gradient","Closed form",30000,13
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,22
+"F-diffusion","Gradient","Closed form",4500,21
+"F-diffusion","Gradient","Closed form",15000,14
+"F-diffusion","Gradient","Closed form",30000,10
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,24
+"F-diffusion","Gradient","Closed form",15000,21
+"F-diffusion","Gradient","Closed form",30000,17
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,9
+"F-diffusion","Gradient","Closed form",4500,19
+"F-diffusion","Gradient","Closed form",15000,15
+"F-diffusion","Gradient","Closed form",30000,20
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,17
+"F-diffusion","Gradient","Closed form",15000,23
+"F-diffusion","Gradient","Closed form",30000,12
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,21
+"F-diffusion","Gradient","Closed form",4500,23
+"F-diffusion","Gradient","Closed form",15000,12
+"F-diffusion","Gradient","Closed form",30000,14
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,14
+"F-diffusion","Gradient","Closed form",4500,16
+"F-diffusion","Gradient","Closed form",15000,19
+"F-diffusion","Gradient","Closed form",30000,13
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,21
+"F-diffusion","Gradient","Closed form",4500,15
+"F-diffusion","Gradient","Closed form",15000,29
+"F-diffusion","Gradient","Closed form",30000,17
+"F-diffusion","Gradient","Closed form",150,12
+"F-diffusion","Gradient","Closed form",1500,10
+"F-diffusion","Gradient","Closed form",4500,23
+"F-diffusion","Gradient","Closed form",15000,12
+"F-diffusion","Gradient","Closed form",30000,20
+"F-diffusion","Gradient","Closed form",150,12
+"F-diffusion","Gradient","Closed form",1500,14
+"F-diffusion","Gradient","Closed form",4500,18
+"F-diffusion","Gradient","Closed form",15000,26
+"F-diffusion","Gradient","Closed form",30000,14
+"F-diffusion","Gradient","Closed form",150,19
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,19
+"F-diffusion","Gradient","Closed form",15000,28
+"F-diffusion","Gradient","Closed form",30000,14
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,23
+"F-diffusion","Gradient","Closed form",4500,15
+"F-diffusion","Gradient","Closed form",15000,15
+"F-diffusion","Gradient","Closed form",30000,14
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,12
+"F-diffusion","Gradient","Closed form",4500,16
+"F-diffusion","Gradient","Closed form",15000,23
+"F-diffusion","Gradient","Closed form",30000,15
+"F-diffusion","Gradient","Closed form",150,15
+"F-diffusion","Gradient","Closed form",1500,11
+"F-diffusion","Gradient","Closed form",4500,13
+"F-diffusion","Gradient","Closed form",15000,19
+"F-diffusion","Gradient","Closed form",30000,12
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,17
+"F-diffusion","Gradient","Closed form",4500,13
+"F-diffusion","Gradient","Closed form",15000,8
+"F-diffusion","Gradient","Closed form",30000,13
+"F-diffusion","Gradient","Closed form",150,12
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,14
+"F-diffusion","Gradient","Closed form",15000,13
+"F-diffusion","Gradient","Closed form",30000,8
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,20
+"F-diffusion","Gradient","Closed form",4500,15
+"F-diffusion","Gradient","Closed form",15000,17
+"F-diffusion","Gradient","Closed form",30000,12
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,22
+"F-diffusion","Gradient","Closed form",4500,19
+"F-diffusion","Gradient","Closed form",15000,16
+"F-diffusion","Gradient","Closed form",30000,5
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,12
+"F-diffusion","Gradient","Closed form",4500,15
+"F-diffusion","Gradient","Closed form",15000,21
+"F-diffusion","Gradient","Closed form",30000,13
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,14
+"F-diffusion","Gradient","Closed form",15000,19
+"F-diffusion","Gradient","Closed form",30000,18
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,19
+"F-diffusion","Gradient","Closed form",4500,15
+"F-diffusion","Gradient","Closed form",15000,14
+"F-diffusion","Gradient","Closed form",30000,12
+"F-diffusion","Gradient","Closed form",150,12
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,15
+"F-diffusion","Gradient","Closed form",15000,24
+"F-diffusion","Gradient","Closed form",30000,12
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,20
+"F-diffusion","Gradient","Closed form",4500,17
+"F-diffusion","Gradient","Closed form",15000,19
+"F-diffusion","Gradient","Closed form",30000,8
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,15
+"F-diffusion","Gradient","Closed form",4500,14
+"F-diffusion","Gradient","Closed form",15000,20
+"F-diffusion","Gradient","Closed form",30000,13
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,9
+"F-diffusion","Gradient","Closed form",4500,11
+"F-diffusion","Gradient","Closed form",15000,11
+"F-diffusion","Gradient","Closed form",30000,15
+"F-diffusion","Gradient","Closed form",150,15
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,20
+"F-diffusion","Gradient","Closed form",15000,24
+"F-diffusion","Gradient","Closed form",30000,14
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,10
+"F-diffusion","Gradient","Closed form",4500,22
+"F-diffusion","Gradient","Closed form",15000,25
+"F-diffusion","Gradient","Closed form",30000,18
+"F-diffusion","Gradient","Closed form",150,12
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,14
+"F-diffusion","Gradient","Closed form",15000,13
+"F-diffusion","Gradient","Closed form",30000,22
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,15
+"F-diffusion","Gradient","Closed form",15000,15
+"F-diffusion","Gradient","Closed form",30000,13
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,22
+"F-diffusion","Gradient","Closed form",4500,18
+"F-diffusion","Gradient","Closed form",15000,17
+"F-diffusion","Gradient","Closed form",30000,8
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,14
+"F-diffusion","Gradient","Closed form",4500,25
+"F-diffusion","Gradient","Closed form",15000,15
+"F-diffusion","Gradient","Closed form",30000,12
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,20
+"F-diffusion","Gradient","Closed form",4500,28
+"F-diffusion","Gradient","Closed form",15000,15
+"F-diffusion","Gradient","Closed form",30000,11
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,15
+"F-diffusion","Gradient","Closed form",15000,13
+"F-diffusion","Gradient","Closed form",30000,14
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,15
+"F-diffusion","Gradient","Closed form",4500,9
+"F-diffusion","Gradient","Closed form",15000,12
+"F-diffusion","Gradient","Closed form",30000,20
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,12
+"F-diffusion","Gradient","Closed form",4500,17
+"F-diffusion","Gradient","Closed form",15000,21
+"F-diffusion","Gradient","Closed form",30000,22
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,12
+"F-diffusion","Gradient","Closed form",4500,25
+"F-diffusion","Gradient","Closed form",15000,33
+"F-diffusion","Gradient","Closed form",30000,14
+"F-diffusion","Gradient","Closed form",150,12
+"F-diffusion","Gradient","Closed form",1500,8
+"F-diffusion","Gradient","Closed form",4500,17
+"F-diffusion","Gradient","Closed form",15000,12
+"F-diffusion","Gradient","Closed form",30000,14
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,13
+"F-diffusion","Gradient","Closed form",4500,17
+"F-diffusion","Gradient","Closed form",15000,12
+"F-diffusion","Gradient","Closed form",30000,12
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,14
+"F-diffusion","Gradient","Closed form",4500,14
+"F-diffusion","Gradient","Closed form",15000,26
+"F-diffusion","Gradient","Closed form",30000,13
+"F-diffusion","Gradient","Closed form",150,13
+"F-diffusion","Gradient","Closed form",1500,10
+"F-diffusion","Gradient","Closed form",4500,14
+"F-diffusion","Gradient","Closed form",15000,15
+"F-diffusion","Gradient","Closed form",30000,13
+"F-diffusion","Gradient","Closed form",150,12
+"F-diffusion","Gradient","Closed form",1500,14
+"F-diffusion","Gradient","Closed form",4500,16
+"F-diffusion","Gradient","Closed form",15000,23
+"F-diffusion","Gradient","Closed form",30000,15
+"F-diffusion","Gradient","Closed form",150,14
+"F-diffusion","Gradient","Closed form",1500,16
+"F-diffusion","Gradient","Closed form",4500,19
+"F-diffusion","Gradient","Closed form",15000,31
+"F-diffusion","Gradient","Closed form",30000,15
+"F-diffusion","Function","Numeric",150,44
+"F-diffusion","Function","Numeric",1500,26
+"F-diffusion","Function","Numeric",4500,54
+"F-diffusion","Function","Numeric",15000,25
+"F-diffusion","Function","Numeric",30000,28
+"F-diffusion","Function","Numeric",150,48
+"F-diffusion","Function","Numeric",1500,39
+"F-diffusion","Function","Numeric",4500,29
+"F-diffusion","Function","Numeric",15000,19
+"F-diffusion","Function","Numeric",30000,15
+"F-diffusion","Function","Numeric",150,30
+"F-diffusion","Function","Numeric",1500,42
+"F-diffusion","Function","Numeric",4500,14
+"F-diffusion","Function","Numeric",15000,25
+"F-diffusion","Function","Numeric",30000,26
+"F-diffusion","Function","Numeric",150,41
+"F-diffusion","Function","Numeric",1500,41
+"F-diffusion","Function","Numeric",4500,15
+"F-diffusion","Function","Numeric",15000,27
+"F-diffusion","Function","Numeric",30000,30
+"F-diffusion","Function","Numeric",150,44
+"F-diffusion","Function","Numeric",1500,39
+"F-diffusion","Function","Numeric",4500,30
+"F-diffusion","Function","Numeric",15000,20
+"F-diffusion","Function","Numeric",30000,35
+"F-diffusion","Function","Numeric",150,26
+"F-diffusion","Function","Numeric",1500,43
+"F-diffusion","Function","Numeric",4500,132
+"F-diffusion","Function","Numeric",15000,145
+"F-diffusion","Function","Numeric",30000,18
+"F-diffusion","Function","Numeric",150,34
+"F-diffusion","Function","Numeric",1500,37
+"F-diffusion","Function","Numeric",4500,14
+"F-diffusion","Function","Numeric",15000,24
+"F-diffusion","Function","Numeric",30000,20
+"F-diffusion","Function","Numeric",150,34
+"F-diffusion","Function","Numeric",1500,25
+"F-diffusion","Function","Numeric",4500,39
+"F-diffusion","Function","Numeric",15000,15
+"F-diffusion","Function","Numeric",30000,19
+"F-diffusion","Function","Numeric",150,24
+"F-diffusion","Function","Numeric",1500,43
+"F-diffusion","Function","Numeric",4500,32
+"F-diffusion","Function","Numeric",15000,13
+"F-diffusion","Function","Numeric",30000,25
+"F-diffusion","Function","Numeric",150,29
+"F-diffusion","Function","Numeric",1500,25
+"F-diffusion","Function","Numeric",4500,14
+"F-diffusion","Function","Numeric",15000,13
+"F-diffusion","Function","Numeric",30000,95
+"F-diffusion","Function","Numeric",150,49
+"F-diffusion","Function","Numeric",1500,30
+"F-diffusion","Function","Numeric",4500,41
+"F-diffusion","Function","Numeric",15000,25
+"F-diffusion","Function","Numeric",30000,20
+"F-diffusion","Function","Numeric",150,48
+"F-diffusion","Function","Numeric",1500,15
+"F-diffusion","Function","Numeric",4500,15
+"F-diffusion","Function","Numeric",15000,25
+"F-diffusion","Function","Numeric",30000,24
+"F-diffusion","Function","Numeric",150,26
+"F-diffusion","Function","Numeric",1500,20
+"F-diffusion","Function","Numeric",4500,54
+"F-diffusion","Function","Numeric",15000,15
+"F-diffusion","Function","Numeric",30000,18
+"F-diffusion","Function","Numeric",150,47
+"F-diffusion","Function","Numeric",1500,39
+"F-diffusion","Function","Numeric",4500,72
+"F-diffusion","Function","Numeric",15000,15
+"F-diffusion","Function","Numeric",30000,21
+"F-diffusion","Function","Numeric",150,43
+"F-diffusion","Function","Numeric",1500,25
+"F-diffusion","Function","Numeric",4500,39
+"F-diffusion","Function","Numeric",15000,25
+"F-diffusion","Function","Numeric",30000,14
+"F-diffusion","Function","Numeric",150,50
+"F-diffusion","Function","Numeric",1500,41
+"F-diffusion","Function","Numeric",4500,41
+"F-diffusion","Function","Numeric",15000,15
+"F-diffusion","Function","Numeric",30000,14
+"F-diffusion","Function","Numeric",150,30
+"F-diffusion","Function","Numeric",1500,25
+"F-diffusion","Function","Numeric",4500,41
+"F-diffusion","Function","Numeric",15000,32
+"F-diffusion","Function","Numeric",30000,15
+"F-diffusion","Function","Numeric",150,26
+"F-diffusion","Function","Numeric",1500,15
+"F-diffusion","Function","Numeric",4500,135
+"F-diffusion","Function","Numeric",15000,25
+"F-diffusion","Function","Numeric",30000,29
+"F-diffusion","Function","Numeric",150,33
+"F-diffusion","Function","Numeric",1500,29
+"F-diffusion","Function","Numeric",4500,35
+"F-diffusion","Function","Numeric",15000,34
+"F-diffusion","Function","Numeric",30000,30
+"F-diffusion","Function","Numeric",150,34
+"F-diffusion","Function","Numeric",1500,40
+"F-diffusion","Function","Numeric",4500,71
+"F-diffusion","Function","Numeric",15000,35
+"F-diffusion","Function","Numeric",30000,27
+"F-diffusion","Function","Numeric",150,38
+"F-diffusion","Function","Numeric",1500,28
+"F-diffusion","Function","Numeric",4500,32
+"F-diffusion","Function","Numeric",15000,23
+"F-diffusion","Function","Numeric",30000,19
+"F-diffusion","Function","Numeric",150,27
+"F-diffusion","Function","Numeric",1500,43
+"F-diffusion","Function","Numeric",4500,52
+"F-diffusion","Function","Numeric",15000,26
+"F-diffusion","Function","Numeric",30000,24
+"F-diffusion","Function","Numeric",150,23
+"F-diffusion","Function","Numeric",1500,36
+"F-diffusion","Function","Numeric",4500,25
+"F-diffusion","Function","Numeric",15000,23
+"F-diffusion","Function","Numeric",30000,17
+"F-diffusion","Function","Numeric",150,36
+"F-diffusion","Function","Numeric",1500,15
+"F-diffusion","Function","Numeric",4500,41
+"F-diffusion","Function","Numeric",15000,24
+"F-diffusion","Function","Numeric",30000,30
+"F-diffusion","Function","Numeric",150,26
+"F-diffusion","Function","Numeric",1500,50
+"F-diffusion","Function","Numeric",4500,53
+"F-diffusion","Function","Numeric",15000,14
+"F-diffusion","Function","Numeric",30000,25
+"F-diffusion","Function","Numeric",150,29
+"F-diffusion","Function","Numeric",1500,40
+"F-diffusion","Function","Numeric",4500,15
+"F-diffusion","Function","Numeric",15000,24
+"F-diffusion","Function","Numeric",30000,12
+"F-diffusion","Function","Numeric",150,26
+"F-diffusion","Function","Numeric",1500,40
+"F-diffusion","Function","Numeric",4500,52
+"F-diffusion","Function","Numeric",15000,34
+"F-diffusion","Function","Numeric",30000,15
+"F-diffusion","Function","Numeric",150,46
+"F-diffusion","Function","Numeric",1500,40
+"F-diffusion","Function","Numeric",4500,123
+"F-diffusion","Function","Numeric",15000,22
+"F-diffusion","Function","Numeric",30000,18
+"F-diffusion","Function","Numeric",150,38
+"F-diffusion","Function","Numeric",1500,43
+"F-diffusion","Function","Numeric",4500,30
+"F-diffusion","Function","Numeric",15000,25
+"F-diffusion","Function","Numeric",30000,19
+"F-diffusion","Function","Numeric",150,38
+"F-diffusion","Function","Numeric",1500,41
+"F-diffusion","Function","Numeric",4500,70
+"F-diffusion","Function","Numeric",15000,23
+"F-diffusion","Function","Numeric",30000,22
+"F-diffusion","Function","Numeric",150,40
+"F-diffusion","Function","Numeric",1500,23
+"F-diffusion","Function","Numeric",4500,45
+"F-diffusion","Function","Numeric",15000,16
+"F-diffusion","Function","Numeric",30000,25
+"F-diffusion","Function","Numeric",150,31
+"F-diffusion","Function","Numeric",1500,34
+"F-diffusion","Function","Numeric",4500,35
+"F-diffusion","Function","Numeric",15000,18
+"F-diffusion","Function","Numeric",30000,24
+"F-diffusion","Function","Numeric",150,36
+"F-diffusion","Function","Numeric",1500,44
+"F-diffusion","Function","Numeric",4500,55
+"F-diffusion","Function","Numeric",15000,16
+"F-diffusion","Function","Numeric",30000,18
+"F-diffusion","Function","Numeric",150,27
+"F-diffusion","Function","Numeric",1500,49
+"F-diffusion","Function","Numeric",4500,15
+"F-diffusion","Function","Numeric",15000,20
+"F-diffusion","Function","Numeric",30000,18
+"F-diffusion","Function","Numeric",150,38
+"F-diffusion","Function","Numeric",1500,43
+"F-diffusion","Function","Numeric",4500,34
+"F-diffusion","Function","Numeric",15000,16
+"F-diffusion","Function","Numeric",30000,20
+"F-diffusion","Function","Numeric",150,26
+"F-diffusion","Function","Numeric",1500,40
+"F-diffusion","Function","Numeric",4500,41
+"F-diffusion","Function","Numeric",15000,25
+"F-diffusion","Function","Numeric",30000,15
+"F-diffusion","Function","Numeric",150,35
+"F-diffusion","Function","Numeric",1500,34
+"F-diffusion","Function","Numeric",4500,15
+"F-diffusion","Function","Numeric",15000,15
+"F-diffusion","Function","Numeric",30000,25
+"F-diffusion","Function","Numeric",150,27
+"F-diffusion","Function","Numeric",1500,25
+"F-diffusion","Function","Numeric",4500,112
+"F-diffusion","Function","Numeric",15000,20
+"F-diffusion","Function","Numeric",30000,26
+"F-diffusion","Function","Numeric",150,33
+"F-diffusion","Function","Numeric",1500,34
+"F-diffusion","Function","Numeric",4500,40
+"F-diffusion","Function","Numeric",15000,14
+"F-diffusion","Function","Numeric",30000,33
+"F-diffusion","Function","Numeric",150,33
+"F-diffusion","Function","Numeric",1500,14
+"F-diffusion","Function","Numeric",4500,71
+"F-diffusion","Function","Numeric",15000,14
+"F-diffusion","Function","Numeric",30000,35
+"F-diffusion","Function","Numeric",150,39
+"F-diffusion","Function","Numeric",1500,33
+"F-diffusion","Function","Numeric",4500,28
+"F-diffusion","Function","Numeric",15000,35
+"F-diffusion","Function","Numeric",30000,25
+"F-diffusion","Function","Numeric",150,24
+"F-diffusion","Function","Numeric",1500,41
+"F-diffusion","Function","Numeric",4500,61
+"F-diffusion","Function","Numeric",15000,15
+"F-diffusion","Function","Numeric",30000,24
+"F-diffusion","Function","Numeric",150,36
+"F-diffusion","Function","Numeric",1500,22
+"F-diffusion","Function","Numeric",4500,14
+"F-diffusion","Function","Numeric",15000,13
+"F-diffusion","Function","Numeric",30000,13
+"F-diffusion","Function","Numeric",150,50
+"F-diffusion","Function","Numeric",1500,49
+"F-diffusion","Function","Numeric",4500,15
+"F-diffusion","Function","Numeric",15000,43
+"F-diffusion","Function","Numeric",30000,14
+"F-diffusion","Function","Numeric",150,26
+"F-diffusion","Function","Numeric",1500,44
+"F-diffusion","Function","Numeric",4500,28
+"F-diffusion","Function","Numeric",15000,13
+"F-diffusion","Function","Numeric",30000,16
+"F-diffusion","Function","Numeric",150,37
+"F-diffusion","Function","Numeric",1500,45
+"F-diffusion","Function","Numeric",4500,54
+"F-diffusion","Function","Numeric",15000,66
+"F-diffusion","Function","Numeric",30000,28
+"F-diffusion","Function","Numeric",150,48
+"F-diffusion","Function","Numeric",1500,19
+"F-diffusion","Function","Numeric",4500,54
+"F-diffusion","Function","Numeric",15000,15
+"F-diffusion","Function","Numeric",30000,34
+"F-diffusion","Function","Numeric",150,35
+"F-diffusion","Function","Numeric",1500,30
+"F-diffusion","Function","Numeric",4500,14
+"F-diffusion","Function","Numeric",15000,24
+"F-diffusion","Function","Numeric",30000,13
+"F-diffusion","Function","Numeric",150,35
+"F-diffusion","Function","Numeric",1500,50
+"F-diffusion","Function","Numeric",4500,54
+"F-diffusion","Function","Numeric",15000,15
+"F-diffusion","Function","Numeric",30000,15
+"F-diffusion","Function","Numeric",150,54
+"F-diffusion","Function","Numeric",1500,41
+"F-diffusion","Function","Numeric",4500,51
+"F-diffusion","Function","Numeric",15000,26
+"F-diffusion","Function","Numeric",30000,20
+"F-diffusion","Gradient","Numeric",150,18
+"F-diffusion","Gradient","Numeric",1500,15
+"F-diffusion","Gradient","Numeric",4500,25
+"F-diffusion","Gradient","Numeric",15000,15
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,13
+"F-diffusion","Gradient","Numeric",1500,25
+"F-diffusion","Gradient","Numeric",4500,18
+"F-diffusion","Gradient","Numeric",15000,10
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,15
+"F-diffusion","Gradient","Numeric",1500,22
+"F-diffusion","Gradient","Numeric",4500,7
+"F-diffusion","Gradient","Numeric",15000,15
+"F-diffusion","Gradient","Numeric",30000,7
+"F-diffusion","Gradient","Numeric",150,22
+"F-diffusion","Gradient","Numeric",1500,17
+"F-diffusion","Gradient","Numeric",4500,8
+"F-diffusion","Gradient","Numeric",15000,15
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,23
+"F-diffusion","Gradient","Numeric",1500,25
+"F-diffusion","Gradient","Numeric",4500,18
+"F-diffusion","Gradient","Numeric",15000,9
+"F-diffusion","Gradient","Numeric",30000,22
+"F-diffusion","Gradient","Numeric",150,15
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,81
+"F-diffusion","Gradient","Numeric",15000,100
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,18
+"F-diffusion","Gradient","Numeric",1500,17
+"F-diffusion","Gradient","Numeric",4500,8
+"F-diffusion","Gradient","Numeric",15000,15
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,16
+"F-diffusion","Gradient","Numeric",1500,15
+"F-diffusion","Gradient","Numeric",4500,18
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,11
+"F-diffusion","Gradient","Numeric",1500,19
+"F-diffusion","Gradient","Numeric",4500,18
+"F-diffusion","Gradient","Numeric",15000,5
+"F-diffusion","Gradient","Numeric",30000,15
+"F-diffusion","Gradient","Numeric",150,15
+"F-diffusion","Gradient","Numeric",1500,15
+"F-diffusion","Gradient","Numeric",4500,7
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,64
+"F-diffusion","Gradient","Numeric",150,14
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,18
+"F-diffusion","Gradient","Numeric",15000,7
+"F-diffusion","Gradient","Numeric",30000,9
+"F-diffusion","Gradient","Numeric",150,18
+"F-diffusion","Gradient","Numeric",1500,8
+"F-diffusion","Gradient","Numeric",4500,8
+"F-diffusion","Gradient","Numeric",15000,13
+"F-diffusion","Gradient","Numeric",30000,15
+"F-diffusion","Gradient","Numeric",150,15
+"F-diffusion","Gradient","Numeric",1500,11
+"F-diffusion","Gradient","Numeric",4500,25
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,18
+"F-diffusion","Gradient","Numeric",1500,17
+"F-diffusion","Gradient","Numeric",4500,46
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,9
+"F-diffusion","Gradient","Numeric",150,18
+"F-diffusion","Gradient","Numeric",1500,15
+"F-diffusion","Gradient","Numeric",4500,25
+"F-diffusion","Gradient","Numeric",15000,15
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,22
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,18
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,14
+"F-diffusion","Gradient","Numeric",1500,15
+"F-diffusion","Gradient","Numeric",4500,25
+"F-diffusion","Gradient","Numeric",15000,11
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,14
+"F-diffusion","Gradient","Numeric",1500,8
+"F-diffusion","Gradient","Numeric",4500,82
+"F-diffusion","Gradient","Numeric",15000,15
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,10
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,22
+"F-diffusion","Gradient","Numeric",15000,9
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,18
+"F-diffusion","Gradient","Numeric",1500,17
+"F-diffusion","Gradient","Numeric",4500,39
+"F-diffusion","Gradient","Numeric",15000,22
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,15
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,18
+"F-diffusion","Gradient","Numeric",15000,15
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,15
+"F-diffusion","Gradient","Numeric",1500,17
+"F-diffusion","Gradient","Numeric",4500,25
+"F-diffusion","Gradient","Numeric",15000,15
+"F-diffusion","Gradient","Numeric",30000,15
+"F-diffusion","Gradient","Numeric",150,9
+"F-diffusion","Gradient","Numeric",1500,14
+"F-diffusion","Gradient","Numeric",4500,6
+"F-diffusion","Gradient","Numeric",15000,15
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,12
+"F-diffusion","Gradient","Numeric",1500,8
+"F-diffusion","Gradient","Numeric",4500,18
+"F-diffusion","Gradient","Numeric",15000,15
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,13
+"F-diffusion","Gradient","Numeric",1500,24
+"F-diffusion","Gradient","Numeric",4500,25
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,15
+"F-diffusion","Gradient","Numeric",150,14
+"F-diffusion","Gradient","Numeric",1500,25
+"F-diffusion","Gradient","Numeric",4500,8
+"F-diffusion","Gradient","Numeric",15000,13
+"F-diffusion","Gradient","Numeric",30000,5
+"F-diffusion","Gradient","Numeric",150,13
+"F-diffusion","Gradient","Numeric",1500,17
+"F-diffusion","Gradient","Numeric",4500,25
+"F-diffusion","Gradient","Numeric",15000,22
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,14
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,81
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,15
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,18
+"F-diffusion","Gradient","Numeric",15000,14
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,13
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,39
+"F-diffusion","Gradient","Numeric",15000,5
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,15
+"F-diffusion","Gradient","Numeric",1500,15
+"F-diffusion","Gradient","Numeric",4500,29
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,15
+"F-diffusion","Gradient","Numeric",150,9
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,22
+"F-diffusion","Gradient","Numeric",15000,10
+"F-diffusion","Gradient","Numeric",30000,15
+"F-diffusion","Gradient","Numeric",150,11
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,36
+"F-diffusion","Gradient","Numeric",15000,7
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,14
+"F-diffusion","Gradient","Numeric",1500,32
+"F-diffusion","Gradient","Numeric",4500,8
+"F-diffusion","Gradient","Numeric",15000,10
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,14
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,22
+"F-diffusion","Gradient","Numeric",15000,7
+"F-diffusion","Gradient","Numeric",30000,9
+"F-diffusion","Gradient","Numeric",150,14
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,18
+"F-diffusion","Gradient","Numeric",15000,14
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,13
+"F-diffusion","Gradient","Numeric",1500,22
+"F-diffusion","Gradient","Numeric",4500,8
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,15
+"F-diffusion","Gradient","Numeric",150,15
+"F-diffusion","Gradient","Numeric",1500,14
+"F-diffusion","Gradient","Numeric",4500,74
+"F-diffusion","Gradient","Numeric",15000,10
+"F-diffusion","Gradient","Numeric",30000,6
+"F-diffusion","Gradient","Numeric",150,18
+"F-diffusion","Gradient","Numeric",1500,21
+"F-diffusion","Gradient","Numeric",4500,25
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,9
+"F-diffusion","Gradient","Numeric",150,16
+"F-diffusion","Gradient","Numeric",1500,8
+"F-diffusion","Gradient","Numeric",4500,46
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,22
+"F-diffusion","Gradient","Numeric",150,22
+"F-diffusion","Gradient","Numeric",1500,22
+"F-diffusion","Gradient","Numeric",4500,7
+"F-diffusion","Gradient","Numeric",15000,22
+"F-diffusion","Gradient","Numeric",30000,15
+"F-diffusion","Gradient","Numeric",150,11
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,30
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,15
+"F-diffusion","Gradient","Numeric",150,18
+"F-diffusion","Gradient","Numeric",1500,11
+"F-diffusion","Gradient","Numeric",4500,7
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,20
+"F-diffusion","Gradient","Numeric",1500,24
+"F-diffusion","Gradient","Numeric",4500,8
+"F-diffusion","Gradient","Numeric",15000,29
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,12
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,18
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,14
+"F-diffusion","Gradient","Numeric",1500,22
+"F-diffusion","Gradient","Numeric",4500,27
+"F-diffusion","Gradient","Numeric",15000,34
+"F-diffusion","Gradient","Numeric",30000,10
+"F-diffusion","Gradient","Numeric",150,14
+"F-diffusion","Gradient","Numeric",1500,11
+"F-diffusion","Gradient","Numeric",4500,36
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,22
+"F-diffusion","Gradient","Numeric",150,18
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,8
+"F-diffusion","Gradient","Numeric",15000,13
+"F-diffusion","Gradient","Numeric",30000,8
+"F-diffusion","Gradient","Numeric",150,13
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,36
+"F-diffusion","Gradient","Numeric",15000,8
+"F-diffusion","Gradient","Numeric",30000,7
+"F-diffusion","Gradient","Numeric",150,22
+"F-diffusion","Gradient","Numeric",1500,18
+"F-diffusion","Gradient","Numeric",4500,25
+"F-diffusion","Gradient","Numeric",15000,7
+"F-diffusion","Gradient","Numeric",30000,9
+"Linear","Function","Closed form",150,45
+"Linear","Function","Closed form",1500,50
+"Linear","Function","Closed form",4500,31
+"Linear","Function","Closed form",15000,67
+"Linear","Function","Closed form",30000,43
+"Linear","Function","Closed form",150,27
+"Linear","Function","Closed form",1500,138
+"Linear","Function","Closed form",4500,30
+"Linear","Function","Closed form",15000,33
+"Linear","Function","Closed form",30000,64
+"Linear","Function","Closed form",150,62
+"Linear","Function","Closed form",1500,73
+"Linear","Function","Closed form",4500,56
+"Linear","Function","Closed form",15000,60
+"Linear","Function","Closed form",30000,45
+"Linear","Function","Closed form",150,86
+"Linear","Function","Closed form",1500,72
+"Linear","Function","Closed form",4500,171
+"Linear","Function","Closed form",15000,65
+"Linear","Function","Closed form",30000,67
+"Linear","Function","Closed form",150,65
+"Linear","Function","Closed form",1500,42
+"Linear","Function","Closed form",4500,32
+"Linear","Function","Closed form",15000,34
+"Linear","Function","Closed form",30000,48
+"Linear","Function","Closed form",150,106
+"Linear","Function","Closed form",1500,69
+"Linear","Function","Closed form",4500,64
+"Linear","Function","Closed form",15000,43
+"Linear","Function","Closed form",30000,53
+"Linear","Function","Closed form",150,45
+"Linear","Function","Closed form",1500,63
+"Linear","Function","Closed form",4500,53
+"Linear","Function","Closed form",15000,35
+"Linear","Function","Closed form",30000,35
+"Linear","Function","Closed form",150,50
+"Linear","Function","Closed form",1500,147
+"Linear","Function","Closed form",4500,51
+"Linear","Function","Closed form",15000,34
+"Linear","Function","Closed form",30000,33
+"Linear","Function","Closed form",150,39
+"Linear","Function","Closed form",1500,59
+"Linear","Function","Closed form",4500,44
+"Linear","Function","Closed form",15000,33
+"Linear","Function","Closed form",30000,58
+"Linear","Function","Closed form",150,69
+"Linear","Function","Closed form",1500,32
+"Linear","Function","Closed form",4500,32
+"Linear","Function","Closed form",15000,45
+"Linear","Function","Closed form",30000,54
+"Linear","Function","Closed form",150,46
+"Linear","Function","Closed form",1500,32
+"Linear","Function","Closed form",4500,33
+"Linear","Function","Closed form",15000,35
+"Linear","Function","Closed form",30000,34
+"Linear","Function","Closed form",150,83
+"Linear","Function","Closed form",1500,202
+"Linear","Function","Closed form",4500,57
+"Linear","Function","Closed form",15000,35
+"Linear","Function","Closed form",30000,32
+"Linear","Function","Closed form",150,108
+"Linear","Function","Closed form",1500,166
+"Linear","Function","Closed form",4500,53
+"Linear","Function","Closed form",15000,67
+"Linear","Function","Closed form",30000,34
+"Linear","Function","Closed form",150,55
+"Linear","Function","Closed form",1500,61
+"Linear","Function","Closed form",4500,50
+"Linear","Function","Closed form",15000,42
+"Linear","Function","Closed form",30000,44
+"Linear","Function","Closed form",150,119
+"Linear","Function","Closed form",1500,48
+"Linear","Function","Closed form",4500,31
+"Linear","Function","Closed form",15000,35
+"Linear","Function","Closed form",30000,54
+"Linear","Function","Closed form",150,41
+"Linear","Function","Closed form",1500,51
+"Linear","Function","Closed form",4500,32
+"Linear","Function","Closed form",15000,32
+"Linear","Function","Closed form",30000,34
+"Linear","Function","Closed form",150,45
+"Linear","Function","Closed form",1500,29
+"Linear","Function","Closed form",4500,53
+"Linear","Function","Closed form",15000,54
+"Linear","Function","Closed form",30000,88
+"Linear","Function","Closed form",150,47
+"Linear","Function","Closed form",1500,62
+"Linear","Function","Closed form",4500,52
+"Linear","Function","Closed form",15000,57
+"Linear","Function","Closed form",30000,57
+"Linear","Function","Closed form",150,28
+"Linear","Function","Closed form",1500,40
+"Linear","Function","Closed form",4500,58
+"Linear","Function","Closed form",15000,34
+"Linear","Function","Closed form",30000,204
+"Linear","Function","Closed form",150,65
+"Linear","Function","Closed form",1500,60
+"Linear","Function","Closed form",4500,59
+"Linear","Function","Closed form",15000,65
+"Linear","Function","Closed form",30000,33
+"Linear","Function","Closed form",150,28
+"Linear","Function","Closed form",1500,29
+"Linear","Function","Closed form",4500,57
+"Linear","Function","Closed form",15000,34
+"Linear","Function","Closed form",30000,53
+"Linear","Function","Closed form",150,44
+"Linear","Function","Closed form",1500,31
+"Linear","Function","Closed form",4500,32
+"Linear","Function","Closed form",15000,67
+"Linear","Function","Closed form",30000,35
+"Linear","Function","Closed form",150,41
+"Linear","Function","Closed form",1500,51
+"Linear","Function","Closed form",4500,31
+"Linear","Function","Closed form",15000,36
+"Linear","Function","Closed form",30000,33
+"Linear","Function","Closed form",150,56
+"Linear","Function","Closed form",1500,40
+"Linear","Function","Closed form",4500,42
+"Linear","Function","Closed form",15000,36
+"Linear","Function","Closed form",30000,34
+"Linear","Function","Closed form",150,44
+"Linear","Function","Closed form",1500,186
+"Linear","Function","Closed form",4500,32
+"Linear","Function","Closed form",15000,33
+"Linear","Function","Closed form",30000,52
+"Linear","Function","Closed form",150,27
+"Linear","Function","Closed form",1500,63
+"Linear","Function","Closed form",4500,34
+"Linear","Function","Closed form",15000,34
+"Linear","Function","Closed form",30000,173
+"Linear","Function","Closed form",150,49
+"Linear","Function","Closed form",1500,63
+"Linear","Function","Closed form",4500,31
+"Linear","Function","Closed form",15000,55
+"Linear","Function","Closed form",30000,53
+"Linear","Function","Closed form",150,41
+"Linear","Function","Closed form",1500,59
+"Linear","Function","Closed form",4500,31
+"Linear","Function","Closed form",15000,34
+"Linear","Function","Closed form",30000,44
+"Linear","Function","Closed form",150,50
+"Linear","Function","Closed form",1500,31
+"Linear","Function","Closed form",4500,71
+"Linear","Function","Closed form",15000,65
+"Linear","Function","Closed form",30000,56
+"Linear","Function","Closed form",150,46
+"Linear","Function","Closed form",1500,112
+"Linear","Function","Closed form",4500,32
+"Linear","Function","Closed form",15000,37
+"Linear","Function","Closed form",30000,44
+"Linear","Function","Closed form",150,45
+"Linear","Function","Closed form",1500,30
+"Linear","Function","Closed form",4500,51
+"Linear","Function","Closed form",15000,83
+"Linear","Function","Closed form",30000,56
+"Linear","Function","Closed form",150,26
+"Linear","Function","Closed form",1500,59
+"Linear","Function","Closed form",4500,71
+"Linear","Function","Closed form",15000,33
+"Linear","Function","Closed form",30000,34
+"Linear","Function","Closed form",150,38
+"Linear","Function","Closed form",1500,33
+"Linear","Function","Closed form",4500,30
+"Linear","Function","Closed form",15000,35
+"Linear","Function","Closed form",30000,36
+"Linear","Function","Closed form",150,46
+"Linear","Function","Closed form",1500,61
+"Linear","Function","Closed form",4500,180
+"Linear","Function","Closed form",15000,64
+"Linear","Function","Closed form",30000,35
+"Linear","Function","Closed form",150,58
+"Linear","Function","Closed form",1500,30
+"Linear","Function","Closed form",4500,57
+"Linear","Function","Closed form",15000,34
+"Linear","Function","Closed form",30000,45
+"Linear","Function","Closed form",150,57
+"Linear","Function","Closed form",1500,54
+"Linear","Function","Closed form",4500,31
+"Linear","Function","Closed form",15000,66
+"Linear","Function","Closed form",30000,34
+"Linear","Function","Closed form",150,71
+"Linear","Function","Closed form",1500,62
+"Linear","Function","Closed form",4500,30
+"Linear","Function","Closed form",15000,54
+"Linear","Function","Closed form",30000,35
+"Linear","Function","Closed form",150,28
+"Linear","Function","Closed form",1500,49
+"Linear","Function","Closed form",4500,33
+"Linear","Function","Closed form",15000,75
+"Linear","Function","Closed form",30000,45
+"Linear","Function","Closed form",150,41
+"Linear","Function","Closed form",1500,109
+"Linear","Function","Closed form",4500,52
+"Linear","Function","Closed form",15000,34
+"Linear","Function","Closed form",30000,53
+"Linear","Function","Closed form",150,55
+"Linear","Function","Closed form",1500,202
+"Linear","Function","Closed form",4500,63
+"Linear","Function","Closed form",15000,33
+"Linear","Function","Closed form",30000,70
+"Linear","Function","Closed form",150,72
+"Linear","Function","Closed form",1500,50
+"Linear","Function","Closed form",4500,47
+"Linear","Function","Closed form",15000,67
+"Linear","Function","Closed form",30000,35
+"Linear","Function","Closed form",150,58
+"Linear","Function","Closed form",1500,48
+"Linear","Function","Closed form",4500,45
+"Linear","Function","Closed form",15000,44
+"Linear","Function","Closed form",30000,34
+"Linear","Function","Closed form",150,58
+"Linear","Function","Closed form",1500,44
+"Linear","Function","Closed form",4500,32
+"Linear","Function","Closed form",15000,32
+"Linear","Function","Closed form",30000,35
+"Linear","Function","Closed form",150,48
+"Linear","Function","Closed form",1500,61
+"Linear","Function","Closed form",4500,66
+"Linear","Function","Closed form",15000,74
+"Linear","Function","Closed form",30000,32
+"Linear","Function","Closed form",150,27
+"Linear","Function","Closed form",1500,30
+"Linear","Function","Closed form",4500,61
+"Linear","Function","Closed form",15000,45
+"Linear","Function","Closed form",30000,33
+"Linear","Function","Closed form",150,63
+"Linear","Function","Closed form",1500,64
+"Linear","Function","Closed form",4500,145
+"Linear","Function","Closed form",15000,53
+"Linear","Function","Closed form",30000,149
+"Linear","Function","Closed form",150,41
+"Linear","Function","Closed form",1500,31
+"Linear","Function","Closed form",4500,46
+"Linear","Function","Closed form",15000,32
+"Linear","Function","Closed form",30000,33
+"Linear","Function","Closed form",150,44
+"Linear","Function","Closed form",1500,72
+"Linear","Function","Closed form",4500,54
+"Linear","Function","Closed form",15000,59
+"Linear","Function","Closed form",30000,60
+"Linear","Function","Closed form",150,27
+"Linear","Function","Closed form",1500,31
+"Linear","Function","Closed form",4500,53
+"Linear","Function","Closed form",15000,33
+"Linear","Function","Closed form",30000,32
+"Linear","Function","Closed form",150,61
+"Linear","Function","Closed form",1500,30
+"Linear","Function","Closed form",4500,53
+"Linear","Function","Closed form",15000,35
+"Linear","Function","Closed form",30000,35
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,13
+"Linear","Gradient","Closed form",4500,7
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,8
+"Linear","Gradient","Closed form",1500,13
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,12
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,15
+"Linear","Gradient","Closed form",15000,14
+"Linear","Gradient","Closed form",30000,7
+"Linear","Gradient","Closed form",150,21
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,19
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,12
+"Linear","Gradient","Closed form",150,19
+"Linear","Gradient","Closed form",1500,7
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,7
+"Linear","Gradient","Closed form",30000,7
+"Linear","Gradient","Closed form",150,100
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,13
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,12
+"Linear","Gradient","Closed form",150,13
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,13
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,15
+"Linear","Gradient","Closed form",1500,14
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,9
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,6
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,13
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,12
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,7
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,19
+"Linear","Gradient","Closed form",1500,100
+"Linear","Gradient","Closed form",4500,9
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,100
+"Linear","Gradient","Closed form",1500,100
+"Linear","Gradient","Closed form",4500,13
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,13
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,7
+"Linear","Gradient","Closed form",150,100
+"Linear","Gradient","Closed form",1500,10
+"Linear","Gradient","Closed form",4500,7
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,13
+"Linear","Gradient","Closed form",150,9
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,13
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,13
+"Linear","Gradient","Closed form",30000,19
+"Linear","Gradient","Closed form",150,13
+"Linear","Gradient","Closed form",1500,13
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,14
+"Linear","Gradient","Closed form",30000,12
+"Linear","Gradient","Closed form",150,8
+"Linear","Gradient","Closed form",1500,7
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,26
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,6
+"Linear","Gradient","Closed form",150,8
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,9
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,12
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,9
+"Linear","Gradient","Closed form",1500,13
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,6
+"Linear","Gradient","Closed form",150,13
+"Linear","Gradient","Closed form",1500,7
+"Linear","Gradient","Closed form",4500,7
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,21
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,11
+"Linear","Gradient","Closed form",150,8
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,16
+"Linear","Gradient","Closed form",150,14
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,12
+"Linear","Gradient","Closed form",150,9
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,6
+"Linear","Gradient","Closed form",30000,6
+"Linear","Gradient","Closed form",150,9
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,19
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,15
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,11
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,5
+"Linear","Gradient","Closed form",150,13
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,11
+"Linear","Gradient","Closed form",30000,11
+"Linear","Gradient","Closed form",150,7
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,7
+"Linear","Gradient","Closed form",150,7
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,7
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,13
+"Linear","Gradient","Closed form",1500,13
+"Linear","Gradient","Closed form",4500,15
+"Linear","Gradient","Closed form",15000,15
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,11
+"Linear","Gradient","Closed form",1500,7
+"Linear","Gradient","Closed form",4500,9
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,6
+"Linear","Gradient","Closed form",150,11
+"Linear","Gradient","Closed form",1500,14
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,7
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,13
+"Linear","Gradient","Closed form",4500,7
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,8
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,7
+"Linear","Gradient","Closed form",15000,4
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,9
+"Linear","Gradient","Closed form",1500,100
+"Linear","Gradient","Closed form",4500,14
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,12
+"Linear","Gradient","Closed form",150,13
+"Linear","Gradient","Closed form",1500,24
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,6
+"Linear","Gradient","Closed form",30000,14
+"Linear","Gradient","Closed form",150,14
+"Linear","Gradient","Closed form",1500,13
+"Linear","Gradient","Closed form",4500,10
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,11
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,7
+"Linear","Gradient","Closed form",15000,6
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,7
+"Linear","Gradient","Closed form",4500,8
+"Linear","Gradient","Closed form",15000,6
+"Linear","Gradient","Closed form",30000,8
+"Linear","Gradient","Closed form",150,13
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,6
+"Linear","Gradient","Closed form",150,8
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,6
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,13
+"Linear","Gradient","Closed form",4500,16
+"Linear","Gradient","Closed form",15000,13
+"Linear","Gradient","Closed form",30000,18
+"Linear","Gradient","Closed form",150,9
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,7
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,6
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,12
+"Linear","Gradient","Closed form",4500,13
+"Linear","Gradient","Closed form",15000,12
+"Linear","Gradient","Closed form",30000,15
+"Linear","Gradient","Closed form",150,8
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,5
+"Linear","Gradient","Closed form",150,12
+"Linear","Gradient","Closed form",1500,8
+"Linear","Gradient","Closed form",4500,12
+"Linear","Gradient","Closed form",15000,8
+"Linear","Gradient","Closed form",30000,8
+"Linear","Function","Numeric",150,29
+"Linear","Function","Numeric",1500,33
+"Linear","Function","Numeric",4500,34
+"Linear","Function","Numeric",15000,15
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,30
+"Linear","Function","Numeric",1500,46
+"Linear","Function","Numeric",4500,51
+"Linear","Function","Numeric",15000,15
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,34
+"Linear","Function","Numeric",1500,32
+"Linear","Function","Numeric",4500,25
+"Linear","Function","Numeric",15000,25
+"Linear","Function","Numeric",30000,26
+"Linear","Function","Numeric",150,27
+"Linear","Function","Numeric",1500,31
+"Linear","Function","Numeric",4500,38
+"Linear","Function","Numeric",15000,26
+"Linear","Function","Numeric",30000,36
+"Linear","Function","Numeric",150,39
+"Linear","Function","Numeric",1500,34
+"Linear","Function","Numeric",4500,38
+"Linear","Function","Numeric",15000,13
+"Linear","Function","Numeric",30000,25
+"Linear","Function","Numeric",150,28
+"Linear","Function","Numeric",1500,41
+"Linear","Function","Numeric",4500,48
+"Linear","Function","Numeric",15000,145
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,39
+"Linear","Function","Numeric",1500,15
+"Linear","Function","Numeric",4500,51
+"Linear","Function","Numeric",15000,28
+"Linear","Function","Numeric",30000,20
+"Linear","Function","Numeric",150,38
+"Linear","Function","Numeric",1500,15
+"Linear","Function","Numeric",4500,49
+"Linear","Function","Numeric",15000,34
+"Linear","Function","Numeric",30000,16
+"Linear","Function","Numeric",150,44
+"Linear","Function","Numeric",1500,29
+"Linear","Function","Numeric",4500,38
+"Linear","Function","Numeric",15000,24
+"Linear","Function","Numeric",30000,23
+"Linear","Function","Numeric",150,37
+"Linear","Function","Numeric",1500,16
+"Linear","Function","Numeric",4500,29
+"Linear","Function","Numeric",15000,14
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,38
+"Linear","Function","Numeric",1500,41
+"Linear","Function","Numeric",4500,40
+"Linear","Function","Numeric",15000,11
+"Linear","Function","Numeric",30000,13
+"Linear","Function","Numeric",150,56
+"Linear","Function","Numeric",1500,41
+"Linear","Function","Numeric",4500,29
+"Linear","Function","Numeric",15000,14
+"Linear","Function","Numeric",30000,25
+"Linear","Function","Numeric",150,29
+"Linear","Function","Numeric",1500,36
+"Linear","Function","Numeric",4500,59
+"Linear","Function","Numeric",15000,15
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,52
+"Linear","Function","Numeric",1500,43
+"Linear","Function","Numeric",4500,49
+"Linear","Function","Numeric",15000,15
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,37
+"Linear","Function","Numeric",1500,15
+"Linear","Function","Numeric",4500,49
+"Linear","Function","Numeric",15000,115
+"Linear","Function","Numeric",30000,25
+"Linear","Function","Numeric",150,46
+"Linear","Function","Numeric",1500,43
+"Linear","Function","Numeric",4500,14
+"Linear","Function","Numeric",15000,16
+"Linear","Function","Numeric",30000,13
+"Linear","Function","Numeric",150,30
+"Linear","Function","Numeric",1500,14
+"Linear","Function","Numeric",4500,40
+"Linear","Function","Numeric",15000,31
+"Linear","Function","Numeric",30000,25
+"Linear","Function","Numeric",150,36
+"Linear","Function","Numeric",1500,14
+"Linear","Function","Numeric",4500,50
+"Linear","Function","Numeric",15000,15
+"Linear","Function","Numeric",30000,35
+"Linear","Function","Numeric",150,28
+"Linear","Function","Numeric",1500,31
+"Linear","Function","Numeric",4500,40
+"Linear","Function","Numeric",15000,24
+"Linear","Function","Numeric",30000,31
+"Linear","Function","Numeric",150,34
+"Linear","Function","Numeric",1500,31
+"Linear","Function","Numeric",4500,31
+"Linear","Function","Numeric",15000,15
+"Linear","Function","Numeric",30000,25
+"Linear","Function","Numeric",150,16
+"Linear","Function","Numeric",1500,45
+"Linear","Function","Numeric",4500,29
+"Linear","Function","Numeric",15000,16
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,28
+"Linear","Function","Numeric",1500,26
+"Linear","Function","Numeric",4500,29
+"Linear","Function","Numeric",15000,92
+"Linear","Function","Numeric",30000,24
+"Linear","Function","Numeric",150,29
+"Linear","Function","Numeric",1500,15
+"Linear","Function","Numeric",4500,12
+"Linear","Function","Numeric",15000,17
+"Linear","Function","Numeric",30000,27
+"Linear","Function","Numeric",150,38
+"Linear","Function","Numeric",1500,14
+"Linear","Function","Numeric",4500,13
+"Linear","Function","Numeric",15000,23
+"Linear","Function","Numeric",30000,18
+"Linear","Function","Numeric",150,40
+"Linear","Function","Numeric",1500,42
+"Linear","Function","Numeric",4500,55
+"Linear","Function","Numeric",15000,145
+"Linear","Function","Numeric",30000,25
+"Linear","Function","Numeric",150,30
+"Linear","Function","Numeric",1500,31
+"Linear","Function","Numeric",4500,49
+"Linear","Function","Numeric",15000,27
+"Linear","Function","Numeric",30000,21
+"Linear","Function","Numeric",150,29
+"Linear","Function","Numeric",1500,62
+"Linear","Function","Numeric",4500,48
+"Linear","Function","Numeric",15000,16
+"Linear","Function","Numeric",30000,27
+"Linear","Function","Numeric",150,48
+"Linear","Function","Numeric",1500,35
+"Linear","Function","Numeric",4500,21
+"Linear","Function","Numeric",15000,14
+"Linear","Function","Numeric",30000,33
+"Linear","Function","Numeric",150,18
+"Linear","Function","Numeric",1500,49
+"Linear","Function","Numeric",4500,24
+"Linear","Function","Numeric",15000,15
+"Linear","Function","Numeric",30000,21
+"Linear","Function","Numeric",150,27
+"Linear","Function","Numeric",1500,23
+"Linear","Function","Numeric",4500,70
+"Linear","Function","Numeric",15000,22
+"Linear","Function","Numeric",30000,12
+"Linear","Function","Numeric",150,39
+"Linear","Function","Numeric",1500,32
+"Linear","Function","Numeric",4500,41
+"Linear","Function","Numeric",15000,14
+"Linear","Function","Numeric",30000,56
+"Linear","Function","Numeric",150,24
+"Linear","Function","Numeric",1500,32
+"Linear","Function","Numeric",4500,29
+"Linear","Function","Numeric",15000,14
+"Linear","Function","Numeric",30000,45
+"Linear","Function","Numeric",150,35
+"Linear","Function","Numeric",1500,43
+"Linear","Function","Numeric",4500,48
+"Linear","Function","Numeric",15000,13
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,39
+"Linear","Function","Numeric",1500,46
+"Linear","Function","Numeric",4500,43
+"Linear","Function","Numeric",15000,26
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,38
+"Linear","Function","Numeric",1500,37
+"Linear","Function","Numeric",4500,42
+"Linear","Function","Numeric",15000,15
+"Linear","Function","Numeric",30000,16
+"Linear","Function","Numeric",150,41
+"Linear","Function","Numeric",1500,38
+"Linear","Function","Numeric",4500,12
+"Linear","Function","Numeric",15000,15
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,41
+"Linear","Function","Numeric",1500,31
+"Linear","Function","Numeric",4500,38
+"Linear","Function","Numeric",15000,14
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,28
+"Linear","Function","Numeric",1500,52
+"Linear","Function","Numeric",4500,14
+"Linear","Function","Numeric",15000,20
+"Linear","Function","Numeric",30000,24
+"Linear","Function","Numeric",150,36
+"Linear","Function","Numeric",1500,20
+"Linear","Function","Numeric",4500,31
+"Linear","Function","Numeric",15000,24
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,38
+"Linear","Function","Numeric",1500,26
+"Linear","Function","Numeric",4500,69
+"Linear","Function","Numeric",15000,15
+"Linear","Function","Numeric",30000,35
+"Linear","Function","Numeric",150,38
+"Linear","Function","Numeric",1500,49
+"Linear","Function","Numeric",4500,31
+"Linear","Function","Numeric",15000,14
+"Linear","Function","Numeric",30000,145
+"Linear","Function","Numeric",150,25
+"Linear","Function","Numeric",1500,37
+"Linear","Function","Numeric",4500,35
+"Linear","Function","Numeric",15000,15
+"Linear","Function","Numeric",30000,20
+"Linear","Function","Numeric",150,26
+"Linear","Function","Numeric",1500,40
+"Linear","Function","Numeric",4500,27
+"Linear","Function","Numeric",15000,13
+"Linear","Function","Numeric",30000,27
+"Linear","Function","Numeric",150,39
+"Linear","Function","Numeric",1500,31
+"Linear","Function","Numeric",4500,13
+"Linear","Function","Numeric",15000,14
+"Linear","Function","Numeric",30000,23
+"Linear","Function","Numeric",150,28
+"Linear","Function","Numeric",1500,55
+"Linear","Function","Numeric",4500,52
+"Linear","Function","Numeric",15000,42
+"Linear","Function","Numeric",30000,25
+"Linear","Function","Numeric",150,27
+"Linear","Function","Numeric",1500,42
+"Linear","Function","Numeric",4500,50
+"Linear","Function","Numeric",15000,14
+"Linear","Function","Numeric",30000,15
+"Linear","Function","Numeric",150,45
+"Linear","Function","Numeric",1500,37
+"Linear","Function","Numeric",4500,49
+"Linear","Function","Numeric",15000,25
+"Linear","Function","Numeric",30000,13
+"Linear","Function","Numeric",150,36
+"Linear","Function","Numeric",1500,30
+"Linear","Function","Numeric",4500,51
+"Linear","Function","Numeric",15000,25
+"Linear","Function","Numeric",30000,35
+"Linear","Function","Numeric",150,22
+"Linear","Function","Numeric",1500,40
+"Linear","Function","Numeric",4500,63
+"Linear","Function","Numeric",15000,20
+"Linear","Function","Numeric",30000,12
+"Linear","Function","Numeric",150,43
+"Linear","Function","Numeric",1500,38
+"Linear","Function","Numeric",4500,75
+"Linear","Function","Numeric",15000,24
+"Linear","Function","Numeric",30000,15
+"Linear","Gradient","Numeric",150,14
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,22
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,15
+"Linear","Gradient","Numeric",1500,19
+"Linear","Gradient","Numeric",4500,24
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,16
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,8
+"Linear","Gradient","Numeric",15000,14
+"Linear","Gradient","Numeric",30000,7
+"Linear","Gradient","Numeric",150,15
+"Linear","Gradient","Numeric",1500,16
+"Linear","Gradient","Numeric",4500,24
+"Linear","Gradient","Numeric",15000,15
+"Linear","Gradient","Numeric",30000,14
+"Linear","Gradient","Numeric",150,22
+"Linear","Gradient","Numeric",1500,17
+"Linear","Gradient","Numeric",4500,24
+"Linear","Gradient","Numeric",15000,6
+"Linear","Gradient","Numeric",30000,15
+"Linear","Gradient","Numeric",150,14
+"Linear","Gradient","Numeric",1500,17
+"Linear","Gradient","Numeric",4500,32
+"Linear","Gradient","Numeric",15000,100
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,20
+"Linear","Gradient","Numeric",1500,8
+"Linear","Gradient","Numeric",4500,24
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,9
+"Linear","Gradient","Numeric",150,16
+"Linear","Gradient","Numeric",1500,8
+"Linear","Gradient","Numeric",4500,32
+"Linear","Gradient","Numeric",15000,7
+"Linear","Gradient","Numeric",30000,7
+"Linear","Gradient","Numeric",150,17
+"Linear","Gradient","Numeric",1500,17
+"Linear","Gradient","Numeric",4500,25
+"Linear","Gradient","Numeric",15000,5
+"Linear","Gradient","Numeric",30000,7
+"Linear","Gradient","Numeric",150,13
+"Linear","Gradient","Numeric",1500,8
+"Linear","Gradient","Numeric",4500,18
+"Linear","Gradient","Numeric",15000,6
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,15
+"Linear","Gradient","Numeric",1500,16
+"Linear","Gradient","Numeric",4500,25
+"Linear","Gradient","Numeric",15000,6
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,17
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,18
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,14
+"Linear","Gradient","Numeric",150,14
+"Linear","Gradient","Numeric",1500,22
+"Linear","Gradient","Numeric",4500,31
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,21
+"Linear","Gradient","Numeric",1500,24
+"Linear","Gradient","Numeric",4500,32
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,6
+"Linear","Gradient","Numeric",150,14
+"Linear","Gradient","Numeric",1500,8
+"Linear","Gradient","Numeric",4500,31
+"Linear","Gradient","Numeric",15000,74
+"Linear","Gradient","Numeric",30000,6
+"Linear","Gradient","Numeric",150,17
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,5
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,11
+"Linear","Gradient","Numeric",1500,8
+"Linear","Gradient","Numeric",4500,25
+"Linear","Gradient","Numeric",15000,11
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,16
+"Linear","Gradient","Numeric",1500,8
+"Linear","Gradient","Numeric",4500,25
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,15
+"Linear","Gradient","Numeric",150,15
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,18
+"Linear","Gradient","Numeric",15000,7
+"Linear","Gradient","Numeric",30000,9
+"Linear","Gradient","Numeric",150,18
+"Linear","Gradient","Numeric",1500,16
+"Linear","Gradient","Numeric",4500,18
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,6
+"Linear","Gradient","Numeric",150,8
+"Linear","Gradient","Numeric",1500,17
+"Linear","Gradient","Numeric",4500,18
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,7
+"Linear","Gradient","Numeric",150,15
+"Linear","Gradient","Numeric",1500,15
+"Linear","Gradient","Numeric",4500,17
+"Linear","Gradient","Numeric",15000,53
+"Linear","Gradient","Numeric",30000,13
+"Linear","Gradient","Numeric",150,15
+"Linear","Gradient","Numeric",1500,8
+"Linear","Gradient","Numeric",4500,4
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,6
+"Linear","Gradient","Numeric",150,15
+"Linear","Gradient","Numeric",1500,8
+"Linear","Gradient","Numeric",4500,5
+"Linear","Gradient","Numeric",15000,12
+"Linear","Gradient","Numeric",30000,10
+"Linear","Gradient","Numeric",150,14
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,36
+"Linear","Gradient","Numeric",15000,100
+"Linear","Gradient","Numeric",30000,15
+"Linear","Gradient","Numeric",150,13
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,32
+"Linear","Gradient","Numeric",15000,7
+"Linear","Gradient","Numeric",30000,9
+"Linear","Gradient","Numeric",150,13
+"Linear","Gradient","Numeric",1500,32
+"Linear","Gradient","Numeric",4500,24
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,7
+"Linear","Gradient","Numeric",150,13
+"Linear","Gradient","Numeric",1500,22
+"Linear","Gradient","Numeric",4500,11
+"Linear","Gradient","Numeric",15000,6
+"Linear","Gradient","Numeric",30000,9
+"Linear","Gradient","Numeric",150,8
+"Linear","Gradient","Numeric",1500,24
+"Linear","Gradient","Numeric",4500,15
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,10
+"Linear","Gradient","Numeric",150,15
+"Linear","Gradient","Numeric",1500,15
+"Linear","Gradient","Numeric",4500,39
+"Linear","Gradient","Numeric",15000,5
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,13
+"Linear","Gradient","Numeric",1500,19
+"Linear","Gradient","Numeric",4500,25
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,27
+"Linear","Gradient","Numeric",150,9
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,17
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,29
+"Linear","Gradient","Numeric",150,16
+"Linear","Gradient","Numeric",1500,25
+"Linear","Gradient","Numeric",4500,24
+"Linear","Gradient","Numeric",15000,5
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,22
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,29
+"Linear","Gradient","Numeric",15000,7
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,16
+"Linear","Gradient","Numeric",1500,22
+"Linear","Gradient","Numeric",4500,17
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,7
+"Linear","Gradient","Numeric",150,14
+"Linear","Gradient","Numeric",1500,22
+"Linear","Gradient","Numeric",4500,5
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,17
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,24
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,15
+"Linear","Gradient","Numeric",1500,23
+"Linear","Gradient","Numeric",4500,8
+"Linear","Gradient","Numeric",15000,9
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,16
+"Linear","Gradient","Numeric",1500,11
+"Linear","Gradient","Numeric",4500,18
+"Linear","Gradient","Numeric",15000,7
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,14
+"Linear","Gradient","Numeric",1500,15
+"Linear","Gradient","Numeric",4500,45
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,22
+"Linear","Gradient","Numeric",150,18
+"Linear","Gradient","Numeric",1500,24
+"Linear","Gradient","Numeric",4500,18
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,100
+"Linear","Gradient","Numeric",150,11
+"Linear","Gradient","Numeric",1500,22
+"Linear","Gradient","Numeric",4500,22
+"Linear","Gradient","Numeric",15000,7
+"Linear","Gradient","Numeric",30000,10
+"Linear","Gradient","Numeric",150,11
+"Linear","Gradient","Numeric",1500,11
+"Linear","Gradient","Numeric",4500,5
+"Linear","Gradient","Numeric",15000,7
+"Linear","Gradient","Numeric",30000,7
+"Linear","Gradient","Numeric",150,21
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,5
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,3
+"Linear","Gradient","Numeric",150,13
+"Linear","Gradient","Numeric",1500,24
+"Linear","Gradient","Numeric",4500,24
+"Linear","Gradient","Numeric",15000,18
+"Linear","Gradient","Numeric",30000,7
+"Linear","Gradient","Numeric",150,15
+"Linear","Gradient","Numeric",1500,25
+"Linear","Gradient","Numeric",4500,25
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,8
+"Linear","Gradient","Numeric",150,16
+"Linear","Gradient","Numeric",1500,22
+"Linear","Gradient","Numeric",4500,32
+"Linear","Gradient","Numeric",15000,6
+"Linear","Gradient","Numeric",30000,5
+"Linear","Gradient","Numeric",150,16
+"Linear","Gradient","Numeric",1500,11
+"Linear","Gradient","Numeric",4500,32
+"Linear","Gradient","Numeric",15000,8
+"Linear","Gradient","Numeric",30000,22
+"Linear","Gradient","Numeric",150,11
+"Linear","Gradient","Numeric",1500,18
+"Linear","Gradient","Numeric",4500,32
+"Linear","Gradient","Numeric",15000,9
+"Linear","Gradient","Numeric",30000,5
+"Linear","Gradient","Numeric",150,22
+"Linear","Gradient","Numeric",1500,17
+"Linear","Gradient","Numeric",4500,39
+"Linear","Gradient","Numeric",15000,6
+"Linear","Gradient","Numeric",30000,7

@@ -46,12 +46,12 @@ numeric_strang_splitting <- function(par,
   if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
   
   
-  b <- nleqslv::nleqslv(x = mu, fn = drift_lamperti_sde, par = par)$x
+  b <- nleqslv::nleqslv(x = median(data), fn = drift_lamperti_sde, par = par)$x
   
   A <- numDeriv::grad(func = drift_lamperti_sde, x = b, par = par)
   
   diff_f <- function(t, y){drift_lamperti_sde(y, par) - A * (y - b)}
-  
+
   # Solution to ODE
   f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
   
@@ -66,7 +66,7 @@ numeric_strang_splitting <- function(par,
   inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
   inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
   df     <- (inv_f2 - inv_f3) / (2 * 0.01)
-  
+
   # Strang likelihood
   -mean(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE), na.rm = TRUE) - 
     mean(log(abs(df)), na.rm = TRUE)
@@ -155,93 +155,6 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma){
   -sum(stats::dnorm(fh_half_inv, mu_h, sqrt(v_part), log = TRUE), na.rm = TRUE) -
     sum(log(abs(det_Dfh_half_inv)), na.rm = TRUE)
 }
-
-# OU_dynamic_numeric_score <- function(par, data, delta, alpha0, mu0, sigma){
-#   numDeriv::grad(OU_dynamic_likelihood,
-#                  x = par,
-#                  delta = delta,
-#                  data = data,
-#                  alpha0 = alpha0,
-#                  mu0 = mu0,
-#                  sigma = sigma
-#   )
-# }
-
-# OU_dynamic_score <- function(par, data, delta, alpha0, mu0, sigma){
-#   tau     <- par[1]
-#   A       <- par[2]
-#   nu      <- if(length(par) == 3) par[3] else 1
-# 
-#   N       <- length(data)
-#   Xupp    <- data[2:N]
-#   Xlow    <- data[1:(N-1)]
-#   time    <- delta * (1:(N-1))
-# 
-#   m          <- mu0 - alpha0 / (2 * A)
-#   lambda0    <- -alpha0^2 / (4 * A)
-#   lam_seq    <- lambda0 * (1 - time / tau)^nu
-#   alpha_seq  <- 2 * sqrt(abs(A * lam_seq))
-#   gamma2_seq <- sigma^2 / (2 * alpha_seq)
-#   rho_seq    <- exp(-alpha_seq * delta)
-#   mu_seq     <- m + ifelse(A >= 0, 1, -1) * sqrt(abs(lam_seq / A))
-#   
-#   #fh_half_tmp_low <- A * delta * (Xlow - mu_seq)
-#   #fh_half_tmp_upp <- A * delta * (Xupp - mu_seq)
-# 
-# 
-#   # eq1 <- sum(
-#   #     (1 - rho_seq) / (gamma2_seq * (1 - rho_seq^2)) * 
-#   #       (fh_half_tmp_upp - fh_half_tmp_low * rho_seq - mu_seq * (1 - rho_seq))
-#   # )
-# 
-#   # eq2 <- (sum(
-#   #   rho_seq / (1 - rho_seq^2)
-#   # ) + sum(
-#   #     (fh_half_tmp_upp - fh_half_tmp_low * rho_seq - mu_seq * (1 - rho_seq)) *
-#   #       (fh_half_tmp_low - mu_seq) / (gamma2_seq * (1 - rho_seq^2))
-#   #   ) - sum(
-#   #     rho_seq * (fh_half_tmp_upp - fh_half_tmp_low * rho_seq - mu_seq * 
-#   #                  (1 - rho_seq))^2 / (gamma2_seq * (1 - rho_seq^2)^2)
-#   #   )
-#   # ) / N
-# 
-#   # eq3 <- (-sum(
-#   #   1 / (2 * gamma2_seq)
-#   #   ) + sum(
-#   #   (fh_half_tmp_upp - fh_half_tmp_low * rho_seq - mu_seq * (1 - rho_seq))^2 /
-#   #     (2 * gamma2_seq^2 * (1 - rho_seq^2)))
-#   #   )
-#   # 
-# 
-#   ## Calculate the Strang-based score - divided by N for numeric stability
-#   eq1 <- sum(
-#       (1 - rho_seq) / (gamma2_seq * (1 - rho_seq^2)) *
-#         (Xupp - Xlow * rho_seq - mu_seq * (1 - rho_seq))
-#   ) / N
-#   
-#   eq2 <- (sum(
-#     rho_seq / (1 - rho_seq^2)
-#    ) + sum(
-#       (Xupp - Xlow * rho_seq - mu_seq * (1 - rho_seq)) * (Xlow - mu_seq) /
-#         (gamma2_seq * (1 - rho_seq^2))
-#     ) - sum(
-#       rho_seq * (Xupp - Xlow * rho_seq - mu_seq *(1 - rho_seq))^2 /
-#         (gamma2_seq * (1 - rho_seq^2)^2)
-#     )
-#   ) / N
-#   
-#   eq3 <- (-sum(
-#     1 / (2 * gamma2_seq)
-#     ) + sum(
-#     (Xupp - Xlow * rho_seq - mu_seq * (1 - rho_seq))^2 /
-#       (2 * gamma2_seq^2 * (1 - rho_seq^2)))
-#     ) / N
-# 
-#   
-#   if(length(par) == 3){return(c(eq1, eq2, eq3))} # If we want to estimate nu, use all three equations.
-#   c(eq1, eq3)
-# }
-
 
 OU_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
   tau <- par[1]
@@ -934,8 +847,8 @@ F_diffusion_strang_splitting <- function(par, data, delta, exp_sigma = FALSE) {
   df     <- (inv_f2 - inv_f3) / (2 * 0.01)
 
   # Strang likelihood
-  -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE), na.rm = TRUE) -
-    sum(log(abs(df)), na.rm = TRUE)
+  -mean(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE), na.rm = TRUE) -
+    mean(log(abs(df)), na.rm = TRUE)
 }
 
 F_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
@@ -1077,26 +990,39 @@ optimize_stationary_likelihood <- function(likelihood_fun,
                                            delta,
                                            exp_sigma = TRUE,
                                            method = "BFGS",
+                                           return_all = FALSE,
                                            ...){
   res_optim <- stats::optim(init_par, fn = likelihood_fun,
-                     method = method,
-                     data = data, delta = delta, exp_sigma = exp_sigma, ...)
+                            method = method,
+                            data = data, delta = delta, exp_sigma = exp_sigma, ...)
+  
   if(exp_sigma){
-  res_optim$par[3] <- exp(res_optim$par[3])
+    res_optim$par[3] <- exp(res_optim$par[3])
   }
-  list(par = res_optim$par, objective = res_optim$value)
+  
+  if(return_all) {
+    return(res_optim)
+  } else {
+    return(list(par = res_optim$par, objective = res_optim$value))
+  }
 }
 
 optimize_dynamic_likelihood <- function(likelihood_fun, data,
                                         init_par, delta,
                                         alpha0, mu0, sigma, 
-                                        method = "BFGS", ...){
+                                        method = "BFGS", 
+                                        return_all = FALSE,...){
 
   res_optim <- stats::optim(init_par, fn = likelihood_fun,
                             method = method,
                             data = data, delta = delta,
                             alpha0 = alpha0 , mu0 = mu0, sigma = sigma, ...)
-  list(par = res_optim$par, objective = res_optim$value)
+  
+  if(return_all) {
+    return(res_optim)
+  } else {
+    return(list(par = res_optim$par, objective = res_optim$value))
+  }
 }
 
 optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, M, N,
@@ -1292,7 +1218,7 @@ source("source_code/tipping_simulations.R")
 #                             mu0 = stationary_part_true_param[2],
 #                             sigma = stationary_part_true_param[3],
 #                             method = "BFGS")
-#
+# 
 # optimize_dynamic_likelihood(likelihood_fun = t_transform_dynamic_likelihood,
 #                   data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t > t_0]),
 #                   init_par = dynamic_part_true_param,

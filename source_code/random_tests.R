@@ -152,7 +152,7 @@ F_lamperti_drift <- function(y, par){
   - 1 / sinh(y) * ((beta + sigma^2 / 2) * cosh(y) - beta * (2 * mu + 1))
 }
 
-actual_dt <- 0.005
+actual_dt <- 0.0005
 t_0 <- 50
 tau <- 100
 true_param <- c(0.3, 2, -4, 0.15)
@@ -173,7 +173,7 @@ optimize_stationary_likelihood(
   data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
   init_par = stationary_part_true_param,
   delta = actual_dt,
-  exp_sigma = TRUE)
+  exp_sigma = FALSE)
 
 optimize_stationary_likelihood(
   likelihood_fun = numeric_strang_splitting,
@@ -188,9 +188,6 @@ numeric_strang_splitting(par = stationary_part_true_param,
                          delta = actual_dt,
                          drift_lamperti_sde = F_lamperti_drift)
 
-F_diffusion_strang_splitting(par = stationary_part_true_param,
-                             data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
-                             delta = actual_dt)
 
 dummy_func <- function(y, par){
   beta  <- par[1]
@@ -212,8 +209,7 @@ actual_dt <- 0.1
 tau <- 100
 t_0 <- 50
 
-sim_res_jacobi <- simulate_jacobi_diffusion_tipping_model(actual_dt, true_param, tau, t_0,
-                                                          beyond_tipping = - 35)
+sim_res_jacobi <- simulate_jacobi_diffusion_tipping_model(actual_dt, true_param, tau, t_0)
 sim_res_jacobi |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) +
   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
   ggplot2::geom_vline(xintercept = t_0)

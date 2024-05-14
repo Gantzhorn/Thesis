@@ -301,7 +301,7 @@ simulate_jacobi_diffusion_tipping_model <- function(step_length, par,
       A * (X_t[i - 1] - m) * sigma * sqrt(X_t[i - 1] * (1 - X_t[i - 1])) * dW[i - 1] * step_length +
       ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * (A * (X_t[i - 1] - m)) -
          sigma^2 * A / 2 * (X_t[i - 1] * (1 - X_t[i - 1]))) * step_length^2 - 
-      ((A * (X_t[i - 1] - m) + lambda_t[i - 1]) * sigma * (1 - 2 * X_t[i - 1]) + sigma^3 / 2) *
+      ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * sigma * (1 - 2 * X_t[i - 1]) + sigma^3 / 2) *
       dW[i - 1] * step_length / (4 * sqrt(X_t[i - 1] * (1 - X_t[i - 1])))
   
     
