@@ -1077,14 +1077,6 @@ source("source_code/tipping_simulations.R")
 #                             mu0 = stationary_part_true_param[2],
 #                             sigma = stationary_part_true_param[3])
 
-# nleqslv::nleqslv(OU_dynamic_score,
-#                  x = dynamic_part_true_param,
-#                  data = sim_res_add$X_t[sim_res_add$t > t_0],
-#                  delta = actual_dt,
-#                  alpha0 = stationary_part_true_param[1],
-#                  mu0 = stationary_part_true_param[2],
-#                  sigma = stationary_part_true_param[3])$x
-
 #-----------------------------------------------------------------------------------------------------------------------------#
 
 # # Square-root noise model

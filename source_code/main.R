@@ -220,8 +220,8 @@ circleFun <- function(center=c(0,0), diameter=1, npoints=100, start=0, end=2)
          y = center[2] + diameter / 2 * sin(tt))
 }
 dat_half_circle <- circleFun(c(0.577, 0), 0.1, start = 1/2, end = 3/2)
-dat_half_circle <- rbind(dat_half_circle, dat_half_circle[1,])  # Ensure closure by repeating the first point at the end
-dat_half_circle$lambda <- factor(lambda_double_well_vec[3])  # Adjust as per your specific lambda settings
+dat_half_circle <- rbind(dat_half_circle, dat_half_circle[1,])
+dat_half_circle$lambda <- factor(lambda_double_well_vec[3]) 
 
 
 double_well_plot_neg <- ggplot(double_well_plot_data, aes(x = x_prime, y = force)) +
@@ -901,12 +901,12 @@ Stationary_estimation_all <- bind_rows(OU_likelihood_tibble, OU_score_tibble, sq
                                    "t-diffusion", "F-diffusion", "Jacobi-diffusion")),
          Type = factor(Type, levels = c("Likelihood", "Estimation eq.", "Likelihood (Alt.)")))
 
-if(!file.exists("data/Stationary_estimation_all.csv")){
-  utils::write.table(Stationary_estimation_all, file="data/Stationary_estimation_all.csv",
-                     sep = ",", row.names = FALSE)
-} else{
-  Stationary_estimation_all <- read_csv("data/Stationary_estimation_all.csv")
-}
+# if(!file.exists("data/Stationary_estimation_all.csv")){
+#   utils::write.table(Stationary_estimation_all, file="data/Stationary_estimation_all.csv",
+#                      sep = ",", row.names = FALSE)
+# } else{
+#   Stationary_estimation_all <- read_csv("data/Stationary_estimation_all.csv")
+# }
 
 parameter_precision_stationary <- Stationary_estimation_all %>% filter(Parameter != "running_time") |> 
   ggplot(aes(x = t_0 * 1 / delta, y = ARE, color = Parameter, linetype = Type)) +
@@ -990,12 +990,12 @@ Dynamic_estimation_all <- bind_rows(OU_dynamic_tibble, sqrt_dynamic_tibble, sqrt
                     "t-diffusion", "F-diffusion", "Jacobi-diffusion")),
 Type = factor(Type, levels = c("Strang", "Strang (Alt.)")))
 
-if(!file.exists("data/Dynamic_estimation_all.csv")){
-  utils::write.table(Dynamic_estimation_all, file="data/Dynamic_estimation_all.csv",
-                     sep = ",", row.names = FALSE)
-} else{
-  Dynamic_estimation_all <- read_csv("data/Dynamic_estimation_all.csv")
-}
+# if(!file.exists("data/Dynamic_estimation_all.csv")){
+#   utils::write.table(Dynamic_estimation_all, file="data/Dynamic_estimation_all.csv",
+#                      sep = ",", row.names = FALSE)
+# } else{
+#   Dynamic_estimation_all <- read_csv("data/Dynamic_estimation_all.csv")
+# }
 
 
 parameter_precision_dynamic <- Dynamic_estimation_all %>% filter(Parameter != "running_time") |> 
@@ -1248,12 +1248,12 @@ combined_nus_tibble_long <- combined_nus_tibble |>
   pivot_longer(-c(Model, N, Parameter), names_to = "nu", values_to = "ARE") |> 
   mutate(nu = factor(round(as.numeric(nu), 2)))
 
-if(!file.exists("data/nu_estimation_ARE.csv")){
-  utils::write.table(combined_nus_tibble_long, file="data/nu_estimation_ARE.csv",
-                     sep = ",", row.names = FALSE)
-} else{
-  combined_nus_tibble_long <- read_csv("data/nu_estimation_ARE.csv")
-}
+# if(!file.exists("data/nu_estimation_ARE.csv")){
+#   utils::write.table(combined_nus_tibble_long, file="data/nu_estimation_ARE.csv",
+#                      sep = ",", row.names = FALSE)
+# } else{
+#   combined_nus_tibble_long <- read_csv("data/nu_estimation_ARE.csv")
+# }
 
 combined_nus_plot <- combined_nus_tibble_long |> ggplot(aes(x = N, y = ARE, col = nu)) +
   geom_line(linewidth = 1.5) + geom_point(size = 3) + 
@@ -1873,12 +1873,12 @@ col_wise_median_numeric_Linear <- colwise_median(numeric_dist_Linear)
 median_closed_F_tibble <- as_tibble(col_wise_median_closed_F) %>%
   mutate(Type = "Closed form", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Median")
 median_numeric_F_tibble <- as_tibble(col_wise_median_numeric_F) %>%
-  mutate(Type = "Numeric", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Median")
+  mutate(Type = "Numerical", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Median")
 
 median_closed_Linear_tibble <- as_tibble(col_wise_median_closed_Linear) %>%
   mutate(Type = "Closed form", Model = "Linear", N = t_0 / actual_dts, quantile = "Median")
 median_numeric_Linear_tibble <- as_tibble(col_wise_median_numeric_Linear) %>%
-  mutate(Type = "Numeric", Model = "Linear", N = t_0 / actual_dts, quantile = "Median")
+  mutate(Type = "Numerical", Model = "Linear", N = t_0 / actual_dts, quantile = "Median")
 
 # Upper quantiles
 col_wise_upper_closed_F <- colwise_quantile(closed_form_dist_F, probs = 0.9)
@@ -1889,12 +1889,12 @@ col_wise_upper_numeric_Linear <- colwise_quantile(numeric_dist_Linear, probs = 0
 upper_closed_F_tibble <- as_tibble(col_wise_upper_closed_F) %>%
   mutate(Type = "Closed form", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Upper")
 upper_numeric_F_tibble <- as_tibble(col_wise_upper_numeric_F) %>%
-  mutate(Type = "Numeric", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Upper")
+  mutate(Type = "Numerical", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Upper")
 
 upper_closed_Linear_tibble <- as_tibble(col_wise_upper_closed_Linear) %>%
   mutate(Type = "Closed form", Model = "Linear", N = t_0 / actual_dts, quantile = "Upper")
 upper_numeric_Linear_tibble <- as_tibble(col_wise_upper_numeric_Linear) %>%
-  mutate(Type = "Numeric", Model = "Linear", N = t_0 / actual_dts, quantile = "Upper")
+  mutate(Type = "Numerical", Model = "Linear", N = t_0 / actual_dts, quantile = "Upper")
 
 # Lower quantiles
 col_wise_lower_closed_F <- colwise_quantile(closed_form_dist_F, probs = 0.1)
@@ -1905,12 +1905,12 @@ col_wise_lower_numeric_Linear <- colwise_quantile(numeric_dist_Linear, probs = 0
 lower_closed_F_tibble <- as_tibble(col_wise_lower_closed_F) %>%
   mutate(Type = "Closed form", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Lower")
 lower_numeric_F_tibble <- as_tibble(col_wise_lower_numeric_F) %>%
-  mutate(Type = "Numeric", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Lower")
+  mutate(Type = "Numerical", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Lower")
 
 lower_closed_Linear_tibble <- as_tibble(col_wise_lower_closed_Linear) %>%
   mutate(Type = "Closed form", Model = "Linear", N = t_0 / actual_dts, quantile = "Lower")
 lower_numeric_Linear_tibble <- as_tibble(col_wise_lower_numeric_Linear) %>%
-  mutate(Type = "Numeric", Model = "Linear", N = t_0 / actual_dts, quantile = "Lower")
+  mutate(Type = "Numerical", Model = "Linear", N = t_0 / actual_dts, quantile = "Lower")
 
 # Combine all results into a single tibble
 Running_result <- bind_rows(
@@ -1929,7 +1929,7 @@ Running_result <- bind_rows(
 ) |> pivot_wider(values_from = value, names_from = quantile)
 
 # if(!file.exists("data/Running_result_numeric.csv")){
-#   utils::write.table(ARE_dist_result, file="data/Running_result_numeric.csv",
+#   utils::write.table(Running_result, file="data/Running_result_numeric.csv",
 #                      sep = ",", row.names = FALSE)
 # } else{
 #   Running_result <- read_csv("data/Running_result_numeric.csv")
@@ -1937,18 +1937,19 @@ Running_result <- bind_rows(
 
 Running_result_numeric_plot <- Running_result |> 
   ggplot(aes(x = N, y = Median, col = Type, fill = Type)) + geom_line(linewidth = 1.5) + geom_point(size = 3) + 
-  geom_ribbon(aes(ymin = Lower, ymax = Upper), alpha = 0.3) + 
+  geom_ribbon(aes(ymin = Lower, ymax = Upper), alpha = 0.2) + 
   facet_wrap(~Model) +
   scale_x_log10(breaks = t_0 / actual_dts) + scale_y_log10() + 
   scale_fill_manual(values = thesis_palette) + scale_color_manual(values = thesis_palette) +
-  theme(strip.text = element_text(face = "bold", size = 16), panel.spacing = unit(2, "lines"),
+  theme(strip.text = element_text(face = "bold", size = 16), panel.spacing = unit(3, "lines"),
         axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
-        legend.text  = element_text(size = 14), axis.text = element_text(size = 14))
+        legend.text  = element_text(size = 14), axis.text = element_text(size = 14)) + 
+  ylab("Running time (s)")
 
-ggsave(Running_result_numeric_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "Running_result_numeric.jpeg",
-       height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(Running_result_numeric_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "Running_result_numeric.jpeg",
+#        height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 
 # Number of iterations
@@ -1958,17 +1959,17 @@ as_tibble(F_closed_function_count) |>
 as_tibble(F_closed_gradient_count) |> 
   mutate(Model = "F-diffusion", Type = "Gradient", Method =  "Closed form"),
 as_tibble(F_numeric_function_count) |> 
-  mutate(Model = "F-diffusion", Type = "Function", Method =  "Numeric"),
+  mutate(Model = "F-diffusion", Type = "Function", Method =  "Numerical"),
 as_tibble(F_numeric_gradient_count) |> 
-  mutate(Model = "F-diffusion", Type = "Gradient", Method =  "Numeric"),
+  mutate(Model = "F-diffusion", Type = "Gradient", Method =  "Numerical"),
 as_tibble(Linear_closed_function_count) |> 
   mutate(Model = "Linear", Type = "Function", Method =  "Closed form"),
 as_tibble(Linear_closed_gradient_count) |> 
   mutate(Model = "Linear", Type = "Gradient", Method =  "Closed form"),
 as_tibble(Linear_numeric_function_count) |> 
-  mutate(Model = "Linear", Type = "Function", Method =  "Numeric"),
+  mutate(Model = "Linear", Type = "Function", Method =  "Numerical"),
 as_tibble(Linear_numeric_gradient_count) |> 
-  mutate(Model = "Linear", Type = "Gradient", Method =  "Numeric")
+  mutate(Model = "Linear", Type = "Gradient", Method =  "Numerical")
 ) |> mutate(Model = factor(Model), Type = factor(Type), Method = factor(Method))
 names(function_gradient_count_result) <- c(t_0 / actual_dts, "Model", "Type", "Method")
 
@@ -1983,6 +1984,45 @@ function_gradient_count_result_long <- function_gradient_count_result |>
 # } else{
 #   function_gradient_count_result_long <- read_csv("data/gradientAndFunctionCount.csv")
 # }
+function_gradient_count_Linear_plot <- function_gradient_count_result_long %>%
+  filter(Model == "Linear") %>%
+  ggplot(aes(x = Method, y = Count, fill = Type)) + 
+  geom_boxplot(alpha = 0.85) + scale_y_log10() + 
+  facet_wrap(~factor(N), ncol = 5) + 
+  scale_fill_manual(values = thesis_palette) +
+  xlab("") + 
+  ylab("Number of Evaluations") + 
+  theme(
+    strip.text = element_text(size = 14, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.text.y = element_text(size = 14),
+    legend.key.size = unit(2, 'lines')
+  )
+
+ggsave(function_gradient_count_Linear_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "function_gradient_count_Linear_plot.jpeg",
+       height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+function_gradient_count_F_plot <- function_gradient_count_result_long %>%
+  filter(Model == "F-diffusion") %>%
+  ggplot(aes(x = Method, y = Count, fill = Type)) + 
+  geom_boxplot(alpha = 0.85) + scale_y_log10() + 
+  facet_wrap(~factor(N), ncol = 5) + 
+  scale_fill_manual(values = thesis_palette) +
+  xlab("") + 
+  ylab("Number of Evaluations") + 
+  theme(
+    strip.text = element_text(size = 14, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.text.y = element_text(size = 14),
+    legend.key.size = unit(2, 'lines')
+  )
+
+ggsave(function_gradient_count_F_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "function_gradient_count_F_plot.jpeg",
+       height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
 
 summarized_function_gradient_count_result <- function_gradient_count_result_long |>
   group_by(Model, Type, Method, N) |> 
@@ -1991,14 +2031,317 @@ summarized_function_gradient_count_result <- function_gradient_count_result_long
 
 summarized_function_gradient_count_result |>
   ggplot(aes(x = N, y = Median, col = Method, fill = Method)) +
-  geom_line(linewidth = 1.25) +
+  geom_line(linewidth = 1.25) + geom_point(size = 2.5) + 
   scale_x_log10(breaks = t_0 / actual_dts) + 
-  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = .3) + 
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = .2) + 
   facet_grid(Type~Model, scales = "free_y") + 
   scale_fill_manual(values = thesis_palette) + 
   scale_color_manual(values = thesis_palette) +
   ylab("Evaluations") + xlab("N")
   
+
+# Model misspecification
+tau_values <- c(35, 60, 90, 132, 175, 200, 250)
+
+# Initialize lists to store results
+results_list <- list(
+  quantiles_OU = list(),
+  quantiles_OU_dynamic = list(),
+  quantiles_t = list(),
+  quantiles_t_dynamic = list(),
+  stationary_estim_param = list(),
+  dynamic_estim_param = list()
+)
+
+# Define the true parameters
+true_param <- c(0.87, -1.51, -2.69, sqrt(0.30))
+mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+stationary_part_true_param <- c(alpha0, mu0 , true_param[4])
+actual_dt <- 1/12
+t_0 <- 54
+
+# Parameters for the simulation
+numSim <- 200
+considered_quantiles <- c(0.01, 0.025, 0.05, 0.1,
+                          0.175, 0.25, 0.33, 
+                          0.5, 0.67, 0.75, 0.825,
+                          0.9, 0.95, 0.975, 0.99)
+
+set.seed(150524)
+
+for (tau in tau_values) {
+  cat("Processing tau =", tau, "\n")
+  
+  # Initialize matrices for each value of tau
+  quantiles_OU <- matrix(NA, nrow = numSim, ncol = length(considered_quantiles))
+  quantiles_OU_dynamic <- matrix(NA, nrow = numSim, ncol = length(considered_quantiles))
+  quantiles_t <- matrix(NA, nrow = numSim, ncol = length(considered_quantiles))
+  quantiles_t_dynamic <- matrix(NA, nrow = numSim, ncol = length(considered_quantiles))
+  
+  # Initialize matrices for parameter estimates
+  stationary_estim_param <- matrix(NA, nrow = numSim, ncol = 6)
+  dynamic_estim_param <- matrix(NA, nrow = numSim, ncol = 4)
+  
+  for (i in 1:numSim) {
+    if (i == 1 || i %% 5 == 0) {
+      cat("Grinding ", i, "\n")
+    }
+    success <- FALSE
+    while (!success) {
+      seedOU <- sample.int(100000, size = 1)
+      sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0, seed = seedOU)
+      
+      mu_init <- mean(sim_res_add$X_t[sim_res_add$t <= t_0])
+      
+      rho_init <- sum((sim_res_add$X_t[sim_res_add$t <= t_0 & sim_res_add$t > 0] - mu_init) *
+                        (sim_res_add$X_t[sim_res_add$t < t_0] - mu_init)) / sum((sim_res_add$X_t[sim_res_add$t <= t_0] - mu_init)^2)
+      
+      alpha_init <- -log(rho_init) / actual_dt
+      
+      gamma_sq_init <- mean((sim_res_add$X_t[sim_res_add$t <= t_0 & sim_res_add$t > 0] - 
+                               sim_res_add$X_t[sim_res_add$t < t_0] * rho_init - mu_init * (1 - rho_init))^2) / 
+        (1 - rho_init^2)
+      
+      sigma_init <- sqrt(gamma_sq_init * 2 * alpha_init)
+      
+      initital_param_stationary <- c(alpha_init, mu_init, sigma_init)
+      
+      noise_dynamic_part <- runif(2, min = .85, max = 1.15)
+      failOU <- FALSE
+      failOU_dynamic <- FALSE
+      failt <- FALSE
+      failt_dynamic <- FALSE
+      fail_quantiles <- FALSE
+      
+      tryCatch({
+        stationary_estim_param[i, 1:3] <- optimize_stationary_likelihood(
+          likelihood_fun = OU_likelihood,
+          data = sim_res_add$X_t[sim_res_add$t <= t_0],
+          init_par = initital_param_stationary,
+          delta = actual_dt, exp_sigma = TRUE)$par
+      }, error = function(e){
+        failOU <<- TRUE
+      })
+      
+      tryCatch({
+        dynamic_estim_param[i, 1:2] <- optimize_dynamic_likelihood(
+          likelihood_fun = OU_dynamic_likelihood,
+          data = sim_res_add$X_t[sim_res_add$t > t_0],
+          init_par = dynamic_part_true_param * noise_dynamic_part,
+          delta = actual_dt,
+          alpha0 = stationary_estim_param[i, 1],
+          mu0 = stationary_estim_param[i, 2],
+          sigma = stationary_estim_param[i, 3],
+          control = list(reltol = sqrt(.Machine$double.eps) / 100))$par
+      }, error = function(e){
+        failOU_dynamic <<- TRUE
+      })
+      
+      tryCatch({
+        stationary_estim_param[i, 4:6] <- optimize_stationary_likelihood(
+          likelihood_fun = t_diffusion_strang_splitting,
+          data = asinh(sim_res_add$X_t[sim_res_add$t < t_0]),
+          init_par = initital_param_stationary,
+          delta = actual_dt,
+          exp_sigma = TRUE)$par
+      }, error = function(e){
+        failt <<- TRUE
+      })
+      
+      tryCatch({
+        dynamic_estim_param[i, 3:4] <- optimize_dynamic_likelihood(
+          likelihood_fun = t_transform_dynamic_likelihood,
+          data = asinh(sim_res_add$X_t[sim_res_add$t > t_0]),
+          init_par = dynamic_part_true_param * noise_dynamic_part,
+          delta = actual_dt,
+          alpha0 = stationary_estim_param[i, 4],
+          mu0 = stationary_estim_param[i, 5],
+          sigma = stationary_estim_param[i, 6],
+          control = list(reltol = sqrt(.Machine$double.eps) / 100))$par
+      }, error = function(e){
+        failt_dynamic <<- TRUE
+      })
+      
+    tryCatch({
+    
+    quantiles_OU[i, ] <- unname(quantile(
+      OU_likelihood_resid(
+        par = stationary_estim_param[i, 1:3],
+        data = sim_res_add$X_t[sim_res_add$t <= t_0],
+        delta = actual_dt),
+      probs = considered_quantiles))
+    
+    quantiles_OU_dynamic[i, ] <- unname(quantile(
+      OU_dynamic_likelihood_resid(
+        par = dynamic_estim_param[i, 1:2],
+        data = sim_res_add$X_t[sim_res_add$t > t_0],
+        delta = actual_dt,
+        alpha0 = stationary_estim_param[i, 1],
+        mu0 = stationary_estim_param[i, 2],
+        sigma = stationary_estim_param[i, 3]
+      ),
+      probs = considered_quantiles))
+    
+    t_quantiles <-  t_diffusion_strang_splitting_resid(
+        par = stationary_estim_param[i, 4:6],
+        data = asinh(sim_res_add$X_t[sim_res_add$t <= t_0]),
+        delta = actual_dt)
+    
+    quantiles_t[i, ] <- unname(quantile(t_quantiles[!is.na(t_quantiles)],
+                                        probs = considered_quantiles))
+    
+    t_dynamic_quantiles <- t_transform_dynamic_likelihood_resid(
+      par = dynamic_estim_param[i, 3:4],
+      data = asinh(sim_res_add$X_t[sim_res_add$t > t_0]),
+      delta = actual_dt,
+      alpha0 = stationary_estim_param[i, 4],
+      mu0 = stationary_estim_param[i, 5],
+      sigma = stationary_estim_param[i, 6])
+    
+    quantiles_t_dynamic[i, ] <- unname(quantile(t_dynamic_quantiles[!is.na(t_dynamic_quantiles)],
+                                                probs = considered_quantiles))
+
+    }, error = function(e){
+      fail_quantiles <- TRUE
+    })
+    if (any(is.na(quantiles_t_dynamic[i, ]) | is.nan(quantiles_t_dynamic[i, ]))) {
+
+      fail_quantiles <- TRUE
+    }
+    if (!failOU && !failOU_dynamic && !failt_dynamic && !failt && !fail_quantiles) {
+      success <- TRUE
+    }
+  }
+}
+  
+  # Store the results for each tau value in the list
+  results_list$quantiles_OU[[as.character(tau)]] <- quantiles_OU
+  results_list$quantiles_OU_dynamic[[as.character(tau)]] <- quantiles_OU_dynamic
+  results_list$quantiles_t[[as.character(tau)]] <- quantiles_t
+  results_list$quantiles_t_dynamic[[as.character(tau)]] <- quantiles_t_dynamic
+  results_list$stationary_estim_param[[as.character(tau)]] <- stationary_estim_param
+  results_list$dynamic_estim_param[[as.character(tau)]] <- dynamic_estim_param
+}
+
+
+combined_data_quantiles <- list()
+
+for (tau in tau_values) {
+
+  df_OU <- as.data.frame(results_list$quantiles_OU[[as.character(tau)]]) %>%
+    mutate(tau = tau, Model = "OU")
+  df_OU_dynamic <- as.data.frame(results_list$quantiles_OU_dynamic[[as.character(tau)]]) %>%
+    mutate(tau = tau, Model = "OU_dynamic")
+  df_t <- as.data.frame(results_list$quantiles_t[[as.character(tau)]]) %>%
+    mutate(tau = tau, Model = "t")
+  df_t_dynamic <- as.data.frame(results_list$quantiles_t_dynamic[[as.character(tau)]]) %>%
+    mutate(tau = tau, Model = "t_dynamic")
+  
+
+  combined_tau_df <- bind_rows(df_OU, df_OU_dynamic, df_t, df_t_dynamic)
+  
+
+  combined_data_quantiles[[as.character(tau)]] <- combined_tau_df
+}
+
+# Bind all the data frames in the list into one big data frame
+final_combined_tau_quantiles <- as_tibble(bind_rows(combined_data_quantiles))
+
+names(final_combined_tau_quantiles) <- c(considered_quantiles, "tau", "Model")
+
+# if(!file.exists("data/tau_quantiles.csv")){
+#   utils::write.table(final_combined_tau_quantiles,
+#                      file="data/tau_quantiles.csv", sep = ",", row.names = FALSE)
+# } else{
+#   final_combined_tau_quantiles <- read_csv("data/tau_quantiles.csv")
+# }
+
+
+final_combined_tau_quantiles_long <- final_combined_tau_quantiles |> pivot_longer(-c(tau, Model), names_to = "Quantile", values_to = "Empiric_quantile") |> 
+  mutate(Model = factor(Model), tau = factor(tau), Quantile = as.numeric(Quantile),
+         theoretical_quantile = qnorm(Quantile))
+
+quantiles_plot_tau <- final_combined_tau_quantiles_long |> 
+  filter(str_detect(Model, "dynamic")) |> 
+  ggplot(aes(x = theoretical_quantile, y = Empiric_quantile, col = tau)) +
+  geom_smooth(method = "lm", se = F, linewidth = 1.5) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  facet_wrap(~Model, labeller = labeller(Model = c("OU_dynamic" = "Additive",
+                                                   "t_dynamic" = "t-diffusion"))) +
+  scale_color_manual(values = thesis_palette) +
+  guides(col = guide_legend(override.aes = list(linewidth = 5))) + 
+  labs(color = expression(tau)) + xlab("Theoretical quantiles") + 
+  ylab("Empirical quantiles") + 
+  theme(
+    strip.text = element_text(size = 14, face = "bold"),
+    axis.title = element_text(face = "bold")
+  )
+
+# ggsave(quantiles_plot_tau, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "quantiles_plot_tau.jpeg",
+#        height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
+
+stationary_parameters_misspecification <- map2_dfr(results_list$stationary_estim_param, tau_values, ~{
+  as_tibble(.x) %>% mutate(tau = .y)
+})
+
+names(stationary_parameters_misspecification) <- c("alpha_OU", "mu_OU", "sigma_OU",
+                                                   "alpha_t", "mu_t", "sigma_t", "tau")
+
+dynamic_parameters_misspecification <- map2_dfr(results_list$dynamic_estim_param, tau_values, ~{
+  as_tibble(.x) %>% mutate(tau = .y)
+})
+
+names(dynamic_parameters_misspecification) <- c("tau_OU", "A_OU", "tau_t", "A_t", "tau")
+
+
+# if(!file.exists("data/dynamic_parameters_misspecification.csv")){
+#   utils::write.table(dynamic_parameters_misspecification,
+#                      file="data/dynamic_parameters_misspecification.csv", sep = ",", row.names = FALSE)
+# } else{
+#   dynamic_parameters_misspecification <- read_csv("data/dynamic_parameters_misspecification.csv")
+# }
+
+dynamic_parameters_misspecification_long <- dynamic_parameters_misspecification |> 
+  mutate(tau_OU = (tau_OU - tau) / tau,
+  A_OU = (A_OU - true_param[1]) / true_param[1],
+  tau_t = (tau_t - tau) / tau,
+  A_t = (A_t - true_param[1]) / true_param[1])  |> 
+  pivot_longer(cols = -tau, 
+               names_to = c("Metric", "Model"), 
+               names_sep = "_", 
+               values_to = "RE")
+
+
+
+# Overview of extreme cases
+dynamic_parameters_misspecification_long |>
+  filter(abs(RE) >= 1.5, Metric != "A") |> group_by(tau, Model) |>
+  summarise(count = n()) |> pivot_wider(values_from = count, names_from = Model) |>
+  mutate(t = ifelse(is.na(t), 0, t)) |> xtable::xtable()
+
+RE_dist_tau <- dynamic_parameters_misspecification_long |> 
+  filter(abs(RE) < 1.5, Metric != "A") |> 
+  ggplot(aes(x = factor(tau), y = RE, fill = Model)) +
+  geom_violin() +
+  geom_hline(yintercept = 0, linetype = "dashed") + 
+  scale_fill_manual(values = thesis_palette, labels = c("Additive", "t-diffusion")) +
+  ylab("Relative error") +
+  xlab(expression(tau)) +
+  theme(
+    axis.title.x = element_text(size = 26, face = "bold", margin = margin(t = 20)),
+    axis.title.y = element_text(size = 20, face = "bold"),
+    axis.text = element_text(size = 16, face = "bold"),
+    legend.title = element_text(size = 22, face = "bold"),
+    legend.text = element_text(size = 20)
+  )
+
+# ggsave(RE_dist_tau, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "RE_dist_tau.jpeg",
+#        height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 ###------------------------------------------------------------------------###
 ###-----------------------------Result-------------------------------------###

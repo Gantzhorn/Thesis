@@ -510,3 +510,28 @@ In this section we show the results of a few benchmarks using the \code{microben
     \label{figure:ARE_dist_numeric_F_diffusion}
     \end{center}
 \end{figure}
+
+\begin{figure}[h!]
+    \begin{center}
+    \includegraphics[scale = .08]{figures/function_gradient_count_F_plot.jpeg}     
+    \caption{Number of gradient- and function evaluations for the two methods in the experiment on the $F$-diffusion based model. A similar result for the linear-noise model is shown in figure \ref{figure:linearFunctionGradientCount}.}
+    \label{figure:FFunctionGradientCount}   
+    \end{center}
+\end{figure}
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{rrrr}
+    $\tau$ & Additive & $t$-diffusion \\ 
+      \hline
+      $35$ &  $52$ & $112$ \\ 
+      $60$ &   $4$ & $6$ \\ 
+      $90$ &   $4$ & $1$ \\ 
+      $132$ &  $5$ & $3$ \\ 
+      $175$ &  $5$ & $0$ \\ 
+      $200$ &  $9$ & $0$ \\ 
+      $250$ &  $4$ & $0$ \\ 
+       \hline
+    \end{tabular}
+    \caption{Overview of how many times each model had an absolute relative error of above 1.5 stratified after $\tau$ in relation to the simulation study on model misspecification}
+    \label{table:AREabove2tauSim}
+    \end{table}
