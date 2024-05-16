@@ -1984,25 +1984,25 @@ function_gradient_count_result_long <- function_gradient_count_result |>
 # } else{
 #   function_gradient_count_result_long <- read_csv("data/gradientAndFunctionCount.csv")
 # }
-function_gradient_count_Linear_plot <- function_gradient_count_result_long %>%
-  filter(Model == "Linear") %>%
-  ggplot(aes(x = Method, y = Count, fill = Type)) + 
-  geom_boxplot(alpha = 0.85) + scale_y_log10() + 
-  facet_wrap(~factor(N), ncol = 5) + 
-  scale_fill_manual(values = thesis_palette) +
-  xlab("") + 
-  ylab("Number of Evaluations") + 
-  theme(
-    strip.text = element_text(size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
-    axis.text.y = element_text(size = 14),
-    legend.key.size = unit(2, 'lines')
-  )
+# function_gradient_count_Linear_plot <- function_gradient_count_result_long %>%
+#   filter(Model == "Linear") %>%
+#   ggplot(aes(x = Method, y = Count, fill = Type)) + 
+#   geom_boxplot(alpha = 0.85) + scale_y_log10() + 
+#   facet_wrap(~factor(N), ncol = 5) + 
+#   scale_fill_manual(values = thesis_palette) +
+#   xlab("") + 
+#   ylab("Number of Evaluations") + 
+#   theme(
+#     strip.text = element_text(size = 14, face = "bold"),
+#     axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+#     axis.text.y = element_text(size = 14),
+#     legend.key.size = unit(2, 'lines')
+#   )
 
-ggsave(function_gradient_count_Linear_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "function_gradient_count_Linear_plot.jpeg",
-       height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(function_gradient_count_Linear_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "function_gradient_count_Linear_plot.jpeg",
+#        height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 function_gradient_count_F_plot <- function_gradient_count_result_long %>%
   filter(Model == "F-diffusion") %>%
@@ -2266,16 +2266,19 @@ quantiles_plot_tau <- final_combined_tau_quantiles_long |>
   filter(str_detect(Model, "dynamic")) |> 
   ggplot(aes(x = theoretical_quantile, y = Empiric_quantile, col = tau)) +
   geom_smooth(method = "lm", se = F, linewidth = 1.5) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", linewidth = 1) +
   facet_wrap(~Model, labeller = labeller(Model = c("OU_dynamic" = "Additive",
                                                    "t_dynamic" = "t-diffusion"))) +
   scale_color_manual(values = thesis_palette) +
-  guides(col = guide_legend(override.aes = list(linewidth = 5))) + 
+  guides(col = guide_legend(override.aes = list(linewidth = 8))) + 
   labs(color = expression(tau)) + xlab("Theoretical quantiles") + 
   ylab("Empirical quantiles") + 
   theme(
-    strip.text = element_text(size = 14, face = "bold"),
-    axis.title = element_text(face = "bold")
+    strip.text = element_text(size = 22, face = "bold"),
+    axis.title = element_text(face = "bold", size = 22),
+    legend.title = element_text(size = 30),
+    legend.text = element_text(size = 18),
+    axis.text = element_text(size = 18)
   )
 
 # ggsave(quantiles_plot_tau, path = paste0(getwd(), "/tex_files/figures"),
@@ -2326,16 +2329,16 @@ RE_dist_tau <- dynamic_parameters_misspecification_long |>
   filter(abs(RE) < 1.5, Metric != "A") |> 
   ggplot(aes(x = factor(tau), y = RE, fill = Model)) +
   geom_violin() +
-  geom_hline(yintercept = 0, linetype = "dashed") + 
+  geom_hline(yintercept = 0, linetype = "dashed", linewidth = 1) + 
   scale_fill_manual(values = thesis_palette, labels = c("Additive", "t-diffusion")) +
   ylab("Relative error") +
   xlab(expression(tau)) +
   theme(
-    axis.title.x = element_text(size = 26, face = "bold", margin = margin(t = 20)),
+    axis.title.x = element_text(size = 30, face = "bold", margin = margin(t = 20)),
     axis.title.y = element_text(size = 20, face = "bold"),
     axis.text = element_text(size = 16, face = "bold"),
-    legend.title = element_text(size = 22, face = "bold"),
-    legend.text = element_text(size = 20)
+    legend.title = element_text(size = 26, face = "bold"),
+    legend.text = element_text(size = 24)
   )
 
 # ggsave(RE_dist_tau, path = paste0(getwd(), "/tex_files/figures"),
@@ -2347,6 +2350,193 @@ RE_dist_tau <- dynamic_parameters_misspecification_long |>
 ###-----------------------------Result-------------------------------------###
 ###------------------------------------------------------------------------###
 
+### Estimation on the ice core data
+
+ice_core <- readr::read_csv("data/icecore_data.csv", col_types = c("i", "d", "d"))
+ice_core_clean <- ice_core  |>  
+  dplyr::filter(dplyr::between(age, 55000, 86000)) |>  #23000 #40000
+  dplyr::group_by(age) |> 
+  dplyr::summarise(
+    d180 = mean(d18O),
+    Ca2 = mean(Ca2)
+  ) |> 
+  dplyr::mutate(
+    age = age / 1000,
+    logCa2 = -log(Ca2) - mean(-log(Ca2)),
+    Y = 2 * sqrt(Ca2)
+  ) |> mutate(delta = age- lag(age))
+
+ice_core_plot <- ice_core_clean |> 
+  ggplot(aes(x = age, y = Ca2)) +
+  geom_step(linewidth = 0.5) +
+  geom_vline(xintercept = c(84.74, 77.7, 59.42, 63.22), 
+             linewidth = 0.95, linetype = "dashed") +
+  xlab("Time before present (kyrs)") +
+  ylab(expression(Ca^{2*"+"})) +
+  scale_x_reverse(breaks = scales::pretty_breaks()) +
+  theme(
+    axis.title = element_text(face = "bold", size = 26),
+    axis.text = element_text(size = 22)
+  )
+
+ggsave(ice_core_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "ice_core_plot.jpeg",
+       height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+
+ice_core_zoom_plot <- ice_core_clean |> filter(dplyr::between(age, 77, 84.74) | dplyr::between(age, 59.34, 63.22)) |> 
+  mutate(type = ifelse(dplyr::between(age, 77, 84.74), "1", "2")) |> 
+  ggplot(aes(x = age, y = Ca2)) +
+  geom_step(linewidth = .5) +
+  facet_wrap(~type, scales = "free") + 
+  xlab("Time before present (kyrs)") +
+  scale_x_reverse(breaks = scales::pretty_breaks()) + 
+  theme(
+    strip.text = element_blank(),
+    axis.title = element_text(face = "bold", size = 26),
+    axis.text = element_text(size = 22),
+    panel.spacing = unit(4, "lines")
+  ) +
+  scale_y_continuous(breaks = scales::pretty_breaks()) +
+  ylab(expression(Ca^{2*"+"}))
+
+ggsave(ice_core_zoom_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "ice_core_zoom_plot.jpeg",
+       height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+# First period analysis
+
+ice_core_clean |> filter(age > 77.7 & age < 84.74) |> 
+  ggplot(mapping = aes(x = age, y = Ca2)) +
+  geom_step() + scale_x_reverse()
+
+end_point_period_1 <- 78
+
+ice_core_period_1 <- ice_core_clean |> filter(age > end_point_period_1 & age < 84.74)
+
+actual_dt <- 0.02
+
+t_0 <- 82.8
+
+ice_core_period_1 |> filter(age >= t_0) |> ggplot(aes(x = age, y = Ca2)) + geom_step()
+
+linear_ice_par_1_mar <- mean_reverting_GBM_martingale(
+                         par = c(5, mean(rev(ice_core_period_1$Ca2[ice_core_period_1$age >= t_0])), 
+                                 1),
+                         data = rev(ice_core_period_1$Ca2[ice_core_period_1$age >= t_0]),
+                         delta = actual_dt)
+
+linear_ice_par_1 <- optimize_stationary_likelihood(
+  likelihood_fun = CIR_strang_splitting,
+  data = 2 * sqrt(log(rev(ice_core_period_1$Ca2[ice_core_period_1$age >= t_0]))),
+  init_par = c(1,1,1),
+  delta = actual_dt,
+  exp_sigma = FALSE
+)$par
+
+
+linear_ice_par_dynamic_1 <- optimize_dynamic_likelihood(
+  likelihood_fun = CIR_transform_dynamic_likelihood,
+  data = 2 * sqrt(log(rev(ice_core_period_1$Ca2[ice_core_period_1$age < t_0]))),
+  init_par = c(t_0, -7),
+  delta = actual_dt,
+  alpha0 = linear_ice_par_1[1],
+  mu0 = linear_ice_par_1[2],
+  sigma= linear_ice_par_1[3],
+  return_all = TRUE,
+  control = list(reltol = sqrt(.Machine$double.eps) /10000)
+)
+
+linear_ice_par_dynamic_1
+ice_tipping_1 <- t_0 - linear_ice_par_dynamic_1$par[1]
+
+ice_core_clean |> filter(age > 77.4 & age < 84.74) |> 
+  ggplot(mapping = aes(x = age, y = Ca2)) +
+  geom_step() + scale_x_reverse()  + geom_vline(xintercept = ice_tipping_1)
+
+
+
+
+
+
+initital_param_stationary_ice <- OU_init_params(stat_ice_path, actual_dt)
+
+ice_strang_stat <- optimize_stationary_likelihood(
+  likelihood_fun = OU_likelihood,
+  data = rev(stat_ice_path),
+  init_par = initital_param_stationary_ice,
+  delta = 0.02,
+  exp_sigma = TRUE
+  )$par
+
+data_up_to <- 77.8
+
+dyn_part_ice <- ice_core_clean |> filter(age > data_up_to & age < t_0)
+
+dyn_part_ice |> ggplot(aes(x = age, y = logCa2)) + geom_step() + scale_x_reverse()
+
+(ice_strang_dyn <- optimize_dynamic_likelihood(
+  likelihood_fun = OU_dynamic_likelihood,
+  data = rev(dyn_part_ice$logCa2),
+  init_par =  c(5, 20),
+  delta = 0.02,
+  alpha0 = ice_strang_stat[1],
+  mu0 = ice_strang_stat[2],
+  sigma  = ice_strang_stat[3],
+  control = list(reltol = sqrt(.Machine$double.eps))
+))
+
+tipping_point_ice <- t_0 - ice_strang_dyn$par[1]
+
+
+ice_core_clean |> #filter(age > 75 & age < 84.75) |> 
+  ggplot(mapping = aes(x = age, y = logCa2)) +
+  geom_step() + scale_x_reverse() + geom_vline(xintercept = tipping_point_ice, linetype = "dashed")
+
+# Another section
+
+data_up_to <- 59.6
+t_0 <- 62
+
+ice_core_clean |> filter(age > data_up_to & age < 63.22) |> 
+  ggplot(mapping = aes(x = age, y = Ca2)) +
+  geom_step() + scale_x_reverse() + geom_vline(xintercept = t_0)
+
+initital_param_stationary_ice <- OU_init_params(rev(stat_part_ice$Ca2), actual_dt)
+
+ice_strang_stat <- optimize_stationary_likelihood(
+  likelihood_fun = OU_likelihood,
+  data = rev(stat_part_ice$Ca2),
+  init_par = initital_param_stationary_ice,
+  delta = 0.02,
+  exp_sigma = FALSE
+)$par
+
+dyn_part_ice <- ice_core_clean |> filter(age > data_up_to & age < t_0)
+
+dyn_part_ice |> ggplot(aes(x = age, y = Ca2)) + geom_step() + scale_x_reverse()
+
+(ice_strang_dyn <- optimize_dynamic_likelihood(
+  likelihood_fun = OU_dynamic_likelihood,
+  data =  rev(dyn_part_ice$Ca2),
+  init_par =  c(t_0 - data_up_to, 0.05),
+  delta = 0.02,
+  alpha0 = ice_strang_stat[1],
+  mu0 = ice_strang_stat[2],
+  sigma  = ice_strang_stat[3],
+  control = list(reltol = sqrt(.Machine$double.eps) / 10000)
+))
+
+tipping_point_ice <- t_0 - ice_strang_dyn$par[1]
+
+
+ice_core_clean |> filter(age > tipping_point_ice -2  & age < 63.24) |> 
+  ggplot(mapping = aes(x = age, y = Ca2)) +
+  geom_step() + scale_x_reverse() + geom_vline(xintercept = tipping_point_ice)
+
+
 ### Estimation on the AMOC
 
 AMOC_data <- readr::read_table("data/AMOCdata.txt")
@@ -2355,9 +2545,38 @@ AMOC_data <- dplyr::rename_all(AMOC_data, ~ gsub('"', '',.))
 
 AMOC_data <- mutate(AMOC_data, AMOC3 = AMOC0 - 3 * GM)
 
-AMOC_data |> select(-GM) |>  pivot_longer(cols = -time, names_to = "AMOC_type", values_to = "Value") |> 
-  ggplot(aes(x = time, y = Value, col = AMOC_type)) + geom_step() + facet_wrap(~AMOC_type) +
-  scale_color_manual(values = thesis_palette)
+
+
+AMOC_data_longer <- AMOC_data |>
+  pivot_longer(cols = -time, names_to = "Type", values_to = "Value") 
+
+AMOC_data_plot <- AMOC_data_longer  |> 
+  filter(!(Type %in% c("AMOC1", "AMOC3")))  |> 
+  mutate(Type = case_when(
+    Type == "AMOC0" ~ "SG SST anomaly",
+    Type == "GM" ~ "GM SST anomaly",
+    Type == "AMOC2" ~ "AMOC fingerprint"
+  ))  |> 
+  mutate(Type = factor(Type, levels = c("SG SST anomaly", "GM SST anomaly", "AMOC fingerprint")))  |> 
+  ggplot(aes(x = time, y = Value, col = Type)) +
+  geom_line(linewidth = 0.8) + 
+  facet_wrap(~Type, ncol = 1, scales = "free_y") + 
+  scale_x_continuous(breaks = scales::pretty_breaks(10)) +
+  scale_color_manual(values = c(thesis_palette[1],thesis_palette[6], thesis_palette[3])) +
+  theme(
+    legend.title = element_blank(),
+    strip.text = element_blank(),
+    legend.key.size = unit(5, 'lines'),
+    legend.text = element_text(face = "bold", size = 18),
+    axis.text = element_text(face = "bold", size = 20),
+    axis.title = element_text(face = "bold", size = 22),
+  ) + 
+  xlab("Year") + ylab("[K]")
+
+ggsave(AMOC_data_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "AMOC_data_plot.jpeg",
+       height = 10, width = 16, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
 
 actual_dt <- 1 / 12 # Observations every month
 t_0 <- 1924 # Use same baseline data as paper.

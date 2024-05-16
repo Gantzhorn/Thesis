@@ -73,6 +73,25 @@ numeric_strang_splitting <- function(par,
 }
 
 # Implementation of methods that are based on the additive noise term process
+OU_init_params <- function(data, delta){
+  N <- length(data)
+  mu_hat <- mean(data)
+  
+  rho_hat <- sum((data[2:N]- mu_hat) *
+                        (data[-N] - mu_hat)) / 
+    sum((data[-N] - mu_hat)^2)
+  
+  alpha_hat <- -log(rho_hat) / actual_dt
+  
+  gamma_sq_hat <- mean((data[2:N] - data[-N] * rho_hat -
+                               mu_hat * (1 - rho_hat))^2) / (1 - rho_hat^2)
+  
+  sigma_hat <- sqrt(gamma_sq_hat * 2 * alpha_hat)
+  
+  c(alpha_hat, mu_hat, sigma_hat)
+}
+
+
 OU_likelihood <- function(par, data, delta, exp_sigma = FALSE){
   alpha0 <- par[1]
   mu0    <- par[2]
@@ -785,10 +804,10 @@ t_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma)
   lambda0    <- -alpha0^2 / (4 * A)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
-  if(any((sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) < 0) |
-     any(is.na(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)))){
-    return(50000)
-    }
+  # if(any((sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) < 0) |
+  #    any(is.na(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)))){
+  #   return(50000)
+  #   }
   
   A_linear_part <- -sqrt(sigma^4 / 4 - 2 * A * (2 * lam_seq + m * sigma^2))
   
