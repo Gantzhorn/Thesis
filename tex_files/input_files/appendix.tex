@@ -518,7 +518,7 @@ In this section we show the results of a few benchmarks using the \code{microben
     \label{figure:FFunctionGradientCount}   
     \end{center}
 \end{figure}
-\begin{table}[ht]
+\begin{table}[h!]
     \centering
     \begin{tabular}{rrrr}
     $\tau$ & Additive & $t$-diffusion \\ 
@@ -535,3 +535,23 @@ In this section we show the results of a few benchmarks using the \code{microben
     \caption{Overview of how many times each model had an absolute relative error of above 1.5 stratified after $\tau$ in relation to the simulation study on model misspecification}
     \label{table:AREabove1.5tauSim}
     \end{table}
+\newpage
+    \subsection{Results}
+    In this section we provide supporting information to the results section. Tabels and figures are illustrated in the order they appear in the original section
+
+    \begin{table}[h!]
+        \centering
+        \begin{tabular}{rllrrrrrrrrr}
+          \hline
+         Part & $t_0$ & 0.01 & 0.025 & 0.167 & 0.33 & 0.5 & 0.67 & 0.833 & 0.975 & 0.99 \\ 
+          \hline
+        Theoretical & - & -2.33 & -1.96 & -0.97 & -0.44 & 0.00 & 0.44 & 0.97 & 1.96 & 2.33 \\ 
+        Stationary part & 1912 & -2.49 & -2.03 & -0.94 & -0.38 & 0.06 & 0.45 & 0.88 & 1.94 & 2.17 \\ 
+        Stationary part & 1924 & -2.43 & -1.99 & -0.90 & -0.41 & 0.02 & 0.44 & 0.89 & 1.96 & 2.42 \\ 
+        Dynamic part & 1912 & -2.20 & -1.79 & -0.92 & -0.44 & -0.06 & 0.35 & 0.88 & 2.09 & 2.52 \\ 
+        Dynamic part & 1924 & -2.20 & -1.75 & -0.91 & -0.43 & -0.04 & 0.35 & 0.86 & 2.09 & 2.45 \\ 
+           \hline
+        \end{tabular}
+        \caption{Tabularization of the quantiles at selected values for the stationary- and dynamic parts grouped by the $t_0$ used along with the standard normal quantiles. Supports figure \ref{figure:AMOC_QQ_t_0}}
+        \label{table:QQ_table_parts}
+        \end{table}

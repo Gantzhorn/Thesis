@@ -190,7 +190,7 @@ double_well_plot_data <- lapply(lambda_double_well_vec, function(lambda) {
     force = force_values,
     lambda = factor(lambda, levels = lambda_double_well_vec)
   )
-}) %>% bind_rows()
+}) |> bind_rows()
 
 # Find roots for each lambda parameter
 roots_neglambda <- purrr::map2(lambda_double_well_vec, lambda_double_well_vec, ~ {
@@ -202,7 +202,7 @@ roots_neglambda <- purrr::map2(lambda_double_well_vec, lambda_double_well_vec, ~
 # Combine the list into a single data frame
 roots_data_neglambda <- do.call(rbind, roots_neglambda) 
 
-roots_data_neglambda <- roots_data_neglambda %>%
+roots_data_neglambda <- roots_data_neglambda |>
   mutate(
     root_color = case_when(
       #abs(double_well_doublederiv(root)) < 0.1 ~ "grey",
@@ -210,7 +210,7 @@ roots_data_neglambda <- roots_data_neglambda %>%
       TRUE ~ "white"
     ),
     lambda = factor(lambda)
-  ) %>%
+  ) |>
   as_tibble()
 
 circleFun <- function(center=c(0,0), diameter=1, npoints=100, start=0, end=2)
@@ -908,7 +908,7 @@ Stationary_estimation_all <- bind_rows(OU_likelihood_tibble, OU_score_tibble, sq
 #   Stationary_estimation_all <- read_csv("data/Stationary_estimation_all.csv")
 # }
 
-parameter_precision_stationary <- Stationary_estimation_all %>% filter(Parameter != "running_time") |> 
+parameter_precision_stationary <- Stationary_estimation_all |> filter(Parameter != "running_time") |> 
   ggplot(aes(x = t_0 * 1 / delta, y = ARE, color = Parameter, linetype = Type)) +
   geom_line(linewidth = 1.5) +  
   geom_point(size = 3) +
@@ -931,8 +931,8 @@ parameter_precision_stationary <- Stationary_estimation_all %>% filter(Parameter
 #        height = 6, width = 14, dpi = 300, units = "in", device = "jpeg",
 #        limitsize = FALSE, scale = 1)
 
-estimation_duration_stationary <- Stationary_estimation_all %>%
-  filter(Parameter == "running_time") %>%
+estimation_duration_stationary <- Stationary_estimation_all |>
+  filter(Parameter == "running_time") |>
   ggplot(aes(x = t_0 * 1 / delta, y = ARE, linetype = Type, color = Model)) +
   geom_line(linewidth = 1.95) +  
   geom_point(size = 3.5) +
@@ -998,7 +998,7 @@ Type = factor(Type, levels = c("Strang", "Strang (Alt.)")))
 # }
 
 
-parameter_precision_dynamic <- Dynamic_estimation_all %>% filter(Parameter != "running_time") |> 
+parameter_precision_dynamic <- Dynamic_estimation_all |> filter(Parameter != "running_time") |> 
   ggplot(aes(x = tau * 1 / delta, y = ARE, color = Parameter, linetype = Type)) +
   geom_line(linewidth = 1.5) +  
   geom_point(size = 3) +
@@ -1021,7 +1021,7 @@ ggsave(parameter_precision_dynamic, path = paste0(getwd(), "/tex_files/figures")
        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
        limitsize = FALSE, scale = 1)
 
-estimation_duration_dynamic <-  Dynamic_estimation_all %>% filter(Parameter == "running_time") |>
+estimation_duration_dynamic <-  Dynamic_estimation_all |> filter(Parameter == "running_time") |>
   ggplot(aes(x = tau * 1 / delta, y = ARE, linetype = Type, color = Model)) +
   geom_line(linewidth = 1.95) +  
   geom_point(size = 3.5) +
@@ -1714,40 +1714,40 @@ col_wise_median_closed_ARE_Linear_closed_sigma <-  colwise_median(ARE_Linear_clo
 col_wise_median_closed_ARE_Linear_numeric_sigma <-  colwise_median(ARE_Linear_numeric_sigma)
 
 ARE_median_result <- bind_rows(
-  as_tibble(col_wise_median_closed_ARE_F_closed_alpha) %>%
+  as_tibble(col_wise_median_closed_ARE_F_closed_alpha) |>
     mutate(Model = "F-diffusion", Parameter = "alpha", Type = "Closed", N = t_0 / actual_dts),
   
-  as_tibble(col_wise_median_closed_ARE_F_numeric_alpha) %>%
+  as_tibble(col_wise_median_closed_ARE_F_numeric_alpha) |>
     mutate(Model = "F-diffusion", Parameter = "alpha", Type = "Numeric", N = t_0 / actual_dts),
   
-  as_tibble(col_wise_median_closed_ARE_F_closed_mu) %>%
+  as_tibble(col_wise_median_closed_ARE_F_closed_mu) |>
     mutate(Model = "F-diffusion", Parameter = "mu", Type = "Closed", N = t_0 / actual_dts),
   
-  as_tibble(col_wise_median_closed_ARE_F_numeric_mu) %>%
+  as_tibble(col_wise_median_closed_ARE_F_numeric_mu) |>
     mutate(Model = "F-diffusion", Parameter = "mu", Type = "Numeric", N = t_0 / actual_dts),
   
-  as_tibble(col_wise_median_closed_ARE_F_closed_sigma) %>%
+  as_tibble(col_wise_median_closed_ARE_F_closed_sigma) |>
     mutate(Model = "F-diffusion", Parameter = "sigma", Type = "Closed", N = t_0 / actual_dts),
   
-  as_tibble(col_wise_median_closed_ARE_F_numeric_sigma) %>%
+  as_tibble(col_wise_median_closed_ARE_F_numeric_sigma) |>
     mutate(Model = "F-diffusion", Parameter = "sigma", Type = "Numeric", N = t_0 / actual_dts),
   
-  as_tibble(col_wise_median_closed_ARE_Linear_closed_alpha) %>%
+  as_tibble(col_wise_median_closed_ARE_Linear_closed_alpha) |>
     mutate(Model = "Linear", Parameter = "alpha", Type = "Closed", N = t_0 / actual_dts),
   
-  as_tibble(col_wise_median_closed_ARE_Linear_numeric_alpha) %>%
+  as_tibble(col_wise_median_closed_ARE_Linear_numeric_alpha) |>
     mutate(Model = "Linear", Parameter = "alpha", Type = "Numeric", N = t_0 / actual_dts),
   
-  as_tibble(col_wise_median_closed_ARE_Linear_closed_mu) %>%
+  as_tibble(col_wise_median_closed_ARE_Linear_closed_mu) |>
     mutate(Model = "Linear", Parameter = "mu", Type = "Closed", N = t_0 / actual_dts),
   
-  as_tibble(col_wise_median_closed_ARE_Linear_numeric_mu) %>%
+  as_tibble(col_wise_median_closed_ARE_Linear_numeric_mu) |>
     mutate(Model = "Linear", Parameter = "mu", Type = "Numeric", N = t_0 / actual_dts),
   
-  as_tibble(col_wise_median_closed_ARE_Linear_closed_sigma) %>%
+  as_tibble(col_wise_median_closed_ARE_Linear_closed_sigma) |>
     mutate(Model = "Linear", Parameter = "sigma", Type = "Closed", N = t_0 / actual_dts),
   
-  as_tibble(col_wise_median_closed_ARE_Linear_numeric_sigma) %>%
+  as_tibble(col_wise_median_closed_ARE_Linear_numeric_sigma) |>
     mutate(Model = "Linear", Parameter = "sigma", Type = "Numeric", N = t_0 / actual_dts)
 )|> mutate(Model = factor(Model), Parameter = factor(Parameter), Type = factor(Type))
 
@@ -1766,51 +1766,51 @@ ARE_median_result |> ggplot(aes(x = N, y = value, col = Type)) +
 
 # Distribution
 
-ARE_F_closed_alpha_tibble <- as_tibble(ARE_F_closed_alpha) %>%
+ARE_F_closed_alpha_tibble <- as_tibble(ARE_F_closed_alpha) |>
   mutate(Model = "F-diffusion", Parameter = "alpha", Type = "Closed")
 names(ARE_F_closed_alpha_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
-ARE_F_numeric_alpha_tibble <- as_tibble(ARE_F_numeric_alpha) %>%
+ARE_F_numeric_alpha_tibble <- as_tibble(ARE_F_numeric_alpha) |>
   mutate(Model = "F-diffusion", Parameter = "alpha", Type = "Numeric")
 names(ARE_F_numeric_alpha_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
-ARE_F_closed_mu_tibble <- as_tibble(ARE_F_closed_mu) %>%
+ARE_F_closed_mu_tibble <- as_tibble(ARE_F_closed_mu) |>
   mutate(Model = "F-diffusion", Parameter = "mu", Type = "Closed")
 names(ARE_F_closed_mu_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
-ARE_F_numeric_mu_tibble <- as_tibble(ARE_F_numeric_mu) %>%
+ARE_F_numeric_mu_tibble <- as_tibble(ARE_F_numeric_mu) |>
   mutate(Model = "F-diffusion", Parameter = "mu", Type = "Numeric")
 names(ARE_F_numeric_mu_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
-ARE_F_closed_sigma_tibble <- as_tibble(ARE_F_closed_sigma) %>%
+ARE_F_closed_sigma_tibble <- as_tibble(ARE_F_closed_sigma) |>
   mutate(Model = "F-diffusion", Parameter = "sigma", Type = "Closed")
 names(ARE_F_closed_sigma_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
-ARE_F_numeric_sigma_tibble <- as_tibble(ARE_F_numeric_sigma) %>%
+ARE_F_numeric_sigma_tibble <- as_tibble(ARE_F_numeric_sigma) |>
   mutate(Model = "F-diffusion", Parameter = "sigma", Type = "Numeric")
 names(ARE_F_numeric_sigma_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
-ARE_Linear_closed_alpha_tibble <- as_tibble(ARE_Linear_closed_alpha) %>%
+ARE_Linear_closed_alpha_tibble <- as_tibble(ARE_Linear_closed_alpha) |>
   mutate(Model = "Linear", Parameter = "alpha", Type = "Closed")
 names(ARE_Linear_closed_alpha_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
-ARE_Linear_numeric_alpha_tibble <-  as_tibble(ARE_Linear_numeric_alpha) %>%
+ARE_Linear_numeric_alpha_tibble <-  as_tibble(ARE_Linear_numeric_alpha) |>
   mutate(Model = "Linear", Parameter = "alpha", Type = "Numeric")
 names(ARE_Linear_numeric_alpha_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
-ARE_Linear_closed_mu_tibble <- as_tibble(ARE_Linear_closed_mu) %>%
+ARE_Linear_closed_mu_tibble <- as_tibble(ARE_Linear_closed_mu) |>
   mutate(Model = "Linear", Parameter = "mu", Type = "Closed")
 names(ARE_Linear_closed_mu_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
-ARE_Linear_numeric_mu_tibble <- as_tibble(ARE_Linear_numeric_mu) %>%
+ARE_Linear_numeric_mu_tibble <- as_tibble(ARE_Linear_numeric_mu) |>
   mutate(Model = "Linear", Parameter = "mu", Type = "Numeric")
 names(ARE_Linear_numeric_mu_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
-ARE_Linear_closed_sigma_tibble <- as_tibble(ARE_Linear_closed_sigma) %>%
+ARE_Linear_closed_sigma_tibble <- as_tibble(ARE_Linear_closed_sigma) |>
   mutate(Model = "Linear", Parameter = "sigma", Type = "Closed")
 names(ARE_Linear_closed_sigma_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
-ARE_Linear_numeric_sigma_tibble <- as_tibble(ARE_Linear_numeric_sigma) %>%
+ARE_Linear_numeric_sigma_tibble <- as_tibble(ARE_Linear_numeric_sigma) |>
   mutate(Model = "Linear", Parameter = "sigma", Type = "Numeric")
 names(ARE_Linear_numeric_sigma_tibble) <- c(t_0 / actual_dts, "Model", "Parameter", "Type")
 
@@ -1870,14 +1870,14 @@ col_wise_median_numeric_F <- colwise_median(numeric_dist_F)
 col_wise_median_closed_Linear <- colwise_median(closed_form_dist_Linear)
 col_wise_median_numeric_Linear <- colwise_median(numeric_dist_Linear)
 # Median tibbles
-median_closed_F_tibble <- as_tibble(col_wise_median_closed_F) %>%
+median_closed_F_tibble <- as_tibble(col_wise_median_closed_F) |>
   mutate(Type = "Closed form", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Median")
-median_numeric_F_tibble <- as_tibble(col_wise_median_numeric_F) %>%
+median_numeric_F_tibble <- as_tibble(col_wise_median_numeric_F) |>
   mutate(Type = "Numerical", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Median")
 
-median_closed_Linear_tibble <- as_tibble(col_wise_median_closed_Linear) %>%
+median_closed_Linear_tibble <- as_tibble(col_wise_median_closed_Linear) |>
   mutate(Type = "Closed form", Model = "Linear", N = t_0 / actual_dts, quantile = "Median")
-median_numeric_Linear_tibble <- as_tibble(col_wise_median_numeric_Linear) %>%
+median_numeric_Linear_tibble <- as_tibble(col_wise_median_numeric_Linear) |>
   mutate(Type = "Numerical", Model = "Linear", N = t_0 / actual_dts, quantile = "Median")
 
 # Upper quantiles
@@ -1886,14 +1886,14 @@ col_wise_upper_numeric_F <- colwise_quantile(numeric_dist_F, probs = 0.9)
 col_wise_upper_closed_Linear <- colwise_quantile(closed_form_dist_Linear, probs = 0.9)
 col_wise_upper_numeric_Linear <- colwise_quantile(numeric_dist_Linear, probs = 0.9)
 
-upper_closed_F_tibble <- as_tibble(col_wise_upper_closed_F) %>%
+upper_closed_F_tibble <- as_tibble(col_wise_upper_closed_F) |>
   mutate(Type = "Closed form", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Upper")
-upper_numeric_F_tibble <- as_tibble(col_wise_upper_numeric_F) %>%
+upper_numeric_F_tibble <- as_tibble(col_wise_upper_numeric_F) |>
   mutate(Type = "Numerical", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Upper")
 
-upper_closed_Linear_tibble <- as_tibble(col_wise_upper_closed_Linear) %>%
+upper_closed_Linear_tibble <- as_tibble(col_wise_upper_closed_Linear) |>
   mutate(Type = "Closed form", Model = "Linear", N = t_0 / actual_dts, quantile = "Upper")
-upper_numeric_Linear_tibble <- as_tibble(col_wise_upper_numeric_Linear) %>%
+upper_numeric_Linear_tibble <- as_tibble(col_wise_upper_numeric_Linear) |>
   mutate(Type = "Numerical", Model = "Linear", N = t_0 / actual_dts, quantile = "Upper")
 
 # Lower quantiles
@@ -1902,14 +1902,14 @@ col_wise_lower_numeric_F <- colwise_quantile(numeric_dist_F, probs = 0.1)
 col_wise_lower_closed_Linear <- colwise_quantile(closed_form_dist_Linear, probs = 0.1)
 col_wise_lower_numeric_Linear <- colwise_quantile(numeric_dist_Linear, probs = 0.1)
 
-lower_closed_F_tibble <- as_tibble(col_wise_lower_closed_F) %>%
+lower_closed_F_tibble <- as_tibble(col_wise_lower_closed_F) |>
   mutate(Type = "Closed form", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Lower")
-lower_numeric_F_tibble <- as_tibble(col_wise_lower_numeric_F) %>%
+lower_numeric_F_tibble <- as_tibble(col_wise_lower_numeric_F) |>
   mutate(Type = "Numerical", Model = "F-diffusion", N = t_0 / actual_dts, quantile = "Lower")
 
-lower_closed_Linear_tibble <- as_tibble(col_wise_lower_closed_Linear) %>%
+lower_closed_Linear_tibble <- as_tibble(col_wise_lower_closed_Linear) |>
   mutate(Type = "Closed form", Model = "Linear", N = t_0 / actual_dts, quantile = "Lower")
-lower_numeric_Linear_tibble <- as_tibble(col_wise_lower_numeric_Linear) %>%
+lower_numeric_Linear_tibble <- as_tibble(col_wise_lower_numeric_Linear) |>
   mutate(Type = "Numerical", Model = "Linear", N = t_0 / actual_dts, quantile = "Lower")
 
 # Combine all results into a single tibble
@@ -1984,8 +1984,8 @@ function_gradient_count_result_long <- function_gradient_count_result |>
 # } else{
 #   function_gradient_count_result_long <- read_csv("data/gradientAndFunctionCount.csv")
 # }
-# function_gradient_count_Linear_plot <- function_gradient_count_result_long %>%
-#   filter(Model == "Linear") %>%
+# function_gradient_count_Linear_plot <- function_gradient_count_result_long |>
+#   filter(Model == "Linear") |>
 #   ggplot(aes(x = Method, y = Count, fill = Type)) + 
 #   geom_boxplot(alpha = 0.85) + scale_y_log10() + 
 #   facet_wrap(~factor(N), ncol = 5) + 
@@ -2004,8 +2004,8 @@ function_gradient_count_result_long <- function_gradient_count_result |>
 #        height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
 #        limitsize = FALSE, scale = 1)
 
-function_gradient_count_F_plot <- function_gradient_count_result_long %>%
-  filter(Model == "F-diffusion") %>%
+function_gradient_count_F_plot <- function_gradient_count_result_long |>
+  filter(Model == "F-diffusion") |>
   ggplot(aes(x = Method, y = Count, fill = Type)) + 
   geom_boxplot(alpha = 0.85) + scale_y_log10() + 
   facet_wrap(~factor(N), ncol = 5) + 
@@ -2229,13 +2229,13 @@ combined_data_quantiles <- list()
 
 for (tau in tau_values) {
 
-  df_OU <- as.data.frame(results_list$quantiles_OU[[as.character(tau)]]) %>%
+  df_OU <- as.data.frame(results_list$quantiles_OU[[as.character(tau)]]) |>
     mutate(tau = tau, Model = "OU")
-  df_OU_dynamic <- as.data.frame(results_list$quantiles_OU_dynamic[[as.character(tau)]]) %>%
+  df_OU_dynamic <- as.data.frame(results_list$quantiles_OU_dynamic[[as.character(tau)]]) |>
     mutate(tau = tau, Model = "OU_dynamic")
-  df_t <- as.data.frame(results_list$quantiles_t[[as.character(tau)]]) %>%
+  df_t <- as.data.frame(results_list$quantiles_t[[as.character(tau)]]) |>
     mutate(tau = tau, Model = "t")
-  df_t_dynamic <- as.data.frame(results_list$quantiles_t_dynamic[[as.character(tau)]]) %>%
+  df_t_dynamic <- as.data.frame(results_list$quantiles_t_dynamic[[as.character(tau)]]) |>
     mutate(tau = tau, Model = "t_dynamic")
   
 
@@ -2287,14 +2287,14 @@ quantiles_plot_tau <- final_combined_tau_quantiles_long |>
 #        limitsize = FALSE, scale = 1)
 
 stationary_parameters_misspecification <- map2_dfr(results_list$stationary_estim_param, tau_values, ~{
-  as_tibble(.x) %>% mutate(tau = .y)
+  as_tibble(.x) |> mutate(tau = .y)
 })
 
 names(stationary_parameters_misspecification) <- c("alpha_OU", "mu_OU", "sigma_OU",
                                                    "alpha_t", "mu_t", "sigma_t", "tau")
 
 dynamic_parameters_misspecification <- map2_dfr(results_list$dynamic_estim_param, tau_values, ~{
-  as_tibble(.x) %>% mutate(tau = .y)
+  as_tibble(.x) |> mutate(tau = .y)
 })
 
 names(dynamic_parameters_misspecification) <- c("tau_OU", "A_OU", "tau_t", "A_t", "tau")
@@ -2577,54 +2577,309 @@ ggsave(AMOC_data_plot, path = paste0(getwd(), "/tex_files/figures"),
        filename = "AMOC_data_plot.jpeg",
        height = 10, width = 16, dpi = 300, units = "in", device = "jpeg",
        limitsize = FALSE, scale = 1)
+# Temporal resolution 
+actual_dt <- 1 / 12 
 
-actual_dt <- 1 / 12 # Observations every month
-t_0 <- 1924 # Use same baseline data as paper.
+# Sweeping over starting years for ramping:
 
+end_year <- 1950
+start_year <- 1910
+t_0s <- seq(start_year, end_year, length.out = (end_year + 1 - start_year)) 
+
+# # MSE Method 
+# MSE <- numeric(length(length(t_0s)))
+# for (i in seq_along(t_0s)) {
+#     segment_data <- filter(AMOC_data, time > t_0s[i])
+#     lambda_fit <- lm(AMOC2 ~ time, data = segment_data)
+#     MSE[i] <- mean(resid(lambda_fit)^2)
+# }
+# 
+# MSE_tibble <- tibble(MSE = MSE) |> mutate(Start_Year = t_0s)
+# 
+# MSE_tibble |> 
+#   ggplot(aes(x = Start_Year, y = MSE)) + geom_line()
+# 
+# t_0_v1 <- MSE_tibble$Start_Year[which.min(MSE_tibble$MSE)]
+
+
+# Set starting point of tau to be the time between initialization of ramping and max year in data set
+dynamic_part_starting_param <- matrix(NA, nrow = length(t_0s), ncol = 2)
+dynamic_part_starting_param[, 1] <- max(AMOC_data$time) - t_0s 
+dynamic_part_starting_param[, 2] <- 1
+
+stationary_params <- matrix(nrow = length(t_0s), ncol = 3)
+dynamic_params <- matrix(nrow = length(t_0s), ncol = 2)
+stationary_part_likelihood <- numeric(length(t_0s))
+dynamic_part_likelihood <- numeric(length(t_0s))
+
+for (i in seq_along(t_0s)){
 # Stationary part
-stationary_part_starting_param <- c(1, 1, 1)
+print(i)
+  
+stationary_estim <- optimize_stationary_likelihood(
+    likelihood_fun = t_diffusion_strang_splitting,
+    data = asinh(AMOC_data$AMOC2[AMOC_data$time < t_0s[i]]),
+    init_par = OU_init_params(data = AMOC_data$AMOC2[AMOC_data$time < t_0s[i]], delta = actual_dt),
+    delta = actual_dt,
+    exp_sigma = TRUE,
+    control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+stationary_params[i, ] <- stationary_estim$par
+stationary_part_likelihood[i] <- stationary_estim$objective
 
-
-stationary_part_estim_param <-  optimize_stationary_likelihood(
-              likelihood_fun = t_diffusion_strang_splitting,
-              data = asinh(AMOC_data$AMOC2[AMOC_data$time < t_0]),
-              init_par = stationary_part_starting_param,
-              delta = actual_dt,
-              exp_sigma = TRUE)$par
 
 # Dynamic part
-dynamic_part_starting_param <- c(100, 1) 
-dynamic_part_estim_param <- optimize_dynamic_likelihood(
-                  likelihood_fun = t_transform_dynamic_likelihood,
-                  data = asinh(AMOC_data$AMOC2[AMOC_data$time >= t_0]),
-                  init_par = dynamic_part_starting_param,
-                  delta = actual_dt,
-                  alpha0 = stationary_part_estim_param[1],
-                  mu0 = stationary_part_estim_param[2],
-                  sigma = stationary_part_estim_param[3],
-                  method = "BFGS",
-                  control = list(reltol = sqrt(.Machine$double.eps) / 100000))$par
 
+dynamic_estim <- optimize_dynamic_likelihood(
+  likelihood_fun = t_transform_dynamic_likelihood,
+  data = asinh(AMOC_data$AMOC2[AMOC_data$time >= t_0s[i]]),
+  init_par = dynamic_part_starting_param[i , ],
+  delta = actual_dt,
+  alpha0 = stationary_estim$par[1],
+  mu0 = stationary_estim$par[2],
+  sigma = stationary_estim$par[3],
+  method = "BFGS",
+  control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+print(dynamic_estim$objective)
+dynamic_params[i, ] <- dynamic_estim$par
+
+dynamic_part_likelihood[i] <- dynamic_estim$objective
+}
+
+likelihood_tibble <- tibble(stationary_likelihood = stationary_part_likelihood,
+       dynamic_likelihood = dynamic_part_likelihood,
+       index = t_0s,
+       n_stationary = 12 * (index - min(AMOC_data$time)),
+       n_dynamic = 12 * (max(AMOC_data$time) - index),
+       alpha0 = stationary_params[, 1],
+       mu0 = stationary_params[, 2],
+       sigma = stationary_params[, 3],
+       tau = dynamic_params[, 1],
+       tipping_point = tau + t_0s,
+       A = dynamic_params[, 2]) |> 
+  filter(dynamic_part_likelihood != 50000) |>
+  mutate(dynamic_likelihood = dynamic_part_likelihood / n_dynamic,
+         stationary_likelihood = stationary_likelihood / n_stationary) |> 
+  select(-c(n_stationary, n_dynamic))
+
+stationary_min_row <- likelihood_tibble[which.min(likelihood_tibble$stationary_likelihood),]
+dynamic_min_row <- likelihood_tibble[which.min(likelihood_tibble$dynamic_likelihood),]
+
+ramping_year_likelihood_plot <- likelihood_tibble |> 
+  select(index, stationary_likelihood, dynamic_likelihood) |> 
+  pivot_longer(cols = -index, names_to = c("Part", "Parameter"), names_sep = "_", values_to = "Objective") |> 
+  select(Part, Objective, index) |>
+  ggplot(aes(x = index, y = Objective, col = Part)) + 
+  geom_step(linewidth = 1.25) + 
+  geom_hline(
+    data = tibble(index = c(dynamic_min_row$index, stationary_min_row$index),
+                  Objective = c(dynamic_min_row$dynamic_likelihood, stationary_min_row$stationary_likelihood),
+                  Part = c("dynamic", "stationary")),
+    aes(yintercept = Objective, col = Part), linetype = "dashed", linewidth = 0.8) + 
+  facet_wrap(~Part) +
+  geom_vline(
+    data = tibble(index = c(dynamic_min_row$index, stationary_min_row$index),
+                    Objective = c(dynamic_min_row$dynamic_likelihood, stationary_min_row$stationary_likelihood),
+                    Part = c("stationary", "dynamic")),
+             aes(xintercept = index, col = Part), linetype = "dashed", linewidth = 0.8, show.legend = FALSE) + 
+  geom_point(
+    data = tibble(index = c(dynamic_min_row$index, stationary_min_row$index),
+                  Objective = c(dynamic_min_row$dynamic_likelihood, stationary_min_row$stationary_likelihood),
+                  Part = c("dynamic", "stationary")), size = 3, show.legend = FALSE) +
+  geom_text(
+    data = tibble(index = c(stationary_min_row$index),
+                  Objective = c(stationary_min_row$stationary_likelihood),
+                  Part = c("stationary")),
+    aes(label = index), nudge_y = -0.001 , show.legend = FALSE, size=5) +
+  geom_text(
+    data = tibble(index = c(dynamic_min_row$index),
+                  Objective = c(dynamic_min_row$dynamic_likelihood),
+                  Part = c("dynamic")),
+    aes(label = index), nudge_y = -0.001, show.legend = FALSE, size=5) +
+  scale_color_manual(labels = c("Dynamic", "Stationary"), values = thesis_palette[5:6]) + 
+  guides(col = guide_legend(override.aes = list(linewidth = 4))) +
+  scale_y_continuous(breaks = scales::pretty_breaks()) +  
+  xlab(expression(t[0])) +
+  theme(
+    strip.text = element_blank(),
+    legend.text = element_text(face = "bold", size = 14),
+    legend.title = element_text(face = "bold", size = 18),
+    axis.text = element_text(face = "bold", size = 14),
+    axis.title = element_text(face = "bold", size = 18),
+    theme(panel.spacing = unit(2, "lines"))
+  )
+
+ggsave(ramping_year_likelihood_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "ramping_year_likelihood_plot.jpeg",
+       height = 5, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+# Add min likelihood points to estimate plot 
+min_dynamic_value_wide <- likelihood_tibble |>
+  slice_min(dynamic_likelihood) |> 
+  select(-c(stationary_likelihood, dynamic_likelihood))
+
+min_dynamic_value <- min_dynamic_value_wide |> 
+  pivot_longer(cols = -index, names_to = "Parameter", values_to = "Estimate") |> 
+  mutate(Part = "Dynamic")
+
+min_stationary_value_wide <- likelihood_tibble |>
+  slice_min(stationary_likelihood) |> 
+  select(-c(stationary_likelihood, dynamic_likelihood))
+
+min_stationary_value <- min_stationary_value_wide |> 
+  pivot_longer(cols = -index, names_to = "Parameter", values_to = "Estimate") |> 
+  mutate(Part = "Stationary")
+
+# Table
+min_dynamic_value |> inner_join(min_stationary_value, by = "Parameter") |> 
+  select(Parameter, Estimate.x, Estimate.y) |> 
+  mutate(`Relative difference` = 100 * (Estimate.x - Estimate.y) / Estimate.y) |> 
+  rename(`Estimates 1924` = Estimate.x, `Estimate_1912` = Estimate.y) |> 
+  xtable::xtable()
+                                
+# Combine the extracted values
+highlight_points <- bind_rows(min_dynamic_value, min_stationary_value)
+
+
+
+estimators_base_plot <- likelihood_tibble |> 
+  select(-c(stationary_likelihood, dynamic_likelihood)) |> 
+  pivot_longer(cols = -index, names_to = "Parameter", values_to = "Estimate") |>
+  ggplot(aes(x = index, y = Estimate)) + 
+  geom_step(linewidth = 1.25, aes(col = Parameter)) +
+  facet_wrap(Parameter~., scales = "free_y") + 
+  xlab(expression(t[0])) +
+  theme(
+    strip.text = element_blank(),
+    legend.text = element_text(size = 18),
+    legend.title = element_text(face = "bold", size = 18),
+    axis.text = element_text(face = "bold", size = 14),
+    axis.title = element_text(face = "bold", size = 18),
+    theme(panel.spacing = unit(2, "lines"))
+  ) + 
+  scale_color_manual(labels = c("A", expression(alpha),  expression(mu), expression(sigma), expression(tau),
+                               "Tipping year"), 
+                               values = thesis_palette[-c(5,6,7, 8)]) + 
+  guides(col = guide_legend(override.aes = list(linewidth = 4))) +
+  scale_y_continuous(breaks = scales::pretty_breaks())
+
+estimators_full_plot <- estimators_base_plot +  ggnewscale::new_scale_colour() + 
+geom_point(data = highlight_points, aes(x = index, y = Estimate, col = Part), size = 3) +
+  geom_hline(data = highlight_points, aes(yintercept = Estimate, col = Part),
+             linewidth = 0.8, linetype = "dashed", show.legend = FALSE) +
+  scale_color_manual(labels = c("1924", "1912"), values = thesis_palette[5:6]) +
+  guides(col = guide_legend(override.aes = list(linewidth = 4), title = expression(t[0])))
+
+ggsave(estimators_full_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "estimators_full_plot.jpeg",
+       height = 8, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+
+## QQ-analysis
+min_dynamic_value_wide
+min_stationary_value_wide
+
+
+QQ_data_parts <- bind_rows(
+  # Part based on t_0 = 1924
+  tibble(sample = t_diffusion_strang_splitting_resid(
+  par = c(min_dynamic_value_wide$alpha0, min_dynamic_value_wide$mu0, min_dynamic_value_wide$sigma), 
+  data = asinh(AMOC_data$AMOC2[AMOC_data$time < min_dynamic_value_wide$index]),
+  delta = actual_dt
+)) |> mutate(Optimized = "Dynamic", Part = "Stationary part"),
+
+  tibble(sample = t_transform_dynamic_likelihood_resid(
+   par =  c(min_dynamic_value_wide$tau, min_dynamic_value_wide$A),
+   data = asinh(AMOC_data$AMOC2[AMOC_data$time >= min_dynamic_value_wide$index]),
+   delta = actual_dt,
+   alpha0 = min_dynamic_value_wide$alpha0,
+   mu0 = min_dynamic_value_wide$mu0,
+   sigma = min_dynamic_value_wide$sigma)
+   )|> mutate(Optimized = "Dynamic", Part = "Dynamic part"),
+
+  # Part based on t_0 = 1912
+  tibble(sample = t_diffusion_strang_splitting_resid(
+  par = c(min_stationary_value_wide$alpha0, min_stationary_value_wide$mu0, min_stationary_value_wide$sigma), 
+  data = asinh(AMOC_data$AMOC2[AMOC_data$time < min_stationary_value_wide$index]),
+  delta = actual_dt
+)) |> mutate(Optimized = "Stationary", Part = "Stationary part"),
+
+tibble(sample = t_transform_dynamic_likelihood_resid(
+  par =  c(min_stationary_value_wide$tau, min_stationary_value_wide$A),
+  data = asinh(AMOC_data$AMOC2[AMOC_data$time >= min_stationary_value_wide$index]),
+  delta = actual_dt,
+  alpha0 = min_stationary_value_wide$alpha0,
+  mu0 = min_stationary_value_wide$mu0,
+  sigma = min_stationary_value_wide$sigma)
+)|> mutate(Optimized = "Stationary", Part = "Dynamic part")
+) |> 
+  mutate(Part = factor(Part, levels = c("Stationary part", "Dynamic part")),
+         Optimized = factor(Optimized, levels = c("Stationary", "Dynamic")))
+
+QQ_plot_parts <- QQ_data_parts |> 
+  ggplot(aes(sample = sample)) + geom_qq(aes(col = Optimized), alpha = .8, size = 1.3) + geom_qq_line() + 
+  facet_wrap(~Part) + 
+  scale_color_manual(labels = c("1912", "1924"), values = thesis_palette[5:6]) +
+  theme(
+    strip.text = element_text(face = "bold", size = 22),
+    legend.text = element_text(size = 20),
+    legend.title = element_text(size = 22),
+    axis.title = element_text(face = "bold", size = 20)
+  ) + xlab("Theoretical Quantiles") + ylab("Empirical Quantiles") +
+  guides(col = guide_legend(override.aes = list(alpha = 1, size = 5), title = expression(t[0])))
+
+quantiles_t0 <- c(0.01, 0.025, 0.167, 0.33, 0.5, 0.67, 0.833, 0.975, 0.99)
+
+QQ_table_data <- QQ_data_parts |> group_by(Part, Optimized) |> 
+  reframe(empirical_quantiles = 
+              quantile(sample, probs = quantiles_t0),
+          probs = factor(quantiles_t0))
+
+# Table for quantiles
+bind_rows(
+  tibble(Part = "Theoretical", Optimized = "Theoretical", probs = factor(quantiles_t0),
+         quantiles = qnorm(p = quantiles_t0)) |> 
+    pivot_wider(id_cols = c(Part, Optimized), values_from = quantiles, names_from = probs), 
+QQ_table_data |> 
+  pivot_wider(id_cols = c(Part, Optimized), values_from = empirical_quantiles, names_from = probs)
+) |> xtable::xtable()
+
+
+ggsave(QQ_plot_parts, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "QQ_plot_parts.jpeg",
+       height = 8, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+# Estimation in the AMOC
+
+t_0 <- 1924 # Use same baseline data as paper.
 # Simulate from the model to construct parametric bootstrap confidence intervals
-numSim <- 1000
+numSim <- 2000
 
-# Define parameters - note that we shift the year to index 0.
+# Define parameters - note that we shift the first year, 1870, to be year 0.
 T_0 <- t_0 - 1870
-tau_estim <- dynamic_part_estim_param[1]
-A_estim <- dynamic_part_estim_param[2]
-alpha_0_estim <- stationary_part_estim_param[1]
-mu0_estim <- stationary_part_estim_param[2]
-sigma_estim <- stationary_part_estim_param[3]
+tau_estim <- min_dynamic_value_wide$tau
+A_estim <- min_dynamic_value_wide$A
+alpha_0_estim <- min_dynamic_value_wide$alpha0
+mu0_estim <- min_dynamic_value_wide$mu0
+sigma_estim <- min_dynamic_value_wide$sigma
 
 lambda_0_estim <- -alpha_0_estim^2 / (4 * A_estim)
 m_estim <- mu0_estim - alpha_0_estim / (2 * A_estim)
 
 tc_estim <- tau_estim + t_0
+# Parameters needed for sim method along with time to tipping from largest year in data set (we stop simulating at that point)
 sim_param <- c(A_estim, m_estim, lambda_0_estim, sigma_estim)
-time_to_tipping <- tc_estim - max(AMOC_data$time)
+time_to_tipping <- tc_estim - max(AMOC_data$time) 
+ 
 
-original_estim <- tibble(true_value = c(A_estim, alpha_0_estim, lambda_0_estim,  m_estim, mu0_estim, sigma_estim, tau_estim, tc_estim))
 
+original_estim <- tibble(true_value = c(A_estim, 
+                                        alpha_0_estim, lambda_0_estim,  m_estim,
+                                        mu0_estim, sigma_estim, tau_estim, tc_estim))
+
+dynamic_part_init <- c(max(AMOC_data$time) - t_0, 1)
 estim_matrix <- matrix(data = NA, nrow = numSim, ncol = 8)
 #tc_vector <- numeric(numSim)
 set.seed(07052024)
@@ -2645,7 +2900,7 @@ for (i in 1:numSim) {
       sim_t_stationary_estim <- optimize_stationary_likelihood(
         likelihood_fun = t_diffusion_strang_splitting,
         data = asinh(sim_t$X_t[sim_t$t < T_0]),
-        init_par = stationary_part_starting_param,
+        init_par = OU_init_params(sim_t$X_t[sim_t$t < T_0], delta = actual_dt),
         delta = actual_dt,
         exp_sigma = TRUE,
         method = "BFGS"
@@ -2655,7 +2910,7 @@ for (i in 1:numSim) {
       sim_t_dynamic_estim <- optimize_dynamic_likelihood(
         likelihood_fun = t_transform_dynamic_likelihood,
         data = asinh(sim_t$X_t[sim_t$t >= T_0]),
-        init_par = dynamic_part_starting_param,
+        init_par = dynamic_part_init,
         delta = actual_dt,
         alpha0 = sim_t_stationary_estim[1],
         mu0 = sim_t_stationary_estim[2],
@@ -2678,10 +2933,6 @@ for (i in 1:numSim) {
       success <- TRUE
     }, error = function(e) {
       cat("Error occurred at iteration", i, ":", conditionMessage(e), "\n")
-      
-      attempts <- attempts + 1
-      
-      Sys.sleep(1)
     })
   }
   print(estim_matrix[i, 8])
@@ -2692,21 +2943,22 @@ estim_tibble <- as_tibble(estim_matrix)
 
 names(estim_tibble) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
 
-if(!file.exists("data/estim_tibble.csv")){
-  utils::write.table(estim_tibble, file="data/estim_tibble.csv", sep = ",", row.names = FALSE)
-} else{
-  estim_tibble <- read_csv("data/estim_tibble.csv")
-}
+# if(!file.exists("data/estim_tibble.csv")){
+#   utils::write.table(estim_tibble, file="data/estim_tibble.csv", sep = ",", row.names = FALSE)
+# } else{
+#   estim_tibble <- read_csv("data/estim_tibble.csv")
+# }
 
 original_estim <- original_estim |> mutate(parameter = names(estim_tibble))
 
-estim_tibble_long <- estim_tibble %>%
+# Remove a couple of outliers
+estim_tibble_long <- estim_tibble |> filter(A < 10 & A > 0.01 & tau < 1000 & lambda_0 > -7.5) |> 
   pivot_longer(cols = everything(), names_to = "parameter", values_to = "value")
 
 estim_tibble_plot <- estim_tibble_long |> ggplot(aes(x = value)) +
   geom_histogram(bins = 30, fill = thesis_palette[5], alpha = 0.7, col = "black") + 
   geom_vline(data = original_estim, mapping = aes(xintercept = true_value), linewidth = 1) +
-  facet_wrap(~parameter, scales = "free_x", ncol = 4) +
+  facet_wrap(~parameter, scales = "free", ncol = 4) +
   labs(x = "Estimate", y = "Count") +
   theme(strip.text.x = element_text(size = 12, face = "bold"),
         panel.spacing = unit(1.5, "lines"))
@@ -2719,7 +2971,8 @@ ggplot2::ggsave(filename = "tex_files/figures/estim_tibble_plot.jpeg",
 
   
 qqplot_before_t0 <- tibble::tibble(obsSample =
-                 t_diffusion_strang_splitting_resid(stationary_part_estim_param,
+                 t_diffusion_strang_splitting_resid(
+                 par = c(original_estim$true_value[2], original_estim$true_value[5], original_estim$true_value[6]),
                  data = asinh(AMOC_data$AMOC2[AMOC_data$time < t_0]),
                  delta = actual_dt)) |>
                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
@@ -2728,12 +2981,13 @@ qqplot_before_t0 <- tibble::tibble(obsSample =
 
 
 qqplot_after_t0 <-  tibble::tibble(obsSample =
-                 t_transform_dynamic_likelihood_resid(dynamic_part_estim_param,
+                 t_transform_dynamic_likelihood_resid(
+                 par = c(original_estim$true_value[7], original_estim$true_value[1]),
                  data = asinh(AMOC_data$AMOC2[AMOC_data$time >= t_0]),
                  delta = actual_dt,
-                 alpha0 = stationary_part_estim_param[1],
-                 mu0 = stationary_part_estim_param[2],
-                 sigma = stationary_part_estim_param[3])) |>
+                 alpha0 = original_estim$true_value[2],
+                 mu0 =  original_estim$true_value[5], 
+                 sigma = original_estim$true_value[6])) |>
                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
                  ggplot2::geom_qq() + ggplot2::geom_qq_line() + 
                  xlab("Theoretical Quantiles") + ylab("Sample Quantiles")
