@@ -33,8 +33,8 @@ For the t-diffusion based model, we get
     X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma \sqrt{\left(X_{t_k}^2 + 1\right)} \Delta W_{k} \nonumber\\
     &+ \frac{\sigma^2}{2}X_t \left(\Delta W_{k}^2 - \Delta t_k\right) - A\left(X_{t_k} - m \right)\sigma\sqrt{\left(X_{t_k}^2 + 1\right)}\Delta W_{k}\Delta t_k \nonumber\\
     &+ \left(\left(A\left(X_{t_k} - m \right)^2+\lambda_{t_k}\right)\left(A\left(X_{t_k} - m \right)\right) - \frac{A\sigma^2}{2}\left(X_t^2 + 1\right)\right)\left(\Delta t_k\right)^2 \nonumber\\
-    &-\left(\sigma X_{t_k}\left(A\left(X_{t_k} - m \right)^2 + \lambda_{t_k}\right) - \frac{\sigma^3}{2}\right)\frac{\left(\Delta W_{k}\Delta t_k\right)}{2\sqrt{X_{t_k}^2 + 1}}
-\end{align}
+    &-\left(\sigma X_{t_k}\left(A\left(X_{t_k} - m \right)^2 + \lambda_{t_k}\right) - \frac{\sigma^3}{2}\right)\frac{\left(\Delta W_{k}\Delta t_k\right)}{2\sqrt{X_{t_k}^2 + 1}} \label{eq:skew_t_sim}
+\end{align} 
 \\
 \textbf{F-distribution}\\
 The model with the F-diffusion based model is sampled as
@@ -554,4 +554,23 @@ In this section we show the results of a few benchmarks using the \code{microben
         \end{tabular}
         \caption{Tabularization of the quantiles at selected values for the stationary- and dynamic parts grouped by the $t_0$ used along with the standard normal quantiles. Supports figure \ref{figure:AMOC_QQ_t_0}}
         \label{table:QQ_table_parts}
+        \end{table}
+    
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{rrrrrrrrr}
+            \hline
+            $A$ & $\alpha_0$ & $\lambda_0$ & $m$ & $\mu_0$ & $\sigma$ & $\tau_c$ & Tipping year \\ 
+            \hline
+            $0.26$ & $3.87$ & $-14.48$ & $-7.24$ & $0.25$ & $0.51$ & $453.29$ & $2377.29$ \\ 
+            $0.30$ & $3.63$ & $-11.17$ & $-5.90$ & $0.24$ & $0.53$ & $391.05$ & $2315.05$ \\ 
+            $0.27$ & $3.17$ & $-9.33$ & $-5.64$ & $0.24$ & $0.51$ & $383.59$ & $2307.59$ \\ 
+            $0.26$ & $3.02$ & $-8.79$ & $-5.63$ & $0.19$ & $0.50$ & $402.94$ & $2326.94$ \\ 
+            $0.25$ & $2.92$ & $-8.48$ & $-5.61$ & $0.19$ & $0.52$ & $426.83$ & $2350.83$ \\ 
+            $0.32$ & $3.27$ & $-8.42$ & $-4.91$ & $0.24$ & $0.51$ & $348.77$ & $2272.77$ \\ 
+            $290.17$ & $2.71$ & $-0.01$ & $0.24$& $0.25$ & $0.48$ & $197.33$ & $2121.33$ \\ 
+             \hline
+        \end{tabular}
+        \caption{Table of estimates that were removed. The reason behind the removing of the estimate has been bolded - though in any case the $m$-estimate is also rather extreme in comparison with the typical distribution in figure \ref{figure:AMOC_parametric_bootstrap}}
+        \label{table:extreme_amoc_estimates}
         \end{table}
