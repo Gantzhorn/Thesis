@@ -3619,3 +3619,67 @@ estim_tibble_AMOC1_plot <- estim_tibble_AMOC1_long |> ggplot(aes(x = value, y = 
 #              linewidth = 0.8, linetype = "dashed", show.legend = FALSE) +
 #   scale_color_manual(labels = c("1924", "1912"), values = thesis_palette[5:6]) +
 #   guides(col = guide_legend(override.aes = list(linewidth = 4), title = expression(t[0])))
+
+# Discussion
+
+true_param <- c(0.8, -1.5, -2, 0.3)
+actual_dt <- 1/12 * 1/2
+tau <- 100
+t_0 <- 10
+nus <- round(sort(unique(c(exp(seq(-1.5, 1.5, length.out = 7)), 1/exp(seq(-1.5, 1.5, length.out = 7))))), 2)
+beyond_tippings <- -tau * c(0.9, 0.7, 0.5, 0.1)
+
+simulate_and_label_nu_disussion <- function(nu, beyond_tipping, seed) {
+  sim_result <- simulate_additive_noise_tipping_model(
+    step_length = actual_dt, par = c(true_param,nu), tau = tau, t_0 = t_0, beyond_tipping = beyond_tipping, 
+    seed = seed
+  )
+
+  as_tibble(sim_result) %>%
+    mutate(nu = nu, beyond_tipping = beyond_tipping)
+}
+
+
+combinations <- crossing(nu = nus, beyond_tipping = beyond_tippings)
+
+# Apply the simulate_and_label function to each combination
+all_simulations <- combinations |> 
+  pmap_dfr(~simulate_and_label_nu_disussion(..1, ..2, seed = 200524))
+
+beyond_tipping_shifted <- tibble(
+  beyond_tipping = beyond_tippings,
+  prev_beyond_tipping = lag(beyond_tippings) + tau + t_0
+) %>%
+  filter(!is.na(prev_beyond_tipping))
+
+# Merge the shifted data frame with the simulation data
+all_simulations <- all_simulations  |> 
+  left_join(beyond_tipping_shifted, by = "beyond_tipping")
+
+# Plot
+mu_simulations_discussion_plot <- all_simulations |> 
+  ggplot(mapping = aes(x = t, y = X_t, col = factor(nu))) + 
+  geom_step(linewidth = 0.75) + 
+  geom_vline(aes(xintercept = prev_beyond_tipping)
+             , col = "black ", linetype = "dashed", linewidth = 0.8) +
+  #geom_line(aes(y = mu_t), linewidth = 1, linetype = "dashed") +
+  geom_line(aes(y = mu_t - 2 * sqrt(-lambda_t/true_param[1])), linetype = "dashed", linewidth = 1) + 
+  facet_wrap(~factor(beyond_tipping), scales = "free_x") +
+  ylim(c(min(all_simulations$mu_t - 2 * sqrt(-all_simulations$lambda_t/true_param[1])) - 0.1,
+         max(all_simulations$X_t) + 0.01)) + 
+  scale_color_manual(values = thesis_palette) +
+  xlab("time (t)") + ylab(expression(X[t])) +
+  theme(
+    strip.text = element_blank(),
+    legend.text = element_text(face = "bold", size = 16),
+    axis.text = element_text(face = "bold", size = 14),
+    axis.title = element_text(face = "bold", size = 18)
+  ) + 
+  scale_x_continuous(breaks = scales::pretty_breaks()) + 
+  guides(color = guide_legend(override.aes = list(linewidth = 5), title = expression(nu)))
+
+
+ggsave(mu_simulations_discussion_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "mu_simulations_discussion_plot.jpeg",
+       height = 7, width = 11, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)

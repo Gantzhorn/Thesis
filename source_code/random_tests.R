@@ -242,7 +242,7 @@ optimize_stationary_likelihood(
   data = 2 * asin(sqrt(sim_res_jacobi$X_t[sim_res_jacobi$t<t_0])),
   init_par = stationary_part_true_param,
   delta = actual_dt,
-  exp_sigma = TRUE,
+  exp_sigma = FALSE,
   drift_lamperti_sde = jacobi_lamperti_drift)
 
 pure_numeric_strang_splitting <- function(par,
@@ -301,7 +301,7 @@ pure_numeric_strang_splitting <- function(par,
       par[3]^2 / 2 * lamperti_transform_second_derivative(inverse_lamperti_transform(y))
   }
 
-  b <- nleqslv::nleqslv(x = 0.5, fn = drift_lamperti_sde)$x
+  b <- nleqslv::nleqslv(x = drift_lamperti_sde(), fn = drift_lamperti_sde)$x
   
   A <- numDeriv::grad(func = drift_lamperti_sde, x = b)
 
@@ -313,7 +313,7 @@ pure_numeric_strang_splitting <- function(par,
   
   mu_f <- exp(A * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
-  
+  browser()
   # Inverse of non-linear ODE
   inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
   

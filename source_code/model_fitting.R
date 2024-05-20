@@ -150,11 +150,12 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma){
   m          <- mu0 - alpha0 / (2 * A)
   lambda0    <- -alpha0^2 / (4 * A)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
+  
   alpha_seq  <- 2 * sqrt(abs(A * lam_seq))
   gamma2_seq <- sigma^2 / (2 * alpha_seq)
   rho_seq    <- exp(-alpha_seq * delta)
   mu_seq     <- m + ifelse(A >= 0, 1, -1) * sqrt(abs(lam_seq / A))
-  
+
   ## Calculating the Strang splitting scheme pseudo likelihood
   fh_half_tmp_low <- A * delta * (Xlow - mu_seq) / 2
   fh_half_tmp_upp <- A * delta * (Xupp - mu_seq) / 2
@@ -1061,18 +1062,19 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 source("source_code/tipping_simulations.R")
 
 # Additive noise model
-# true_param <- c(0.87, -1.51, -2.69, 0.2)
+# true_param <- c(0.87, -1.51, -2.69, 0.2, 0.5)
 # actual_dt <- 0.005
 # tau <- 150
 # t_0 <- 50
 # sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step()
+# sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step() +
+#   geom_line(aes(y = mu_t))
 # # Stationary part
 # # Parameters for stationary part
 # mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) *  sqrt(abs(true_param[3] / true_param[1]))
 # alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 # stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-# 
+
 # optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
 #                                data = sim_res_add$X_t[sim_res_add$t < t_0],
 #                                init_par = stationary_part_true_param,
@@ -1083,18 +1085,19 @@ source("source_code/tipping_simulations.R")
 #                  fn = OU_score,
 #                  data = sim_res_add$X_t[sim_res_add$t < t_0],
 #                  delta = actual_dt)$x
-#
+
+
 ## Dynamic part
-# dynamic_part_true_param <- c(tau, true_param[1])
-# 
-# 
-# optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
-#                             data = sim_res_add$X_t[sim_res_add$t > t_0],
-#                             init_par = dynamic_part_true_param,
-#                             delta = actual_dt,
-#                             alpha0 = stationary_part_true_param[1],
-#                             mu0 = stationary_part_true_param[2],
-#                             sigma = stationary_part_true_param[3])
+dynamic_part_true_param <- c(tau, true_param[1], 1)
+
+
+optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
+                            data = sim_res_add$X_t[sim_res_add$t > t_0],
+                            init_par = dynamic_part_true_param,
+                            delta = actual_dt,
+                            alpha0 = stationary_part_true_param[1],
+                            mu0 = stationary_part_true_param[2],
+                            sigma = stationary_part_true_param[3])
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 
