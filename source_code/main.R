@@ -2566,17 +2566,43 @@ AMOC_data_plot <- AMOC_data_longer  |>
   theme(
     legend.title = element_blank(),
     strip.text = element_blank(),
-    legend.key.size = unit(5, 'lines'),
+    legend.key.size = unit(2, 'lines'),
     legend.text = element_text(face = "bold", size = 18),
     axis.text = element_text(face = "bold", size = 20),
     axis.title = element_text(face = "bold", size = 22),
   ) + 
-  xlab("Year") + ylab("[K]")
+  xlab("Year") + ylab("[K]") + 
+  guides(col = guide_legend(override.aes = list(linewidth = 4)))
 
 ggsave(AMOC_data_plot, path = paste0(getwd(), "/tex_files/figures"),
        filename = "AMOC_data_plot.jpeg",
        height = 10, width = 16, dpi = 300, units = "in", device = "jpeg",
        limitsize = FALSE, scale = 1)
+
+AMOC_alt_plot <- AMOC_data_longer  |> 
+  filter((Type %in% c("AMOC1", "AMOC2", "AMOC3")))  |> 
+  mutate(Type = factor(Type, levels = c("AMOC1", "AMOC2", "AMOC3")))  |> 
+  ggplot(aes(x = time, y = Value, col = Type)) +
+  geom_line(linewidth = 0.6) + 
+  facet_wrap(~Type) + 
+  scale_x_continuous(breaks = scales::pretty_breaks(5)) +
+  scale_color_manual(values = c(thesis_palette[1],thesis_palette[6], thesis_palette[3])) +
+  theme(
+    legend.title = element_blank(),
+    strip.text = element_blank(),
+    legend.key.size = unit(2, 'lines'),
+    legend.text = element_text(face = "bold", size = 22),
+    axis.text = element_text(face = "bold", size = 22),
+    axis.title = element_text(face = "bold", size = 22),
+  ) + 
+  xlab("Year") + ylab("[K]") + 
+  guides(col = guide_legend(override.aes = list(linewidth = 4)))
+
+ggsave(AMOC_alt_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "AMOC_alt_plot.jpeg",
+       height = 7, width = 14, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
 # Temporal resolution 
 actual_dt <- 1 / 12 
 
@@ -3024,28 +3050,26 @@ ggplot2::ggsave(filename = "tex_files/figures/qqplot_combined.jpeg",
                 height = 7.5,
                 dpi = 300)
 
-# Using additive model but without ramping
-end_year_add <- 1950
-start_year_add <- 1910
-t_0s_nu <- seq(start_year_add, end_year_add, length.out = (end_year_add + 1 - start_year_add)) 
+# Using additive model but without penalization 
+
 # Set starting point of tau to be the time between initialization of ramping and max year in data set
-dynamic_part_starting_param_additive <- matrix(NA, nrow = length(t_0s_nu), ncol = 2)
-dynamic_part_starting_param_additive[, 1] <- max(AMOC_data$time) - t_0s_nu 
+dynamic_part_starting_param_additive <- matrix(NA, nrow = length(t_0s), ncol = 2)
+dynamic_part_starting_param_additive[, 1] <- max(AMOC_data$time) - t_0s 
 dynamic_part_starting_param_additive[, 2] <- 1
 
-stationary_params_additive <- matrix(nrow = length(t_0s_nu), ncol = 3)
-dynamic_params_additive <- matrix(nrow = length(t_0s_nu), ncol = 2)
-stationary_part_likelihood_additive <- numeric(length(t_0s_nu))
-dynamic_part_likelihood_additive <- numeric(length(t_0s_nu))
+stationary_params_additive <- matrix(nrow = length(t_0s), ncol = 3)
+dynamic_params_additive <- matrix(nrow = length(t_0s), ncol = 2)
+stationary_part_likelihood_additive <- numeric(length(t_0s))
+dynamic_part_likelihood_additive <- numeric(length(t_0s))
 
-for (i in seq_along(t_0s_nu)){
+for (i in seq_along(t_0s)){
   # Stationary part
   print(i)
   
   stationary_estim <- optimize_stationary_likelihood(
     likelihood_fun = OU_likelihood,
-    data = AMOC_data$AMOC2[AMOC_data$time < t_0s_nu[i]],
-    init_par = OU_init_params(data = AMOC_data$AMOC2[AMOC_data$time < t_0s_nu[i]], delta = actual_dt),
+    data = AMOC_data$AMOC2[AMOC_data$time < t_0s[i]],
+    init_par = OU_init_params(data = AMOC_data$AMOC2[AMOC_data$time < t_0s[i]], delta = actual_dt),
     delta = actual_dt,
     exp_sigma = TRUE,
     control = list(reltol = sqrt(.Machine$double.eps) / 1000))
@@ -3057,7 +3081,7 @@ for (i in seq_along(t_0s_nu)){
   
   dynamic_estim <- optimize_dynamic_likelihood(
     likelihood_fun = OU_dynamic_likelihood,
-    data = AMOC_data$AMOC2[AMOC_data$time >= t_0s_nu[i]],
+    data = AMOC_data$AMOC2[AMOC_data$time >= t_0s[i]],
     init_par = dynamic_part_starting_param_additive[i , ],
     delta = actual_dt,
     alpha0 = stationary_estim$par[1],
@@ -3074,14 +3098,14 @@ for (i in seq_along(t_0s_nu)){
 
 likelihood_tibble_additive <- tibble(stationary_likelihood = stationary_part_likelihood_additive,
                             dynamic_likelihood = dynamic_part_likelihood_additive,
-                            index = t_0s_nu,
+                            index = t_0s,
                             n_stationary_add = (index - 1870),
                             n_dynamic_add = (max(AMOC_data$time) - index),
                             alpha0 = stationary_params_additive[, 1],
                             mu0 = stationary_params_additive[, 2],
                             sigma = stationary_params_additive[, 3],
                             tau = dynamic_params_additive[, 1],
-                            tipping_point = tau + t_0s_nu,
+                            tipping_point = tau + t_0s,
                             A = dynamic_params_additive[, 2]#,
                             #nu = dynamic_params_additive[, 3]
                             ) |> 
@@ -3466,7 +3490,7 @@ original_estim_AMOC1 <- tibble(true_value = c(A_estim_AMOC1,
 # if(!file.exists("data/original_estim_AMOC1.csv")){
 #   utils::write.table(original_estim_AMOC1, file="data/original_estim_AMOC1.csv", sep = ",", row.names = FALSE)
 # } else{
-#   original_estim_AMOC1 <- read_csv("data/v.csv")
+#   original_estim_AMOC1 <- read_csv("data/original_estim_AMOC1.csv")
 # }
 
 numSim <- 2000
@@ -3620,6 +3644,672 @@ estim_tibble_AMOC1_plot <- estim_tibble_AMOC1_long |> ggplot(aes(x = value, y = 
 #   scale_color_manual(labels = c("1924", "1912"), values = thesis_palette[5:6]) +
 #   guides(col = guide_legend(override.aes = list(linewidth = 4), title = expression(t[0])))
 
+# Set starting point of tau to be the time between initialization of ramping and max year in data set
+
+dynamic_part_starting_param_AMOC3 <- matrix(NA, nrow = length(t_0s), ncol = 2)
+dynamic_part_starting_param_AMOC3[, 1] <- max(AMOC_data$time) - t_0s 
+dynamic_part_starting_param_AMOC3[, 2] <- 1
+
+stationary_params_AMOC3 <- matrix(nrow = length(t_0s), ncol = 3)
+dynamic_params_AMOC3 <- matrix(nrow = length(t_0s), ncol = 2)
+stationary_part_likelihood_AMOC3 <- numeric(length(t_0s))
+dynamic_part_likelihood_AMOC3 <- numeric(length(t_0s))
+
+for (i in seq_along(t_0s)){
+  # Stationary part
+  print(i)
+  
+  stationary_estim_AMOC3 <- optimize_stationary_likelihood(
+    likelihood_fun = t_diffusion_strang_splitting,
+    data = asinh(AMOC_data$AMOC3[AMOC_data$time < t_0s[i]]),
+    init_par = OU_init_params(data = AMOC_data$AMOC3[AMOC_data$time < t_0s[i]], delta = actual_dt),
+    delta = actual_dt,
+    exp_sigma = TRUE,
+    control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+  stationary_params_AMOC3[i, ] <- stationary_estim_AMOC3$par
+  stationary_part_likelihood_AMOC3[i] <- stationary_estim_AMOC3$objective
+  
+  
+  # Dynamic part
+  
+  dynamic_estim_AMOC3 <- optimize_dynamic_likelihood(
+    likelihood_fun = t_transform_dynamic_likelihood,
+    data = asinh(AMOC_data$AMOC3[AMOC_data$time >= t_0s[i]]),
+    init_par = dynamic_part_starting_param[i , ],
+    delta = actual_dt,
+    alpha0 = stationary_estim_AMOC3$par[1],
+    mu0 = stationary_estim_AMOC3$par[2],
+    sigma = stationary_estim_AMOC3$par[3],
+    method = "BFGS",
+    control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+  print(dynamic_estim_AMOC3$objective)
+  dynamic_params_AMOC3[i, ] <- dynamic_estim_AMOC3$par
+  
+  dynamic_part_likelihood_AMOC3[i] <- dynamic_estim_AMOC3$objective
+}
+
+likelihood_tibble_AMOC3 <- tibble(stationary_likelihood = stationary_part_likelihood_AMOC3,
+                                  dynamic_likelihood = dynamic_part_likelihood_AMOC3,
+                                  index = t_0s,
+                                  n_stationary = index - min(AMOC_data$time),
+                                  n_dynamic = max(AMOC_data$time) - index,
+                                  alpha0 = stationary_params_AMOC3[, 1],
+                                  mu0 = stationary_params_AMOC3[, 2],
+                                  sigma = stationary_params_AMOC3[, 3],
+                                  tau = dynamic_params_AMOC3[, 1],
+                                  tipping_point = tau + t_0s,
+                                  A = dynamic_params_AMOC3[, 2]) |> 
+  filter(dynamic_likelihood != 50000) |>
+  mutate(dynamic_likelihood = dynamic_likelihood / n_dynamic,
+         stationary_likelihood = stationary_likelihood / n_stationary) |> 
+  select(-c(n_stationary, n_dynamic))
+
+stationary_min_row_AMOC3 <- likelihood_tibble_AMOC3[which.min(likelihood_tibble_AMOC3$stationary_likelihood),]
+dynamic_min_row_AMOC3 <- likelihood_tibble_AMOC3[which.min(likelihood_tibble_AMOC3$dynamic_likelihood),]
+
+# Define parameters - note that we shift the first year, 1870, to be year 0.
+T_0 <- dynamic_min_row_AMOC3$index - 1870
+tau_estim_AMOC3 <- dynamic_min_row_AMOC3$tau
+A_estim_AMOC3 <- dynamic_min_row_AMOC3$A
+alpha_0_estim_AMOC3 <- dynamic_min_row_AMOC3$alpha0
+mu0_estim_AMOC3 <- dynamic_min_row_AMOC3$mu0
+sigma_estim_AMOC3 <- dynamic_min_row_AMOC3$sigma
+
+lambda_0_estim_AMOC3 <- -alpha_0_estim_AMOC3^2 / (4 * A_estim_AMOC3)
+m_estim_AMOC3 <- mu0_estim_AMOC3 - alpha_0_estim_AMOC3 / (2 * A_estim_AMOC3)
+
+tc_estim_AMOC3 <- tau_estim_AMOC3 + dynamic_min_row_AMOC3$index
+# Parameters needed for sim method along with time to tipping from largest year in data set (we stop simulating at that point)
+sim_param_AMOC3 <- c(A_estim_AMOC3, m_estim_AMOC3, lambda_0_estim_AMOC3, sigma_estim_AMOC3)
+time_to_tipping_AMOC3 <- tc_estim_AMOC3 - max(AMOC_data$time) 
+
+
+
+original_estim_AMOC3 <- tibble(true_value = c(A_estim_AMOC3, 
+                                              alpha_0_estim_AMOC3, lambda_0_estim_AMOC3,  m_estim_AMOC3,
+                                              mu0_estim_AMOC3, sigma_estim_AMOC3, tau_estim_AMOC3, tc_estim_AMOC3))
+
+# if(!file.exists("data/original_estim_AMOC3.csv")){
+#   utils::write.table(original_estim_AMOC3, file="data/original_estim_AMOC3.csv", sep = ",", row.names = FALSE)
+# } else{
+#   original_estim_AMOC3 <- read_csv("data/original_estim_AMOC3.csv")
+# }
+
+numSim <- 2000
+estim_matrix_AMOC3 <- matrix(data = NA, nrow = numSim, ncol = 8)
+
+set.seed(07052024)
+for (i in 1:numSim) {
+  if (i %% 5 == 1) {
+    cat("Currently grinding", i, "....\n")
+  }
+  
+  success <- FALSE
+  
+  while (!success) {
+    tryCatch({
+      random_seed <- sample(100000, size = 1)
+      sim_t <- simulate_t_distribution_tipping_model(step_length = actual_dt,
+                                                     par = sim_param_AMOC3, tau = tau_estim_AMOC3,
+                                                     t_0 = T_0,
+                                                     beyond_tipping = -time_to_tipping_AMOC3, seed = random_seed)
+      
+      # Stationary part
+      sim_t_stationary_estim <- optimize_stationary_likelihood(
+        likelihood_fun = t_diffusion_strang_splitting,
+        data = asinh(sim_t$X_t[sim_t$t < T_0]),
+        init_par = c(alpha_0_estim_AMOC3, mu0_estim_AMOC3, sigma_estim_AMOC3),
+        delta = actual_dt,
+        exp_sigma = TRUE,
+        method = "BFGS"
+      )$par
+      
+      # Dynamic part
+      sim_t_dynamic_estim <- optimize_dynamic_likelihood(
+        likelihood_fun = t_transform_dynamic_likelihood,
+        data = asinh(sim_t$X_t[sim_t$t >= T_0]),
+        init_par = c(tau_estim_AMOC3, A_estim_AMOC3),
+        delta = actual_dt,
+        alpha0 = sim_t_stationary_estim[1],
+        mu0 = sim_t_stationary_estim[2],
+        sigma = sim_t_stationary_estim[3],
+        method = "BFGS",
+        control = list(reltol = sqrt(.Machine$double.eps) / 1000)
+      )$par
+      
+      estim_matrix_AMOC3[i, 1:8] <- c(
+        sim_t_dynamic_estim[2], 
+        sim_t_stationary_estim[1],
+        -sim_t_stationary_estim[1]^2 / (4 * sim_t_dynamic_estim[2]),
+        sim_t_stationary_estim[2] - sim_t_stationary_estim[1] / (2 * sim_t_dynamic_estim[2]),
+        sim_t_stationary_estim[2],
+        sim_t_stationary_estim[3],
+        sim_t_dynamic_estim[1],
+        T_0 + sim_t_dynamic_estim[1] + 1870
+      )
+      
+      success <- TRUE
+    }, error = function(e) {
+      cat("Error occurred at iteration", i, ":", conditionMessage(e), "\n")
+    })
+  }
+  print(estim_matrix_AMOC3[i, 8])
+}
+
+
+estim_tibble_AMOC3 <- as_tibble(estim_matrix_AMOC3)
+
+names(estim_tibble_AMOC3) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
+
+# if(!file.exists("data/estim_tibble_AMOC3.csv")){
+#   utils::write.table(estim_tibble_AMOC3, file="data/estim_tibble_AMOC3.csv", sep = ",", row.names = FALSE)
+# } else{
+#   estim_tibble_AMOC3 <- read_csv("data/estim_tibble_AMOC3.csv")
+# }
+
+original_estim_AMOC3 <- original_estim_AMOC3 |> mutate(Parameter = names(estim_tibble_AMOC3))
+
+estim_tibble_AMOC3_long <- estim_tibble_AMOC3 |> filter(A < 10, A > 0) |> 
+  pivot_longer(cols = everything(), names_to = "Parameter", values_to = "value")
+
+estim_tibble_AMOC3_plot <- estim_tibble_AMOC3_long |> ggplot(aes(x = value, y = after_stat(density), fill = Parameter)) +
+  geom_histogram(bins = 30, alpha = 2, col = "black", linewidth = .2) + 
+  geom_vline(data = original_estim_AMOC3, mapping = aes(xintercept = true_value), linewidth = 1, linetype = "dashed") +
+  facet_wrap(~Parameter, scales = "free", ncol = 4) +
+  labs(x = "Estimate", y = "") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) + 
+  theme(strip.text.x = element_blank(),
+        panel.spacing = unit(1.5, "lines"),
+        axis.title.x = element_text(face = "bold", size = 16),
+        legend.title = element_text(size = 20),
+        legend.text = element_text(size = 14)
+  ) + 
+  scale_fill_manual(values = thesis_palette,
+                    labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
+                               expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
+
+# AMOC1 for additive model
+dynamic_part_starting_param_additive_AMOC1 <- matrix(NA, nrow = length(t_0s), ncol = 2)
+dynamic_part_starting_param_additive_AMOC1[, 1] <- max(AMOC_data$time) - t_0s 
+dynamic_part_starting_param_additive_AMOC1[, 2] <- 1
+
+stationary_params_additive_AMOC1 <- matrix(nrow = length(t_0s), ncol = 3)
+dynamic_params_additive_AMOC1 <- matrix(nrow = length(t_0s), ncol = 2)
+stationary_part_likelihood_additive_AMOC1 <- numeric(length(t_0s))
+
+dynamic_part_likelihood_additive_AMOC1 <- numeric(length(t_0s))
+
+for (i in seq_along(t_0s)){
+  # Stationary part
+  print(i)
+  
+  stationary_estim <- optimize_stationary_likelihood(
+    likelihood_fun = OU_likelihood,
+    data = AMOC_data$AMOC1[AMOC_data$time < t_0s[i]],
+    init_par = OU_init_params(data = AMOC_data$AMOC1[AMOC_data$time < t_0s[i]], delta = actual_dt),
+    delta = actual_dt,
+    exp_sigma = TRUE,
+    control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+  stationary_params_additive_AMOC1[i, ] <- stationary_estim$par
+  stationary_part_likelihood_additive_AMOC1[i] <- stationary_estim$objective
+  
+  
+  # Dynamic part
+  
+  dynamic_estim <- optimize_dynamic_likelihood(
+    likelihood_fun = OU_dynamic_likelihood,
+    data = AMOC_data$AMOC1[AMOC_data$time >= t_0s[i]],
+    init_par = dynamic_part_starting_param_additive[i , ],
+    delta = actual_dt,
+    alpha0 = stationary_estim$par[1],
+    mu0 = stationary_estim$par[2],
+    sigma = stationary_estim$par[3],
+    method = "BFGS",
+    control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+  print(dynamic_estim$objective)
+  dynamic_params_additive_AMOC1[i, ] <- dynamic_estim$par
+  print(dynamic_estim$par)
+  dynamic_part_likelihood_additive_AMOC1[i] <- dynamic_estim$objective
+}
+
+
+likelihood_tibble_additive_AMOC1 <- tibble(stationary_likelihood = stationary_part_likelihood_additive_AMOC1,
+                                     dynamic_likelihood = dynamic_part_likelihood_additive_AMOC1,
+                                     index = t_0s,
+                                     n_stationary_add = (index - 1870),
+                                     n_dynamic_add = (max(AMOC_data$time) - index),
+                                     alpha0 = stationary_params_additive_AMOC1[, 1],
+                                     mu0 = stationary_params_additive_AMOC1[, 2],
+                                     sigma = stationary_params_additive_AMOC1[, 3],
+                                     tau = dynamic_params_additive_AMOC1[, 1],
+                                     tipping_point = tau + t_0s,
+                                     A = dynamic_params_additive_AMOC1[, 2]#,
+                                     #nu = dynamic_params_additive[, 3]
+) |> 
+  mutate(dynamic_likelihood = dynamic_likelihood / n_dynamic_add,
+         stationary_likelihood = stationary_likelihood / n_stationary_add) |> 
+  select(-c(n_stationary_add, n_dynamic_add))
+
+stationary_min_row_additive_AMOC1 <- likelihood_tibble_additive_AMOC1[which.min(likelihood_tibble_additive_AMOC1$stationary_likelihood),]
+dynamic_min_row_additive_AMOC1 <- likelihood_tibble_additive_AMOC1[which.min(likelihood_tibble_additive_AMOC1$dynamic_likelihood),]
+
+
+t_0_additive_AMOC1 <- dynamic_min_row_additive_AMOC1$index
+actual_dt <- 1 / 12
+# Simulate from the model to construct parametric bootstrap confidence intervals
+numSim <- 2000
+
+# Define parameters - note that we shift the first year, 1870, to be year 0.
+T_0_additive_AMOC1 <- t_0_additive_AMOC1 - 1870
+tau_estim_additive_AMOC1 <- dynamic_min_row_additive_AMOC1$tau
+A_estim_additive_AMOC1 <- dynamic_min_row_additive_AMOC1$A
+alpha_0_estim_additive_AMOC1 <- dynamic_min_row_additive_AMOC1$alpha0
+mu0_estim_additive_AMOC1 <- dynamic_min_row_additive_AMOC1$mu0
+sigma_estim_additive_AMOC1 <- dynamic_min_row_additive_AMOC1$sigma
+
+lambda_0_estim_additive_AMOC1 <- -alpha_0_estim_additive_AMOC1^2 / (4 * A_estim_additive_AMOC1)
+m_estim_additive_AMOC1 <- mu0_estim_additive_AMOC1 - alpha_0_estim_additive_AMOC1 / (2 * A_estim_additive_AMOC1)
+
+tc_estim_additive_AMOC1 <- tau_estim_additive_AMOC1 + t_0_additive_AMOC1
+# Parameters needed for sim method along with time to tipping from largest year in data set (we stop simulating at that point)
+sim_param_additive_AMOC1 <- c(A_estim_additive_AMOC1, m_estim_additive_AMOC1, 
+                              lambda_0_estim_additive_AMOC1, sigma_estim_additive_AMOC1)
+time_to_tipping_additive_AMOC1 <- tc_estim_additive_AMOC1 - max(AMOC_data$time) 
+
+
+
+original_estim_additive_AMOC1 <- tibble(true_value = c(A_estim_additive_AMOC1, 
+                           alpha_0_estim_additive_AMOC1, lambda_0_estim_additive_AMOC1,  m_estim_additive_AMOC1,
+                           mu0_estim_additive_AMOC1, sigma_estim_additive_AMOC1, tau_estim_additive_AMOC1, tc_estim_additive_AMOC1))
+
+if(!file.exists("data/original_estim_additive_AMOC1csv")){
+  utils::write.table(original_estim_additive_AMOC1, file="data/original_estim_additive_AMOC1.csv", sep = ",", row.names = FALSE)
+} else{
+  original_estim_additive_AMOC1 <- read_csv("data/original_estim_additive_AMOC1.csv")
+}
+
+#dynamic_part_init <- c(max(AMOC_data$time) - t_0, 1)
+estim_matrix_additive_AMOC1 <- matrix(data = NA, nrow = numSim, ncol = 8)
+#tc_vector <- numeric(numSim)
+set.seed(07052024)
+for (i in 1:numSim) {
+  if (i %% 5 == 1) {
+    cat("Currently grinding", i, "....\n")
+  }
+  
+  success <- FALSE
+  
+  while (!success) {
+    tryCatch({
+      random_seed <- sample(100000, size = 1)
+      OU_sim <- simulate_additive_noise_tipping_model(step_length = actual_dt,
+                                                      par = sim_param_additive_AMOC1, tau = tau_estim_additive_AMOC1,
+                                                      t_0 = T_0_additive_AMOC1,
+                                                      beyond_tipping = -time_to_tipping_additive_AMOC1, seed = random_seed)
+      
+      # Stationary part
+      sim_OU_stationary_estim <- optimize_stationary_likelihood(
+        likelihood_fun = OU_likelihood,
+        data = OU_sim$X_t[OU_sim$t < T_0_additive_AMOC1],
+        init_par = c(alpha_0_estim_additive_AMOC1, mu0_estim_additive_AMOC1, sigma_estim_additive_AMOC1),
+        delta = actual_dt,
+        exp_sigma = TRUE,
+        method = "BFGS"
+      )$par
+      
+      # Dynamic part
+      sim_OU_dynamic_estim <- optimize_dynamic_likelihood(
+        likelihood_fun = OU_dynamic_likelihood,
+        data = OU_sim$X_t[OU_sim$t >= T_0_additive_AMOC1],
+        init_par = c(tau_estim_additive_AMOC1, A_estim_additive_AMOC1),
+        delta = actual_dt,
+        alpha0 = sim_OU_stationary_estim[1],
+        mu0 = sim_OU_stationary_estim[2],
+        sigma = sim_OU_stationary_estim[3],
+        method = "BFGS",
+        control = list(reltol = sqrt(.Machine$double.eps) / 1000)
+      )$par
+      
+      estim_matrix_additive_AMOC1[i, 1:8] <- c(
+        sim_OU_dynamic_estim[2], 
+        sim_OU_stationary_estim[1],
+        -sim_OU_stationary_estim[1]^2 / (4 * sim_OU_dynamic_estim[2]),
+        sim_OU_stationary_estim[2] - sim_OU_stationary_estim[1] / (2 * sim_OU_dynamic_estim[2]),
+        sim_OU_stationary_estim[2],
+        sim_OU_stationary_estim[3],
+        sim_OU_dynamic_estim[1],
+        T_0_additive_AMOC1 + sim_OU_dynamic_estim[1] + 1870
+      )
+      
+      success <- TRUE
+    }, error = function(e) {
+      cat("Error occurred at iteration", i, ":", conditionMessage(e), "\n")
+    })
+  }
+  print(estim_matrix_additive_AMOC1[i, 8])
+}
+
+
+estim_tibble_additive_AMOC1 <- as_tibble(estim_matrix_additive_AMOC1)
+
+names(estim_tibble_additive_AMOC1) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
+
+if(!file.exists("data/estim_tibble_additive_AMOC1.csv")){
+  utils::write.table(estim_tibble_additive_AMOC1, file="data/estim_tibble_additive_AMOC1.csv", sep = ",", row.names = FALSE)
+} else{
+  estim_tibble_additive_AMOC1 <- read_csv("data/estim_tibble_additive_AMOC1.csv")
+}
+
+original_estim_additive_AMOC1 <- original_estim_additive_AMOC1 |> mutate(Parameter = names(estim_tibble_additive_AMOC1))
+
+estim_tibble_additive_AMOC1_long <- estim_tibble_additive_AMOC1 |> 
+  pivot_longer(cols = everything(), names_to = "Parameter", values_to = "value")
+
+estim_tibble_additive_AMOC1_plot <- estim_tibble_additive_AMOC1_long |> ggplot(aes(x = value, y = after_stat(density), fill = Parameter)) +
+  geom_histogram(bins = 30, alpha = 2, col = "black", linewidth = .2) + 
+  geom_vline(data = original_estim_additive_AMOC1, mapping = aes(xintercept = true_value), linewidth = 1, linetype = "dashed") +
+  facet_wrap(~Parameter, scales = "free", ncol = 4) +
+  labs(x = "Estimate", y = "") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) + 
+  theme(strip.text.x = element_blank(),
+        panel.spacing = unit(1.5, "lines"),
+        axis.title.x = element_text(face = "bold", size = 16),
+        legend.title = element_text(size = 20),
+        legend.text = element_text(size = 14)
+  ) + 
+  scale_fill_manual(values = thesis_palette,
+                    labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
+                               expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
+
+
+# AMOC1 for additive model
+dynamic_part_starting_param_additive_AMOC3 <- matrix(NA, nrow = length(t_0s), ncol = 2)
+dynamic_part_starting_param_additive_AMOC3[, 1] <- max(AMOC_data$time) - t_0s 
+dynamic_part_starting_param_additive_AMOC3[, 2] <- 1
+
+stationary_params_additive_AMOC3 <- matrix(nrow = length(t_0s), ncol = 3)
+dynamic_params_additive_AMOC3 <- matrix(nrow = length(t_0s), ncol = 2)
+stationary_part_likelihood_additive_AMOC3 <- numeric(length(t_0s))
+
+dynamic_part_likelihood_additive_AMOC3 <- numeric(length(t_0s))
+
+for (i in seq_along(t_0s)){
+  # Stationary part
+  print(i)
+  
+  stationary_estim <- optimize_stationary_likelihood(
+    likelihood_fun = OU_likelihood,
+    data = AMOC_data$AMOC3[AMOC_data$time < t_0s[i]],
+    init_par = OU_init_params(data = AMOC_data$AMOC3[AMOC_data$time < t_0s[i]], delta = actual_dt),
+    delta = actual_dt,
+    exp_sigma = TRUE,
+    control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+  stationary_params_additive_AMOC3[i, ] <- stationary_estim$par
+  stationary_part_likelihood_additive_AMOC3[i] <- stationary_estim$objective
+  
+  
+  # Dynamic part
+  
+  dynamic_estim <- optimize_dynamic_likelihood(
+    likelihood_fun = OU_dynamic_likelihood,
+    data = AMOC_data$AMOC3[AMOC_data$time >= t_0s[i]],
+    init_par = dynamic_part_starting_param_additive[i , ],
+    delta = actual_dt,
+    alpha0 = stationary_estim$par[1],
+    mu0 = stationary_estim$par[2],
+    sigma = stationary_estim$par[3],
+    method = "BFGS",
+    control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+  print(dynamic_estim$objective)
+  dynamic_params_additive_AMOC3[i, ] <- dynamic_estim$par
+  print(dynamic_estim$par)
+  dynamic_part_likelihood_additive_AMOC3[i] <- dynamic_estim$objective
+}
+
+
+likelihood_tibble_additive_AMOC3 <- tibble(stationary_likelihood = stationary_part_likelihood_additive_AMOC3,
+                                           dynamic_likelihood = dynamic_part_likelihood_additive_AMOC3,
+                                           index = t_0s,
+                                           n_stationary_add = (index - 1870),
+                                           n_dynamic_add = (max(AMOC_data$time) - index),
+                                           alpha0 = stationary_params_additive_AMOC3[, 1],
+                                           mu0 = stationary_params_additive_AMOC3[, 2],
+                                           sigma = stationary_params_additive_AMOC3[, 3],
+                                           tau = dynamic_params_additive_AMOC3[, 1],
+                                           tipping_point = tau + t_0s,
+                                           A = dynamic_params_additive_AMOC3[, 2]
+) |> 
+  mutate(dynamic_likelihood = dynamic_likelihood / n_dynamic_add,
+         stationary_likelihood = stationary_likelihood / n_stationary_add) |> 
+  select(-c(n_stationary_add, n_dynamic_add))
+
+stationary_min_row_additive_AMOC3 <- likelihood_tibble_additive_AMOC3[which.min(likelihood_tibble_additive_AMOC3$stationary_likelihood),]
+dynamic_min_row_additive_AMOC3 <- likelihood_tibble_additive_AMOC3[which.min(likelihood_tibble_additive_AMOC3$dynamic_likelihood),]
+
+
+t_0_additive_AMOC3 <- dynamic_min_row_additive_AMOC3$index
+actual_dt <- 1 / 12
+# Simulate from the model to construct parametric bootstrap confidence intervals
+numSim <- 2000
+
+# Define parameters - note that we shift the first year, 1870, to be year 0.
+T_0_additive_AMOC3 <- t_0_additive_AMOC3 - 1870
+tau_estim_additive_AMOC3 <- dynamic_min_row_additive_AMOC3$tau
+A_estim_additive_AMOC3 <- dynamic_min_row_additive_AMOC3$A
+alpha_0_estim_additive_AMOC3 <- dynamic_min_row_additive_AMOC3$alpha0
+mu0_estim_additive_AMOC3 <- dynamic_min_row_additive_AMOC3$mu0
+sigma_estim_additive_AMOC3 <- dynamic_min_row_additive_AMOC3$sigma
+
+lambda_0_estim_additive_AMOC3 <- -alpha_0_estim_additive_AMOC3^2 / (4 * A_estim_additive_AMOC3)
+m_estim_additive_AMOC3 <- mu0_estim_additive_AMOC3 - alpha_0_estim_additive_AMOC3 / (2 * A_estim_additive_AMOC3)
+
+tc_estim_additive_AMOC3 <- tau_estim_additive_AMOC3 + t_0_additive_AMOC3
+# Parameters needed for sim method along with time to tipping from largest year in data set (we stop simulating at that point)
+sim_param_additive_AMOC3 <- c(A_estim_additive_AMOC3, m_estim_additive_AMOC3, 
+                              lambda_0_estim_additive_AMOC3, sigma_estim_additive_AMOC3)
+time_to_tipping_additive_AMOC3 <- tc_estim_additive_AMOC3 - max(AMOC_data$time) 
+
+
+
+original_estim_additive_AMOC3 <- tibble(true_value = c(A_estim_additive_AMOC3, 
+                                                       alpha_0_estim_additive_AMOC3, lambda_0_estim_additive_AMOC3,  m_estim_additive_AMOC3,
+                                                       mu0_estim_additive_AMOC3, sigma_estim_additive_AMOC3, tau_estim_additive_AMOC3, tc_estim_additive_AMOC3))
+
+if(!file.exists("data/original_estim_additive_AMOC3csv")){
+  utils::write.table(original_estim_additive_AMOC3, file="data/original_estim_additive_AMOC3.csv", sep = ",", row.names = FALSE)
+} else{
+  original_estim_additive_AMOC3 <- read_csv("data/original_estim_additive_AMOC3.csv")
+}
+
+#dynamic_part_init <- c(max(AMOC_data$time) - t_0, 1)
+estim_matrix_additive_AMOC3 <- matrix(data = NA, nrow = numSim, ncol = 8)
+#tc_vector <- numeric(numSim)
+set.seed(07052024)
+for (i in 1:numSim) {
+  if (i %% 5 == 1) {
+    cat("Currently grinding", i, "....\n")
+  }
+  
+  success <- FALSE
+  
+  while (!success) {
+    tryCatch({
+      random_seed <- sample(100000, size = 1)
+      OU_sim <- simulate_additive_noise_tipping_model(step_length = actual_dt,
+                                                      par = sim_param_additive_AMOC3, tau = tau_estim_additive_AMOC3,
+                                                      t_0 = T_0_additive_AMOC3,
+                                                      beyond_tipping = -time_to_tipping_additive_AMOC3, seed = random_seed)
+      
+      # Stationary part
+      sim_OU_stationary_estim <- optimize_stationary_likelihood(
+        likelihood_fun = OU_likelihood,
+        data = OU_sim$X_t[OU_sim$t < T_0_additive_AMOC3],
+        init_par = c(alpha_0_estim_additive_AMOC3, mu0_estim_additive_AMOC3, sigma_estim_additive_AMOC3),
+        delta = actual_dt,
+        exp_sigma = TRUE,
+        method = "BFGS"
+      )$par
+      
+      # Dynamic part
+      sim_OU_dynamic_estim <- optimize_dynamic_likelihood(
+        likelihood_fun = OU_dynamic_likelihood,
+        data = OU_sim$X_t[OU_sim$t >= T_0_additive_AMOC3],
+        init_par = c(tau_estim_additive_AMOC3, A_estim_additive_AMOC3),
+        delta = actual_dt,
+        alpha0 = sim_OU_stationary_estim[1],
+        mu0 = sim_OU_stationary_estim[2],
+        sigma = sim_OU_stationary_estim[3],
+        method = "BFGS",
+        control = list(reltol = sqrt(.Machine$double.eps) / 1000)
+      )$par
+      
+      estim_matrix_additive_AMOC3[i, 1:8] <- c(
+        sim_OU_dynamic_estim[2], 
+        sim_OU_stationary_estim[1],
+        -sim_OU_stationary_estim[1]^2 / (4 * sim_OU_dynamic_estim[2]),
+        sim_OU_stationary_estim[2] - sim_OU_stationary_estim[1] / (2 * sim_OU_dynamic_estim[2]),
+        sim_OU_stationary_estim[2],
+        sim_OU_stationary_estim[3],
+        sim_OU_dynamic_estim[1],
+        T_0_additive_AMOC3 + sim_OU_dynamic_estim[1] + 1870
+      )
+      
+      success <- TRUE
+    }, error = function(e) {
+      cat("Error occurred at iteration", i, ":", conditionMessage(e), "\n")
+    })
+  }
+  print(estim_matrix_additive_AMOC3[i, 8])
+}
+
+
+estim_tibble_additive_AMOC3 <- as_tibble(estim_matrix_additive_AMOC3)
+
+names(estim_tibble_additive_AMOC3) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
+
+if(!file.exists("data/estim_tibble_additive_AMOC3.csv")){
+  utils::write.table(estim_tibble_additive_AMOC3, file="data/estim_tibble_additive_AMOC3.csv", sep = ",", row.names = FALSE)
+} else{
+  estim_tibble_additive_AMOC3 <- read_csv("data/estim_tibble_additive_AMOC3.csv")
+}
+
+original_estim_additive_AMOC3 <- original_estim_additive_AMOC3 |> mutate(Parameter = names(estim_tibble_additive_AMOC3))
+
+estim_tibble_additive_AMOC3_long <- estim_tibble_additive_AMOC3 |> filter(A > 0, A < 5) |> 
+  pivot_longer(cols = everything(), names_to = "Parameter", values_to = "value")
+
+estim_tibble_additive_AMOC3_plot <- estim_tibble_additive_AMOC3_long |> 
+  ggplot(aes(x = value, y = after_stat(density), fill = Parameter)) +
+  geom_histogram(bins = 30, alpha = 2, col = "black", linewidth = .2) + 
+  geom_vline(data = original_estim_additive_AMOC3, mapping = aes(xintercept = true_value), linewidth = 1, linetype = "dashed") +
+  facet_wrap(~Parameter, scales = "free", ncol = 4) +
+  labs(x = "Estimate", y = "") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) + 
+  theme(strip.text.x = element_blank(),
+        panel.spacing = unit(1.5, "lines"),
+        axis.title.x = element_text(face = "bold", size = 16),
+        legend.title = element_text(size = 20),
+        legend.text = element_text(size = 14)
+  ) + 
+  scale_fill_manual(values = thesis_palette,
+                    labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
+                               expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
+
+Estimates_original_paper <- readxl::read_excel("data/estim_matrix_AMOC_paper.xlsx")
+
+# Compare fingerprint distribution of tipping year for both models
+tau_distribution_all <- bind_rows(
+  tibble(A = estim_tibble$A, tipping_year = estim_tibble$tc, Fingerprint = "AMOC2", Model = "t-diffusion"),
+  tibble(A = filter(estim_tibble_AMOC1, A < 10, A > 0)$A,
+         tipping_year = filter(estim_tibble_AMOC1, A < 10, A > 0)$tc,
+         Fingerprint = "AMOC1", Model = "t-diffusion"),
+  tibble(A = filter(estim_tibble_AMOC3, A < 10, A > 0)$A,
+         tipping_year = filter(estim_tibble_AMOC3, A < 10, A > 0)$tc,
+         Fingerprint = "AMOC3", Model = "t-diffusion"),
+  tibble(A = estim_tibble_additive$A, tipping_year = estim_tibble_additive$tc,
+         Fingerprint = "AMOC2", Model = "Additive"),
+  tibble(A =  filter(estim_tibble_additive_AMOC1, A < 10, A > 0)$A,
+         tipping_year = filter(estim_tibble_additive_AMOC1, A < 10, A > 0)$tc,
+         Fingerprint = "AMOC1", Model = "Additive"),
+  tibble(A = filter(estim_tibble_additive_AMOC3, A < 10, A > 0)$A, tipping_year = filter(estim_tibble_additive_AMOC3, A < 10, A > 0)$tc,
+         Fingerprint = "AMOC3", Model = "Additive"),
+  tibble(A = Estimates_original_paper$a, tipping_year = Estimates_original_paper$tc,
+         Fingerprint = "AMOC2", Model = "Penalized additive")
+)
+
+
+distribution_tau_models <- tau_distribution_all |> ggplot(aes(x = tipping_year, y = Model, fill = Fingerprint)) + geom_violin() +
+  scale_fill_manual(values = c(thesis_palette[1],thesis_palette[6], thesis_palette[3]))  +
+  ylab("") + xlab("Tipping year") + 
+  scale_x_continuous(breaks = scales::pretty_breaks()) +
+  theme(
+    legend.title = element_blank(),
+    strip.text = element_blank(),
+    legend.key.size = unit(2, 'lines'),
+    legend.text = element_text(face = "bold", size = 18),
+    axis.text = element_text(face = "bold", size = 20),
+    axis.title = element_text(face = "bold", size = 22),
+  ) + 
+  guides(col = guide_legend(override.aes = list(linewidth = 4)))
+
+ggsave(distribution_tau_models, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "distribution_tau_models.jpeg",
+       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+tau_quantiles_table <- tau_distribution_all |> group_by(Fingerprint, Model) |> 
+  reframe(quantiles = quantile(tipping_year, prob = c(0.025, 0.165, 0.5, 0.835, 0.975)),
+          prob = c(0.025, 0.165, 0.5, 0.835, 0.975)) |> 
+  pivot_wider(id_cols = c(Fingerprint, Model), values_from = quantiles, names_from = prob) 
+
+xtable::xtable(tau_quantiles_table)
+
+tau_survival_curve <- tau_distribution_all |> group_by(Fingerprint, Model) |> 
+  reframe(quantiles = quantile(tipping_year, prob = seq(0, 1, by = 0.01)),
+          prob = seq(0, 1, by = 0.01)) 
+
+tau_estimates_models <- bind_rows(
+  original_estim |> mutate(Fingerprint = "AMOC2", Model = "t-diffusion"),
+  original_estim_AMOC1 |> mutate(Fingerprint = "AMOC1", Model = "t-diffusion"),
+  original_estim_AMOC3 |> mutate(Fingerprint = "AMOC3", Model = "t-diffusion"),
+  original_estim_additive |> mutate(Fingerprint = "AMOC2", Model = "Additive"),
+  original_estim_additive_AMOC1 |> mutate(Fingerprint = "AMOC1", Model = "Additive"),
+  original_estim_additive_AMOC3 |> mutate(Fingerprint = "AMOC3", Model = "Additive"),
+  tibble(true_value = 2057, Parameter = "tc") |> mutate(Fingerprint = "AMOC2", Model = "Penalized additive")
+) |> filter(Parameter == "tc")
+
+
+surival_curve_first97.5 <- tau_survival_curve |>
+  bind_rows(
+    tau_survival_curve |> filter(prob == 1, Model != "Penalized additive") |> group_by(Model) |> slice_max(quantiles) |> 
+      select(Model, quantiles, prob) |> crossing(tibble(Fingerprint = c("AMOC3", "AMOC2")))
+  ) |> filter(prob < 0.975) |> 
+  ggplot(aes(x = quantiles, y = 1 - prob, col = Fingerprint)) + 
+  geom_step(linewidth = 1.5) + 
+  geom_vline(data = tau_estimates_models, mapping = aes(xintercept = true_value, col = Fingerprint), linetype = "dashed",
+             linewidth = 1.5) + 
+  geom_vline(xintercept = 2024, linetype = "dotted", linewidth = 1.5) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) +
+  facet_wrap(~Model, scales = "free_x") +
+  scale_color_manual(values = c(thesis_palette[1],thesis_palette[6], thesis_palette[3])) +
+  scale_y_continuous(labels = scales::percent) +
+  theme(
+    legend.title = element_blank(),
+    panel.spacing = unit(1, "lines"),
+    strip.text =  element_text(face = "bold", size = 24),
+    legend.text = element_text(face = "bold", size = 22),
+    axis.text = element_text(face = "bold", size = 20),
+    axis.title = element_text(face = "bold", size = 24),
+    legend.position = "bottom"
+  ) + 
+  guides(col = guide_legend(override.aes = list(linewidth = 8))) + 
+  xlab("Year") + ylab("Survival prob.")
+
+ggsave(surival_curve_first97.5, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "surival_curve_first97.5.jpeg",
+         height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
 # Discussion
 
 true_param <- c(0.8, -1.5, -2, 0.3)
@@ -3683,3 +4373,54 @@ ggsave(mu_simulations_discussion_plot, path = paste0(getwd(), "/tex_files/figure
        filename = "mu_simulations_discussion_plot.jpeg",
        height = 7, width = 11, dpi = 300, units = "in", device = "jpeg",
        limitsize = FALSE, scale = 1)
+
+# Correlation between A and the tipping year
+correlation_between_A_and_tau_plot <- tau_distribution_all |> filter(A < 100, tipping_year < 2300) |>
+  mutate(Model = ifelse(Model == "Penalized additive", "Pen. additive", Model)) |> 
+  ggplot(aes(x = A, y = tipping_year, col = Fingerprint)) + 
+  geom_smooth(method = "lm", se = F, linewidth = 2) + 
+  geom_point(alpha = .4) + 
+  geom_hline(yintercept = 2024, linetype = "dashed", linewidth = 2) +
+  facet_wrap(~Model, scales = "free") + 
+  scale_color_manual(values = c(thesis_palette[1],thesis_palette[6], thesis_palette[3])) + 
+  theme(
+    legend.title = element_blank(),
+    panel.spacing = unit(1, "lines"),
+    strip.text =  element_text(face = "bold", size = 24),
+    legend.text = element_text(face = "bold", size = 22),
+    axis.text = element_text(face = "bold", size = 20),
+    axis.title = element_text(face = "bold", size = 24)
+  ) + 
+  guides(col = guide_legend(override.aes = list(size = 5, linewidth = 0, alpha = 1))) +
+  ylab("Year") + xlab("A")
+
+ggsave(correlation_between_A_and_tau_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "correlation_between_A_and_tau_plot.jpeg",
+       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+# Estimate with the penalization in the model
+# AMOC2
+paper_stationary <- optimize_stationary_likelihood(
+  likelihood_fun = OU_likelihood,
+  data = AMOC_data$AMOC2[AMOC_data$time <= 1924],
+  init_par = OU_init_params(AMOC_data$AMOC2[AMOC_data$time <= 1924], delta = 1/12),
+  delta = 1 / 12, 
+  exp_sigma = TRUE
+)
+
+# Dynamic part 
+
+dynamic_estim_penalty <- optimize_dynamic_likelihood(
+  likelihood_fun = OU_dynamic_likelihood,
+  data = AMOC_data$AMOC2[AMOC_data$time > 1924],
+  init_par = c(100, 1),
+  delta = 1 / 12,
+  alpha0 = paper_stationary$par[1],
+  mu0 = paper_stationary$par[2],
+  sigma = paper_stationary$par[3],
+  method = "Nelder-Mead",
+  pen = 0.004)
+
+print(dynamic_estim_penalty$par)
+

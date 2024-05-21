@@ -3,7 +3,7 @@ We apply the estimation methods to proxies of two seperate systems: The Atlantic
 For the AMOC the time series we consider is the sea surface temperature (SST) anomaly in the subpolar gyre in the north Atlantic ocean in comparison to the the global mean SST anomaly. The SG SST minus twice GM SST has been argued to be a proxy of the strengh of the AMOC; we use twice the GM SST anomaly in compensation for the amplificaiton of global warming in the polar regions \cite[caption of figure 1]{Ditlevsen2023}.
 \begin{figure}[h!]
     \begin{center}
-    \includegraphics[scale = .075]{figures/AMOC_data_plot.jpeg}
+    \includegraphics[scale = .09]{figures/AMOC_data_plot.jpeg}
     \caption{SST anomalies in the subpolar gyre and global mean as well as the AMOC fingerprint}
     \label{figure:AMOC_plot}
     \end{center}
@@ -64,6 +64,38 @@ Although we already have presented our diagnostics of choice for the model in ad
 \end{figure}\\
 In the histograms the estimates from the original fit to the AMOC-data has been overlayed with a dashed line for the respective parameters. Note that for a clearer impression of the distribution, we have removed $7$ extreme estimates of the total $2000$. These estimates have been tabularized and can be seen in appendix \ref{section:benchmark} in table \ref{table:extreme_amoc_estimates}. All the empirical distributions of the estimates cover the values that we estimated from the original data well suggesting an overall good fit of the model.
 \subsection{Robustness analysis and the additive noise model}
+In this section we repeat the analysis from before but here we look into other choices of fingerprint for the AMOC. This is also done in \cite{Ditlevsen2023}, but only on the additive model. The two alternative fingerprints are the SST temperature anomaly in the subpolar gyre minus respectively one or three times the global mean SST anomaly.
+
+Recall the original AMOC fingerprint was defined as the SST temperature anomaly in the subpolar gyre minus \textit{two} times the global mean SST anomaly, wherefore we refer to the three fingerprints as \textit{AMOC1}, \textit{AMOC2} and \textit{AMOC3} - where the numbering of course refers to the factor in front of the global mean SST anomaly. For a visual representation of the difference between the fingerprints refer to figure \ref{figure:allAMOCFingerprints}. We repeat the estimation and parametric bootstrap from the previous section on each of the alternative fingerprints. For each fingerprint we find the corresponding $t_0$ using the same methods as above. The parametric bootstraps was again done using $ M = 2000$ from the respective models. Here we only present the distribution of the tipping year as this is our parameter of interest, but the remaining results can be found in the appendix too. In addition to the fit of the AMOC1 and AMOC3, we also try using the model with additive noise. Recall that unlike \cite{Ditlevsen2023} our estimation does not use penalization on $A$ in the estimation of the dynamic part of the process, so the estimates will not be entirely the same. We summarize our findings in the following table and graph
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{rrrrrrrr}
+    Model & Fingerprint & Estimate    & 0.025  & 0.165  & 0.5    & 0.835  & 0.975 \\ 
+      \hline
+    Additive & AMOC1 & 2120.9         & 2076.9 & 2106.5 & 2138.8 & 2169.8 & 2236.4 \\
+    Additive & AMOC2 & 2077.9         & 2039.7 & 2053.5 & 2080.5 & 2113.2 & 2150.8 \\ 
+    Additive & AMOC3 & 2088.3         & 2036.2 & 2056.1 & 2090.6 & 2121.7 & 2146.8 \\ 
+    t-diffusion & AMOC1 & 2093.1      & 2054.3 & 2075.2 & 2103.2 & 2135.2 & 2190.4 \\ 
+    t-diffusion & AMOC2 & 2079.0      & 2039.7 & 2054.6 & 2083.7 & 2117.1 & 2157.1 \\ 
+    t-diffusion & AMOC3 & 2101.0      & 2037.5 & 2070.9 & 2102.5 & 2131.9 & 2152.9 \\ 
+    Pen. additive& AMOC1 & 2083       & 2024 & 2062 & - & 2128 & 2180 \\
+    Pen. additive& AMOC2 & 2057       & 2025.3 & 2039.0 & 2052.6 & 2069.9 & 2095.1 \\ 
+    Pen. additive& AMOC3 & 2067       & 2034 & 2048 & - & 2083 & 2102 \\
+       \hline
+    \end{tabular}
+    \caption{Selected quantiles for the tipping year stratified after which model and type of fingerprint we used. In addition, the parameteric bootstrap from the original analysis is included \cite{Ditlevsen2023}.}
+    \label{table:tipping_quantiles}
+\end{table}
+The table show the same quantiles of the tipping year as \cite{DitlevsenSupplementary}; the \textit{Pen. additive} Model corresponds to the model from \cite{Ditlevsen2023}. Note that this study did bootstrapping with $M = 1000$. Additionally note that \cite[table 1]{Ditlevsen2023} gives $66$- and $95\%$ confidence intervals for the tipping year for the penalized additive model using the AMOC1 and AMOC3 fingerprint, whereas the exact distribution was found for the AMOC2 fingerprint in \cite{DitlevsenSupplementary}. To present the same information in perhaps a more illustrative way we plot the survival curves of the tipping year estimates stratified after model and fingerprint
+\begin{figure}[h!]
+    \begin{center}
+        \includegraphics[scale = .096]{figures/surival_curve_first97.5.jpeg}
+        \caption{The distribution of the tipping year stratified after model and type of fingerprint used - illustrated as the survival curve of the tipping year.}
+        \label{figure:surival_curve_taus}
+    \end{center}
+\end{figure}\\
+where the black dotted line marks the current year, $2024$ and the colored dashed line is the estimated tipping year from the AMOC data. To be completely clear, figure \ref{figure:surival_curve_taus} gives, according to the models, the probability that tipping have not occured at the given year. And for sake of readibility we have removed the $2.5\%$ most extreme observations in each of the tails.\\
+ Unfortunately, we could not find the exact distributional results for AMOC1 and AMOC3 in the penalized additive model, so we cannot construct the curves for these fingerprints. However, table \ref{table:tipping_quantiles} clearly shows the robustness of the methods employed in \cite{Ditlevsen2023}. With regards to our own methods the tipping years seem quite robust both against choice of model i.e. choice of stochastic term and choice of fingerprint. In the inter-model comparison, the difference between the quantiles in the two models for fixed fingerprint is miniscule. On the intra-model side of things, the estimates does not deviate too much from one another either. Yet, our models give estimates that are quite heavy-tailed in comparison with the penalized additive model. 
 % \subsection{Tipping in global climate variations}
 % Climate physicists have extensively studied ice core data from Greenland as the Greenland ice sheet acts as a sediment for the atmosphere. It is widely accepted that the ratio between the isotopes $^{18}\mathrm{O}$ and $^{16}\mathrm{O}$ is an indicator of the temperature at the time of accumulation. Additionally, $\mathrm{Ca}^{2+}$-ions from dust settle in the ice layer by layer. Unlike the ratio they do not diffuse as much; this allows us to have a finer temporal resolution. We can use calcium-ions instead of the ratio, because there is a negative correlation betwen the logarithm of the log-concetration of the $\mathrm{Ca}^{2+}$-ions and the isotope-ratio. This means that higher calcium-ion concentrations indicate colder global conditions. The ice-core data consists of observations of the oxygen isotope ratio and $\mathrm{Ca}^{2+}$-ion concentrations from $107620$ years before present to $10260$ years before present with a constant temporal resolution of $20$ years. We rescale to kilo years and focus on the observation of the calcium-ion between $86$ kilo years before present (kyrs bp) and $55$ kyrs bp; of course still with $\Delta t = 0.02$. Now, transforming ion-concentrations by $-\log (x)$ is a common practice in chemistry, whence we also consider $-\log([\mathrm{Ca}^{2+}]) - C$, where $C$ is a constant that makes the process have mean zero. We depict the ion-concetration over time. 
 % \begin{figure}[h!]
