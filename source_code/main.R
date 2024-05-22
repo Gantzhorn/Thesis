@@ -3,10 +3,10 @@ source("source_code/tipping_simulations.R")
 source("source_code/model_fitting.R")
 source("source_code/model_diagnostics.R")
 
-thesis_theme <- ggthemes::theme_base() +
+thesis_theme <- ggthemes::theme_base() + 
   theme(
     panel.border = element_rect(colour = "black", fill = NA, linewidth = 1),
-    plot.background = element_blank(),      
+    plot.background = element_blank(),
     panel.background = element_blank(),
     strip.background = element_blank()
   )
@@ -2559,24 +2559,24 @@ AMOC_data_plot <- AMOC_data_longer  |>
   ))  |> 
   mutate(Type = factor(Type, levels = c("SG SST anomaly", "GM SST anomaly", "AMOC fingerprint")))  |> 
   ggplot(aes(x = time, y = Value, col = Type)) +
-  geom_line(linewidth = 0.8) + 
+  geom_line(linewidth = 1) + 
   facet_wrap(~Type, ncol = 1, scales = "free_y") + 
   scale_x_continuous(breaks = scales::pretty_breaks(10)) +
   scale_color_manual(values = c(thesis_palette[1],thesis_palette[6], thesis_palette[3])) +
   theme(
     legend.title = element_blank(),
     strip.text = element_blank(),
-    legend.key.size = unit(2, 'lines'),
-    legend.text = element_text(face = "bold", size = 18),
-    axis.text = element_text(face = "bold", size = 20),
-    axis.title = element_text(face = "bold", size = 22),
+    legend.key.size = unit(1, 'lines'),
+    legend.text = element_text(face = "bold", size = 22),
+    axis.text = element_text(face = "bold", size = 24),
+    axis.title = element_text(face = "bold", size = 26),
   ) + 
   xlab("Year") + ylab("[K]") + 
-  guides(col = guide_legend(override.aes = list(linewidth = 4)))
+  guides(col = guide_legend(override.aes = list(linewidth = 6)))
 
 ggsave(AMOC_data_plot, path = paste0(getwd(), "/tex_files/figures"),
        filename = "AMOC_data_plot.jpeg",
-       height = 10, width = 16, dpi = 300, units = "in", device = "jpeg",
+       height = 10, width = 22, dpi = 300, units = "in", device = "jpeg",
        limitsize = FALSE, scale = 1)
 
 AMOC_alt_plot <- AMOC_data_longer  |> 
@@ -4325,7 +4325,7 @@ simulate_and_label_nu_disussion <- function(nu, beyond_tipping, seed) {
     seed = seed
   )
 
-  as_tibble(sim_result) %>%
+  as_tibble(sim_result) |>
     mutate(nu = nu, beyond_tipping = beyond_tipping)
 }
 
@@ -4339,7 +4339,7 @@ all_simulations <- combinations |>
 beyond_tipping_shifted <- tibble(
   beyond_tipping = beyond_tippings,
   prev_beyond_tipping = lag(beyond_tippings) + tau + t_0
-) %>%
+) |>
   filter(!is.na(prev_beyond_tipping))
 
 # Merge the shifted data frame with the simulation data
@@ -4399,7 +4399,7 @@ ggsave(correlation_between_A_and_tau_plot, path = paste0(getwd(), "/tex_files/fi
        height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
        limitsize = FALSE, scale = 1)
 
-# Estimate with the penalization in the model
+# Estimate with the penalization in the model like in the paper
 # AMOC2
 paper_stationary <- optimize_stationary_likelihood(
   likelihood_fun = OU_likelihood,
@@ -4424,3 +4424,64 @@ dynamic_estim_penalty <- optimize_dynamic_likelihood(
 
 print(dynamic_estim_penalty$par)
 
+## showcase of score along with likelihood
+true_param <- c(0.87, -1.51, -2.69, 1)
+tau <- 150
+t_0 <- 20
+
+mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) *  sqrt(abs(true_param[3] / true_param[1]))
+alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+
+# Different values of actual_dt
+actual_dts <- c(0.05)
+
+# Number of repetitions
+n_reps <- 100
+
+results <- list()
+set.seed(220524)
+for (dt in actual_dts) {
+  print(dt)
+  for (rep in 1:n_reps) {
+    if((rep %% 5) == 0){print(rep)}
+    seed = sample.int(1000000, 1)
+    sim_res_add <- simulate_additive_noise_tipping_model(dt, true_param, tau, t_0)
+    
+    data <- sim_res_add$X_t[sim_res_add$t < t_0]
+  
+    mle_optim <- optimize_stationary_likelihood(OU_likelihood, data, stationary_part_true_param, dt, exp_sigma = FALSE)
+    
+    score_nleqslv <- nleqslv::nleqslv(x = stationary_part_true_param, fn = OU_score, data = data, delta = dt)$x
+    
+    mle_optim_score <- optimize_stationary_likelihood(OU_likelihood, data, stationary_part_true_param, dt, exp_sigma = FALSE, gr = OU_score)
+    
+    results[[paste(dt, rep)]] <- list(
+      actual_dt = dt,
+      rep = rep,
+      mle_optim = mle_optim$par,
+      score_nleqslv = score_nleqslv,
+      mle_optim_score = mle_optim_score$par
+    )
+  }
+}
+
+# Convert results to data frame
+results_df_OU <- do.call(rbind, lapply(names(results), function(key) {
+  res <- results[[key]]
+  data.frame(
+    actual_dt = res$actual_dt,
+    rep = res$rep,
+    Method = rep(c("Likelihood", "Score", "Likelihood & score"), each = length(res$mle_optim)),
+    Parameter = rep(c("alpha0", "mu0", "sigma"), times = 3),
+    Estimate = c(res$mle_optim, res$score_nleqslv, res$mle_optim_score)
+  )
+}))
+
+# Plotting the distribution of estimates
+results_df_OU |> group_by(Method, Parameter) |> 
+  reframe(quantile = quantile(Estimate, probs = c(0.025, 0.165, 0.5, 0.835, 0.975)),
+          probs = c(0.025, 0.165, 0.5, 0.835, 0.975)) |> 
+  pivot_wider(id_cols = c(Method, Parameter), values_from = quantile, names_from = probs) |> 
+  xtable::xtable()
+  

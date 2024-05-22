@@ -581,4 +581,25 @@ In this section we show the results of a few benchmarks using the \code{microben
             \label{figure:allAMOCFingerprints}
         \end{center}
     \end{figure}
-  
+\newpage
+\subsection{Discussion}
+In this section we showcase auxilliary results for the discussion section
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{lllrrrrr}
+      \hline 
+     Method              & Parameter & 0.025 & 0.165 & 0.5 & 0.835 & 0.975 \\ \hline
+     Likelihood          & $\alpha_0$ & 2.00 & 2.39 & 3.10 & 3.76 & 4.68 \\ 
+     Likelihood          & $\mu_0$ & 0.01 & 0.11 & 0.20 & 0.27 & 0.33 \\ 
+     Likelihood          & $\sigma$ & 0.92 & 0.96 & 1.00 & 1.03 & 1.07 \\ 
+     Score               & $\alpha_0$ & 0.01 & 2.23 & 3.02 & 3.52 & 4.46 \\ 
+     Score               & $\mu_0$ & -0.05 & 0.11 & 0.19 & 0.27 & 1.68 \\ 
+     Score               & $\sigma$ & 0.92 & 0.96 & 1.00 & 1.03 & 1.07 \\ 
+     Likelihood \& score & $\alpha_0$ & 3.06 & 3.06 & 3.06 & 3.06 & 3.13 \\ 
+     Likelihood \& score & $\mu_0$ & 0.12 & 0.24 & 0.25 & 0.25 & 0.27 \\ 
+     Likelihood \& score & $\sigma$ & 0.98 & 1.00 & 1.00 & 1.00 & 1.02 \\ 
+       \hline
+    \end{tabular}
+    \caption{Table for estimated values from a small study on the effectiveness of using the likelihood and score together in optim. The true values are $\alpha_0 = 3.060$, $\mu_0 = 0.2483$, $\sigma = 1.00$. Various quantiles of $100$ estimates are shown}
+    \label{table:smallOUExperiment}
+    \end{table}

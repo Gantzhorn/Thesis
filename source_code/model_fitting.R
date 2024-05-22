@@ -1088,16 +1088,16 @@ stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 
 
 ## Dynamic part
-dynamic_part_true_param <- c(tau, true_param[1], 1)
-
-
-optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
-                            data = sim_res_add$X_t[sim_res_add$t > t_0],
-                            init_par = dynamic_part_true_param,
-                            delta = actual_dt,
-                            alpha0 = stationary_part_true_param[1],
-                            mu0 = stationary_part_true_param[2],
-                            sigma = stationary_part_true_param[3])
+# dynamic_part_true_param <- c(tau, true_param[1], 1)
+# 
+# 
+# optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
+#                             data = sim_res_add$X_t[sim_res_add$t > t_0],
+#                             init_par = dynamic_part_true_param,
+#                             delta = actual_dt,
+#                             alpha0 = stationary_part_true_param[1],
+#                             mu0 = stationary_part_true_param[2],
+#                             sigma = stationary_part_true_param[3])
 
 
 
