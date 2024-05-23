@@ -173,7 +173,7 @@ OU_dynamic_likelihood <-  function(par, data, delta, alpha0, mu0, sigma, pen = 0
   
   # Negative log-likelihood
   -sum(stats::dnorm(fh_half_inv, mu_h, sqrt(v_part), log = TRUE), na.rm = TRUE) -
-    sum(log(abs(det_Dfh_half_inv)), na.rm = TRUE) + pen * N * (1/A - 1) * (A < 1) # penalty for discussion part
+    sum(log(abs(det_Dfh_half_inv)), na.rm = TRUE) + pen * N * (1/A - 1) * (abs(A) < 1) # penalty for discussion part
 }
 
 OU_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){

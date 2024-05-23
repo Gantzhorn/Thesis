@@ -537,6 +537,7 @@ In this section we show the results of a few benchmarks using the \code{microben
     \end{table}
 \newpage
     \subsection{Results}
+    \subsubsection{Estimating tipping of the Atlantic meridional overturning circulation with the \texorpdfstring{$t$}{t}-diffusion based model.}
     In this section we provide supporting information to the results section. Tabels and figures are illustrated in the order they appear in the original section
 
     \begin{table}[h!]
@@ -562,13 +563,13 @@ In this section we show the results of a few benchmarks using the \code{microben
             \hline
             $A$ & $\alpha_0$ & $\lambda_0$ & $m$ & $\mu_0$ & $\sigma$ & $\tau_c$ & Tipping year \\ 
             \hline
-            $0.26$ & $3.87$ & $-14.48$ & $-7.24$ & $0.25$ & $0.51$ & $453.29$ & $2377.29$ \\ 
-            $0.30$ & $3.63$ & $-11.17$ & $-5.90$ & $0.24$ & $0.53$ & $391.05$ & $2315.05$ \\ 
-            $0.27$ & $3.17$ & $-9.33$ & $-5.64$ & $0.24$ & $0.51$ & $383.59$ & $2307.59$ \\ 
-            $0.26$ & $3.02$ & $-8.79$ & $-5.63$ & $0.19$ & $0.50$ & $402.94$ & $2326.94$ \\ 
-            $0.25$ & $2.92$ & $-8.48$ & $-5.61$ & $0.19$ & $0.52$ & $426.83$ & $2350.83$ \\ 
-            $0.32$ & $3.27$ & $-8.42$ & $-4.91$ & $0.24$ & $0.51$ & $348.77$ & $2272.77$ \\ 
-            $290.17$ & $2.71$ & $-0.01$ & $0.24$& $0.25$ & $0.48$ & $197.33$ & $2121.33$ \\ 
+            $0.26$ & $3.87$ & $\mathbf{-14.48}$ & $-7.24$ & $0.25$ & $0.51$ & $453.29$ & $2377.29$ \\ 
+            $0.30$ & $3.63$ & $\mathbf{-11.17}$ & $-5.90$ & $0.24$ & $0.53$ & $391.05$ & $2315.05$ \\ 
+            $0.27$ & $3.17$ & $\mathbf{-9.33}$ & $-5.64$ & $0.24$ & $0.51$ & $383.59$ & $2307.59$ \\ 
+            $0.26$ & $3.02$ & $\mathbf{-8.79}$ & $-5.63$ & $0.19$ & $0.50$ & $402.94$ & $2326.94$ \\ 
+            $0.25$ & $2.92$ & $\mathbf{-8.48}$ & $-5.61$ & $0.19$ & $0.52$ & $426.83$ & $2350.83$ \\ 
+            $0.32$ & $3.27$ & $\mathbf{-8.42}$ & $-4.91$ & $0.24$ & $0.51$ & $348.77$ & $2272.77$ \\ 
+            $\mathbf{290.17}$ & $2.71$ & $-0.01$ & $0.24$& $0.25$ & $0.48$ & $197.33$ & $2121.33$ \\ 
              \hline
         \end{tabular}
         \caption{Table of estimates that were removed. The reason behind the removing of the estimate has been bolded - though in any case the $m$-estimate is also rather extreme in comparison with the typical distribution in figure \ref{figure:AMOC_parametric_bootstrap}}
@@ -581,6 +582,64 @@ In this section we show the results of a few benchmarks using the \code{microben
             \label{figure:allAMOCFingerprints}
         \end{center}
     \end{figure}
+\newpage
+\subsubsection{Robustness analysis and the additive noise model}\label{subsubsec:RobustnessAnalysisAppendix}
+Here we illustrate the results from the parametric bootstrap of the estimates from the $t$-diffusion based model applied to the AMOC1- and AMOC3 fingerprints. The AMOC2-fingerprint bootstrap can be seen in figure \ref{figure:AMOC_parametric_bootstrap}.
+\begin{figure}[h!]
+    \begin{center}
+        \includegraphics[scale = .09]{figures/estim_tibble_AMOC1_plot.jpeg}
+        \caption{Result from parametric bootstrap of the parameters fitted to the AMOC1-fingerprint with the $t$-diffusion based model}
+        \label{figure:AMOC1_t_diffusion_bootstrap}
+    \end{center}
+\end{figure}\\
+\begin{figure}[h!]
+    \begin{center}
+        \includegraphics[scale = .09]{figures/estim_tibble_AMOC3_plot.jpeg}
+        \caption{Result from parametric bootstrap of the parameters fitted to the AMOC3-fingerprint with the $t$-diffusion based model}
+        \label{figure:AMOC3_t_diffusion_bootstrap}
+    \end{center}
+\end{figure}\\
+We now depict the figures, but for the additive models in our application, i.e. the one additive model without penalization in the optimization. Here we sketch both the AMOC1-, AMOC2- and AMOC3 fingerprints.
+\begin{figure}[h!]
+    \begin{center}
+        \includegraphics[scale = .09]{figures/estim_tibble_AMOC1_plot.jpeg}
+        \caption{Result from parametric bootstrap of the parameters fitted to the AMOC1-fingerprint using the model with additive noise}
+        \label{figure:AMOC1_additive_bootstrap}
+    \end{center}
+\end{figure}
+
+\begin{figure}[h!]
+    \begin{center}
+        \includegraphics[scale = .09]{figures/estim_tibble_additive_plot.jpeg}
+        \caption{Result from parametric bootstrap of the parameters fitted to the AMOC2-fingerprint using the model with additive noise}
+        \label{figure:AMOC2_additive_bootstrap}
+    \end{center}
+\end{figure}
+
+\begin{figure}[h!]
+    \begin{center}
+        \includegraphics[scale = .09]{figures/estim_tibble_AMOC3_plot.jpeg}
+        \caption{Result from parametric bootstrap of the parameters fitted to the AMOC3-fingerprint using the model with additive noise}
+        \label{figure:AMOC3_additive_bootstrap}
+    \end{center}
+\end{figure}
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{llrrrrrrr}
+      \hline
+    Part & model & 0.025 & 0.05 & 0.25 & 0.5 & 0.75 & 0.95 & 0.975 \\ 
+      \hline
+    Stationary part & Additive & -1.99 & -1.67 & -0.66 & 0.04 & 0.65 & 1.59 & 1.92 \\ 
+      Stationary part & t-diffusion & -1.99 & -1.70 & -0.64 & 0.02 & 0.66 & 1.55 & 1.96 \\ 
+      Dynamic part & Additive & -1.72 & -1.47 & -0.59 & -0.05 & 0.59 & 1.55 & 2.06 \\ 
+      Dynamic part & t-diffusion & -1.75 & -1.48 & -0.63 & -0.04 & 0.56 & 1.59 & 2.09 \\ 
+      Theoretical & - & -1.96 & -1.64 & -0.67 & 0.00 & 0.67 & 1.64 & 1.96 \\ 
+       \hline
+    \end{tabular}
+    \caption{Table of quantiles of the uniform residuals stratified after model and part of process along with the theoretical quantiles for the standard gaussian distribution. Supports figure \ref{figure:OU_t_diffusion_QQ_plot}.}
+    \label{table:QQ_OU_vs_t_diffusion}
+\end{table}
+
 \newpage
 \subsection{Discussion}
 In this section we showcase auxilliary results for the discussion section

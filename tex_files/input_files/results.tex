@@ -9,13 +9,13 @@ The AMOC is the main current system in the Atlantic ocean and a crucial componen
     \label{figure:subpolarGyre}
 \end{figure}\\
 
-Through its northward flow the relatively warm surface water losses some of its temperature due to the colder climate and because of mixing with other water and evaporation, it becomes more saline. This increase in density causes the water to sink through convection. After this the water flows southward due to its difference in density in comparison with the surrounding waters amongst other things.
+Through its northward flow the relatively warm surface water loses some of its temperature due to the colder climate and because of mixing with other waters and evaporation, it becomes more saline. This increase in density causes the water to sink through convection, after which the water in the depth flows southward continuing the flow. 
 
-Yet, in recent years there are indications of this process weakening. One driving factor is the increased melting of global ice sheets, particularly the Greenland ice cap, due to climate change. The influx of more freshwater reduces the salinity of the subpolar gyre, which potentially hinders the sinking and thus disrupts the entire circulation. 
+Yet, in recent years there are indications of this process weakening. One driving factor is the increased melting of global ice sheets, particularly the Greenland ice cap, due to climate change. The influx of more freshwater in the area reduces the salinity of the water in the subpolar gyre, which potentially hinders the sinking and thus disrupts the entire circulation. 
 
-The strengh of the AMOC have only been directly measured in the current millenium, which is not enough for our estimation methods to work. Instead, we consider time series of the mean sea surface temperature (SST) anomaly in the subpolar gyre in the North Atlantic ocean in comparison to the global mean SST anomaly. These have been measured since $1870$ and the SG SST minus twice GM SST are largely agreed on being a proxy (or fingerprint) of the strengh of the AMOC. This is primarily caused by the reduced flow of warm water to the gyre as a result of the weakening of the AMOC. In comparison to the rest of the world's ocean this is a rather unique situation, where there in many places of the subpolar gyre is an increasingly lower SST. 
+The strengh of the AMOC have only been directly measured in the current millenium, which is not enough for our estimation methods to work. Instead, we consider time series of the mean sea surface temperature (SST) anomaly in the subpolar gyre in the North Atlantic ocean in comparison to the global mean SST anomaly. These have been measured since $1870$ and the SG SST minus twice GM SST are largely agreed on being a proxy (or fingerprint) of the strengh of the AMOC. In comparison to the rest of the world's oceans there are in many places of the subpolar gyre is an increasingly lower SST and this has been argued to be caused by the slowing down of the AMOC. Importantly note that the multiplication in the fingerprint is to compensate for the amplification of global warming in the polar regions \cite[caption of figure 1]{Ditlevsen2023}.
 
-Importantly note that the multiplication in the fingerprint is to compensate for the amplification of global warming in the polar regions \cite[caption of figure 1]{Ditlevsen2023}. We depict the time series of the mean SST temperature anomaly in the subpolar gyre as well as the global mean SST anomaly. At each time we also compute the AMOC-fingerprint
+We depict the time series of the mean SST temperature anomaly in the subpolar gyre as well as the global mean SST anomaly. At each time we also compute the AMOC-fingerprint
 \begin{figure}[h!]
     \begin{center}
     \includegraphics[scale = .06]{figures/AMOC_data_plot.jpeg}
@@ -91,7 +91,7 @@ In this section we repeat the analysis from before but here we look into other c
 
 Recall the original AMOC fingerprint was defined as the SST temperature anomaly in the subpolar gyre minus \textit{two} times the global mean SST anomaly. The original work on the subject coined the terms \textit{AMOC1}, \textit{AMOC2} and \textit{AMOC3} for the respective fingerprints referencing the factor in front of the global mean SST anomaly. For a visual representation of the difference between the fingerprints refer to figure \ref{figure:allAMOCFingerprints}.
 
-We repeat the estimation and parametric bootstrap from the previous section on each of the alternative fingerprints. For each fingerprint we find the corresponding $t_0$ using the same methods as above. The parametric bootstraps were again done by sampling $M = 2000$ times from the respective models and estimating one those time series. Here we only present the distribution of the tipping year as this is our parameter of interest, but the remaining results can be found in the appendix too. In addition to the fit of the AMOC1 and AMOC3, we also try using the model with additive noise. Recall that unlike \cite{Ditlevsen2023} our estimation does not use penalization on $A$ in the estimation of the dynamic part of the process, so the models are not completely the same. We summarize our findings in the following table and graph
+We repeat the estimation and parametric bootstrap from the previous section on each of the alternative fingerprints. For each fingerprint we find the corresponding $t_0$ using the same methods as above. The parametric bootstraps were again done by sampling $M = 2000$ times from the respective models and estimating one those time series. Here we only present the distribution of the tipping year as this is our parameter of interest, but the remaining results can be found in the appendix \ref{subsubsec:RobustnessAnalysisAppendix} too. In addition to the fit of the AMOC1 and AMOC3, we also try using the model with additive noise. Recall that unlike \cite{Ditlevsen2023} our estimation does not use penalization on $A$ in the estimation of the dynamic part of the process, so the models are not completely the same. We summarize our findings in the following table and graph
 \begin{table}[ht]
     \centering
     \begin{tabular}{rrrrrrrr}
@@ -99,10 +99,11 @@ We repeat the estimation and parametric bootstrap from the previous section on e
       \hline
     Additive & AMOC1 & 2120.9         & 2076.9 & 2106.5 & 2138.8 & 2169.8 & 2236.4 \\
     Additive & AMOC2 & 2077.9         & 2039.7 & 2053.5 & 2080.5 & 2113.2 & 2150.8 \\ 
-    Additive & AMOC3 & 2088.3         & 2036.2 & 2056.1 & 2090.6 & 2121.7 & 2146.8 \\ 
+    Additive & AMOC3 & 2088.3         & 2036.2 & 2056.1 & 2090.6 & 2121.7 & 2146.8 \\ \hline 
     t-diffusion & AMOC1 & 2093.1      & 2054.3 & 2075.2 & 2103.2 & 2135.2 & 2190.4 \\ 
     t-diffusion & AMOC2 & 2079.0      & 2039.7 & 2054.6 & 2083.7 & 2117.1 & 2157.1 \\ 
     t-diffusion & AMOC3 & 2101.0      & 2037.5 & 2070.9 & 2102.5 & 2131.9 & 2152.9 \\ 
+    \hline 
     Pen. additive& AMOC1 & 2083       & 2024 & 2062 & - & 2128 & 2180 \\
     Pen. additive& AMOC2 & 2057       & 2025.3 & 2039.0 & 2052.6 & 2069.9 & 2095.1 \\ 
     Pen. additive& AMOC3 & 2067       & 2034 & 2048 & - & 2083 & 2102 \\
@@ -121,9 +122,21 @@ To present the same information in perhaps a more illustrative way we plot the s
         \label{figure:surival_curve_taus}
     \end{center}
 \end{figure}\\
-where the black dotted line marks the current year, $2024$ and the colored dashed line is the estimated tipping year from the AMOC data. To be completely clear, figure \ref{figure:surival_curve_taus} gives, according to the models, the probability that tipping have not occured at the given year. And for sake of readibility we have removed the $2.5\%$ most extreme observations in each of the tails.
+where the black dotted line marks the current year, $2024$ and the colored dashed line is the estimated tipping year from the AMOC data. To be completely clear, figure \ref{figure:surival_curve_taus} gives, according to the models, the probability that tipping have not occured at the given year. And for sake of readibility we have removed the $2.5\%$ most extreme observations in the higher end of the years.
 
-Unfortunately, we could not find the exact distributional results for AMOC1 and AMOC3 in the penalized additive model, so we cannot construct the curves for these fingerprints. However, table \ref{table:tipping_quantiles} clearly shows the robustness of the methods employed in \cite{Ditlevsen2023}. With regards to our own methods the tipping years seem quite robust both against choice of model i.e. choice of stochastic term and choice of fingerprint. In the inter-model comparison, the difference between the quantiles in the two models for fixed fingerprint is miniscule. On the intra-model side of things, the estimates does not deviate too much from one another either. Yet, our models give estimates that are quite heavy-tailed in comparison with the penalized additive model. 
+Unfortunately, we could not find the exact distributional results for AMOC1 and AMOC3 in the penalized additive model, so we cannot construct the curves for these fingerprints. However, table \ref{table:tipping_quantiles} clearly shows the robustness of the methods employed in \cite{Ditlevsen2023}. With regards to our own methods the tipping years seem quite robust both against choice of model i.e. choice of stochastic term and choice of fingerprint. In the inter-model comparison, the difference between the quantiles in the two models for fixed fingerprint is miniscule. On the intra-model side of things, the estimates does not deviate too much from one another either. Yet, our models give estimates that are quite heavy-tailed in comparison with the penalized additive model.
+
+Finally, we show a direct comparison between the uniform residuals of the normal
+\begin{figure}[h!]
+\begin{center}
+    \includegraphics[scale = .1]{figures/OU_vs_t_diffusion_QQ_plot.jpeg}
+    \caption{Empirical quantiles of the uniform residuals strafified after part of the process and which model was fitted.}
+    \label{figure:OU_t_diffusion_QQ_plot}
+\end{center}
+\end{figure}\\
+The overall impression of figure \ref{figure:OU_t_diffusion_QQ_plot} is that the models are indistinguishable in the stationary part, whereas the $t$-diffusion based model has a slight edge in the tails in the dynamic part. Though they are both a bit heavy-tailed in comparison with the standard normal quantiles. However, this happens mostly in the far end of the tails. 
+
+As said earlier, it can sometimes be a bit difficult to differentiate models on these graphs. In table \ref{table:QQ_OU_vs_t_diffusion} in appendix \ref{subsubsec:RobustnessAnalysisAppendix} we illustrate select quantiles values of the uniform residuals in figure \ref{figure:OU_t_diffusion_QQ_plot} to support the claims made here. Looking at the table, the stationary part of the process is captured a bit better by the additive model, while the opposite is true for the dynamic part. According to the table, all quantiles of the uniform residuals from the $t$-diffusion based model but the $0.975$-quantile are closest to the corresponding quantile in the standard gaussian distribution.
 % \subsection{Tipping in global climate variations}
 % Climate physicists have extensively studied ice core data from Greenland as the Greenland ice sheet acts as a sediment for the atmosphere. It is widely accepted that the ratio between the isotopes $^{18}\mathrm{O}$ and $^{16}\mathrm{O}$ is an indicator of the temperature at the time of accumulation. Additionally, $\mathrm{Ca}^{2+}$-ions from dust settle in the ice layer by layer. Unlike the ratio they do not diffuse as much; this allows us to have a finer temporal resolution. We can use calcium-ions instead of the ratio, because there is a negative correlation betwen the logarithm of the log-concetration of the $\mathrm{Ca}^{2+}$-ions and the isotope-ratio. This means that higher calcium-ion concentrations indicate colder global conditions. The ice-core data consists of observations of the oxygen isotope ratio and $\mathrm{Ca}^{2+}$-ion concentrations from $107620$ years before present to $10260$ years before present with a constant temporal resolution of $20$ years. We rescale to kilo years and focus on the observation of the calcium-ion between $86$ kilo years before present (kyrs bp) and $55$ kyrs bp; of course still with $\Delta t = 0.02$. Now, transforming ion-concentrations by $-\log (x)$ is a common practice in chemistry, whence we also consider $-\log([\mathrm{Ca}^{2+}]) - C$, where $C$ is a constant that makes the process have mean zero. We depict the ion-concetration over time. 
 % \begin{figure}[h!]

@@ -344,44 +344,6 @@ optimize_stationary_likelihood(
   xi = 0.01)
 
 
-library(ggplot2)
-library(sf)
-library(rnaturalearth)
-library(rnaturalearthdata)
-# Define the bounding box for the map (North Atlantic region)
-bbox <- c(xmin = -70, xmax = 5, ymin = 45, ymax = 70)
 
-# Get world data and transform to simple features (sf)
-world <- ne_countries(scale = "medium", returnclass = "sf")
-
-# Create a polygon for the subpolar gyre (approximation)
-# subpolar_gyre <- st_polygon(list(rbind(
-#   c(-45, 60),  # Near southern tip of Greenland
-#   c(-30, 64),  # Southern tip of Iceland
-#   c(-10, 60),  # Waters northwest of the UK
-#   c(-20, 55),  # North of Newfoundland
-#   c(-40, 55),  # South of Greenland
-#   c(-45, 60)   # Closing the loop near southern tip of Greenland
-# ))) %>% 
-#   st_sfc(crs = st_crs(world))
-
-# # Convert to sf object
-# subpolar_gyre_sf <- st_sf(geometry = subpolar_gyre)
-
-# Plot the map
-NorthAtlanticOcean <- ggplot(data = world) +
-  geom_sf(fill = "white", color = "black") +  # landmasses
-  #geom_sf(data = subpolar_gyre_sf, fill = "blue", alpha = 0.5) +  # subpolar gyre
-  coord_sf(xlim = c(bbox["xmin"], bbox["xmax"]), ylim = c(bbox["ymin"], bbox["ymax"]), expand = FALSE) +
-  labs(title = "", x = "Longitude", y = "Latitude") + 
-  theme(
-    axis.title = element_text(face = "bold", size = 16),
-    axis.text = element_text(size = 16)
-  )
-
-ggsave(NorthAtlanticOcean, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "NorthAtlanticOcean.jpeg",
-       height = 8, width = 14, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
 
 

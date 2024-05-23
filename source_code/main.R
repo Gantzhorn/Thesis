@@ -2539,6 +2539,25 @@ ice_core_clean |> filter(age > tipping_point_ice -2  & age < 63.24) |>
 
 ### Estimation on the AMOC
 
+# Map of the AMOC
+bbox <- c(xmin = -70, xmax = 5, ymin = 45, ymax = 70)
+
+world <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
+
+NorthAtlanticOcean <- ggplot(data = world) +
+  geom_sf(fill = "white", color = "black") + 
+  coord_sf(xlim = c(bbox["xmin"], bbox["xmax"]), ylim = c(bbox["ymin"], bbox["ymax"]), expand = FALSE) +
+  labs(title = "", x = "Longitude", y = "Latitude") + 
+  theme(
+    axis.title = element_text(face = "bold", size = 16),
+    axis.text = element_text(size = 16)
+  )
+
+ggsave(NorthAtlanticOcean, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "NorthAtlanticOcean.jpeg",
+       height = 8, width = 14, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
 AMOC_data <- readr::read_table("data/AMOCdata.txt")
 
 AMOC_data <- dplyr::rename_all(AMOC_data, ~ gsub('"', '',.))
@@ -3268,6 +3287,8 @@ QQ_plot_parts_additve <- QQ_data_parts_additive |>
   ) + xlab("Theoretical Quantiles") + ylab("Empirical Quantiles") +
   guides(col = guide_legend(override.aes = list(alpha = 1, size = 5), title = expression(t[0])))
 
+QQ_plot_parts
+
 t_0_additive <- 1915
 actual_dt <- 1 / 12
 # Simulate from the model to construct parametric bootstrap confidence intervals
@@ -3394,11 +3415,52 @@ estim_tibble_additive_plot <- estim_tibble_additive_long |> ggplot(aes(x = value
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
 
+ggsave(estim_tibble_additive_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "estim_tibble_additive_plot.jpeg",
+       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
 tibble::tibble(
   Quantile = c("2.5%", "16.5%", "50%", "83.5%", "97.5%"),
   value = quantile(estim_tibble_additive$tc, prob = c(0.025, 0.165, 0.5, 0.835, 0.975))
 ) |> pivot_wider(names_from = Quantile, values_from = value) |> 
   xtable::xtable()
+
+# OU vs t-diffusion
+
+OU_vs_t_diffusion_QQ_plot <- bind_rows(QQ_data_parts_additive |> mutate(model = "Additive"),
+          QQ_data_parts |> mutate(model = "t-diffusion")) |> 
+  filter(Optimized == "Dynamic") |> 
+  ggplot(aes(sample = sample, col = model)) +
+  geom_qq() + 
+  geom_qq_line(aes(group = 1), linewidth = 0.85, color = "black", linetype = "dashed") +
+  facet_wrap(~Part) + scale_color_manual(values = thesis_palette) + 
+  theme(
+    legend.title = element_blank(),
+    legend.text = element_text(face = "bold", size = 20),
+    strip.text = element_text(face = "bold", size = 20),
+    axis.title = element_text(face = "bold", size = 20)
+  ) + 
+  guides(col = guide_legend(override.aes = list(size = 4))) + 
+  xlab("Theoretical Quantiles") + ylab("Empirical Quantiles") 
+
+ggsave(OU_vs_t_diffusion_QQ_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "OU_vs_t_diffusion_QQ_plot.jpeg",
+       height = 6, width = 14, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+OU_vs_t_diffusion_table <- bind_rows(QQ_data_parts_additive |> mutate(model = "Additive"),
+          QQ_data_parts |> mutate(model = "t-diffusion")) |> 
+  filter(Optimized == "Dynamic") |> 
+  group_by(Part, model) |> 
+  reframe(quantile = quantile(sample, probs = c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975)),
+          probs = c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975)) |> 
+  pivot_wider(id_cols = c(Part, model), values_from = quantile, names_from = probs) |> 
+  bind_rows(tibble(Part = "Theoretical",
+                   model = "-",
+                   quantile = qnorm(c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975)),
+                   probs = c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975)) |>
+                   pivot_wider(id_cols = c(Part, model), values_from = quantile, names_from = probs))
 
 # Robustness analysis
 
@@ -3464,6 +3526,8 @@ likelihood_tibble_AMOC1 <- tibble(stationary_likelihood = stationary_part_likeli
 
 stationary_min_row_AMOC1 <- likelihood_tibble_AMOC1[which.min(likelihood_tibble_AMOC1$stationary_likelihood),]
 dynamic_min_row_AMOC1 <- likelihood_tibble_AMOC1[which.min(likelihood_tibble_AMOC1$dynamic_likelihood),]
+
+
 
 # Define parameters - note that we shift the first year, 1870, to be year 0.
 T_0 <- t_0 - 1870
@@ -3567,12 +3631,14 @@ names(estim_tibble_AMOC1) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", 
 
 original_estim_AMOC1 <- original_estim_AMOC1 |> mutate(Parameter = names(estim_tibble_AMOC1))
 
-estim_tibble_AMOC1_long <- estim_tibble_AMOC1 |> filter(A < 10, A > 0) |> 
+estim_tibble_AMOC1_long <- estim_tibble_AMOC1 |> filter(A < 10, A > 0, lambda_0 > -7.5) |> 
   pivot_longer(cols = everything(), names_to = "Parameter", values_to = "value")
 
-estim_tibble_AMOC1_plot <- estim_tibble_AMOC1_long |> ggplot(aes(x = value, y = after_stat(density), fill = Parameter)) +
+estim_tibble_AMOC1_plot <- estim_tibble_AMOC1_long |>
+  ggplot(aes(x = value, y = after_stat(density), fill = Parameter)) +
   geom_histogram(bins = 30, alpha = 2, col = "black", linewidth = .2) + 
-  geom_vline(data = original_estim_AMOC1, mapping = aes(xintercept = true_value), linewidth = 1, linetype = "dashed") +
+  geom_vline(data = original_estim_AMOC1, mapping = aes(xintercept = true_value),
+             linewidth = 1, linetype = "dashed") +
   facet_wrap(~Parameter, scales = "free", ncol = 4) +
   labs(x = "Estimate", y = "") +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) + 
@@ -3586,63 +3652,10 @@ estim_tibble_AMOC1_plot <- estim_tibble_AMOC1_long |> ggplot(aes(x = value, y = 
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
 
-
-# Plot til AMOC1
-# min_dynamic_AMOC1_value_wide <- likelihood_tibble_AMOC1 |>
-#   slice_min(dynamic_likelihood) |> 
-#   select(-c(stationary_likelihood, dynamic_likelihood))
-# 
-# min_dynamic_AMOC1_value <- min_dynamic_AMOC1_value_wide |> 
-#   pivot_longer(cols = -index, names_to = "Parameter", values_to = "Estimate") |> 
-#   mutate(Part = "Dynamic")
-# 
-# min_stationary_AMOC1_value_wide <- likelihood_tibble_AMOC1 |>
-#   slice_min(stationary_likelihood) |> 
-#   select(-c(stationary_likelihood, dynamic_likelihood))
-# 
-# min_stationary_AMOC1_value <- min_stationary_AMOC1_value_wide |> 
-#   pivot_longer(cols = -index, names_to = "Parameter", values_to = "Estimate") |> 
-#   mutate(Part = "Stationary")
-# 
-# # Table
-# min_dynamic_AMOC1_value |> inner_join(min_stationary_AMOC1_value, by = "Parameter") |> 
-#   select(Parameter, Estimate.x, Estimate.y) |> 
-#   mutate(`Relative difference` = 100 * (Estimate.x - Estimate.y) / Estimate.y) |> 
-#   rename(`Estimates 1924` = Estimate.x, `Estimate_1912` = Estimate.y) |> 
-#   xtable::xtable()
-# 
-# # Combine the extracted values
-# highlight_points_AMOC1 <- bind_rows(min_dynamic_AMOC1_value, min_stationary_AMOC1_value)
-# 
-# 
-# 
-# estimators_base_AMOC1_plot <- likelihood_tibble_AMOC1 |> 
-#   select(-c(stationary_likelihood, dynamic_likelihood)) |> 
-#   pivot_longer(cols = -index, names_to = "Parameter", values_to = "Estimate") |>
-#   ggplot(aes(x = index, y = Estimate)) + 
-#   geom_step(linewidth = 1.25, aes(col = Parameter)) +
-#   facet_wrap(Parameter~., scales = "free_y") + 
-#   xlab(expression(t[0])) +
-#   theme(
-#     strip.text = element_blank(),
-#     legend.text = element_text(size = 18),
-#     legend.title = element_text(face = "bold", size = 18),
-#     axis.text = element_text(face = "bold", size = 14),
-#     axis.title = element_text(face = "bold", size = 18),
-#     theme(panel.spacing = unit(2, "lines"))
-#   ) + 
-#   scale_color_manual(labels = c("A", expression(alpha),  expression(mu), expression(sigma), expression(tau),
-#                                 "Tipping year"), 
-#                      values = thesis_palette[-c(5,6,7, 8)]) + 
-#   guides(col = guide_legend(override.aes = list(linewidth = 4))) +
-#   scale_y_continuous(breaks = scales::pretty_breaks())
-# 
-# estimators_full_AMOC1_plot <- estimators_base_AMOC1_plot +  ggnewscale::new_scale_colour() + 
-#   geom_point(data = highlight_points_AMOC1, aes(x = index, y = Estimate, col = Part), size = 3) +
-#   geom_hline(data = highlight_points_AMOC1, aes(yintercept = Estimate, col = Part),
-#              linewidth = 0.8, linetype = "dashed", show.legend = FALSE) +
-#   scale_color_manual(labels = c("1924", "1912"), values = thesis_palette[5:6]) +
-#   guides(col = guide_legend(override.aes = list(linewidth = 4), title = expression(t[0])))
+ggsave(estim_tibble_AMOC1_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "estim_tibble_AMOC1_plot.jpeg",
+       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
 
 # Set starting point of tau to be the time between initialization of ramping and max year in data set
 
@@ -3828,6 +3841,12 @@ estim_tibble_AMOC3_plot <- estim_tibble_AMOC3_long |> ggplot(aes(x = value, y = 
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
 
+ggsave(estim_tibble_AMOC3_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "estim_tibble_AMOC3_plot.jpeg",
+       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+
 # AMOC1 for additive model
 dynamic_part_starting_param_additive_AMOC1 <- matrix(NA, nrow = length(t_0s), ncol = 2)
 dynamic_part_starting_param_additive_AMOC1[, 1] <- max(AMOC_data$time) - t_0s 
@@ -3922,11 +3941,11 @@ original_estim_additive_AMOC1 <- tibble(true_value = c(A_estim_additive_AMOC1,
                            alpha_0_estim_additive_AMOC1, lambda_0_estim_additive_AMOC1,  m_estim_additive_AMOC1,
                            mu0_estim_additive_AMOC1, sigma_estim_additive_AMOC1, tau_estim_additive_AMOC1, tc_estim_additive_AMOC1))
 
-if(!file.exists("data/original_estim_additive_AMOC1csv")){
-  utils::write.table(original_estim_additive_AMOC1, file="data/original_estim_additive_AMOC1.csv", sep = ",", row.names = FALSE)
-} else{
-  original_estim_additive_AMOC1 <- read_csv("data/original_estim_additive_AMOC1.csv")
-}
+# if(!file.exists("data/original_estim_additive_AMOC1.csv")){
+#   utils::write.table(original_estim_additive_AMOC1, file="data/original_estim_additive_AMOC1.csv", sep = ",", row.names = FALSE)
+# } else{
+#   original_estim_additive_AMOC1 <- read_csv("data/original_estim_additive_AMOC1.csv")
+# }
 
 #dynamic_part_init <- c(max(AMOC_data$time) - t_0, 1)
 estim_matrix_additive_AMOC1 <- matrix(data = NA, nrow = numSim, ncol = 8)
@@ -3994,11 +4013,11 @@ estim_tibble_additive_AMOC1 <- as_tibble(estim_matrix_additive_AMOC1)
 
 names(estim_tibble_additive_AMOC1) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
 
-if(!file.exists("data/estim_tibble_additive_AMOC1.csv")){
-  utils::write.table(estim_tibble_additive_AMOC1, file="data/estim_tibble_additive_AMOC1.csv", sep = ",", row.names = FALSE)
-} else{
-  estim_tibble_additive_AMOC1 <- read_csv("data/estim_tibble_additive_AMOC1.csv")
-}
+# if(!file.exists("data/estim_tibble_additive_AMOC1.csv")){
+#   utils::write.table(estim_tibble_additive_AMOC1, file="data/estim_tibble_additive_AMOC1.csv", sep = ",", row.names = FALSE)
+# } else{
+#   estim_tibble_additive_AMOC1 <- read_csv("data/estim_tibble_additive_AMOC1.csv")
+# }
 
 original_estim_additive_AMOC1 <- original_estim_additive_AMOC1 |> mutate(Parameter = names(estim_tibble_additive_AMOC1))
 
@@ -4020,6 +4039,12 @@ estim_tibble_additive_AMOC1_plot <- estim_tibble_additive_AMOC1_long |> ggplot(a
   scale_fill_manual(values = thesis_palette,
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
+
+ggsave(estim_tibble_additive_AMOC1_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "estim_tibble_additive_AMOC1_plot.jpeg",
+       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
 
 
 # AMOC1 for additive model
@@ -4115,7 +4140,7 @@ original_estim_additive_AMOC3 <- tibble(true_value = c(A_estim_additive_AMOC3,
                                                        alpha_0_estim_additive_AMOC3, lambda_0_estim_additive_AMOC3,  m_estim_additive_AMOC3,
                                                        mu0_estim_additive_AMOC3, sigma_estim_additive_AMOC3, tau_estim_additive_AMOC3, tc_estim_additive_AMOC3))
 
-if(!file.exists("data/original_estim_additive_AMOC3csv")){
+if(!file.exists("data/original_estim_additive_AMOC3.csv")){
   utils::write.table(original_estim_additive_AMOC3, file="data/original_estim_additive_AMOC3.csv", sep = ",", row.names = FALSE)
 } else{
   original_estim_additive_AMOC3 <- read_csv("data/original_estim_additive_AMOC3.csv")
@@ -4214,6 +4239,12 @@ estim_tibble_additive_AMOC3_plot <- estim_tibble_additive_AMOC3_long |>
   scale_fill_manual(values = thesis_palette,
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
+
+
+ggsave(estim_tibble_additive_AMOC3_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "estim_tibble_additive_AMOC3_plot.jpeg",
+       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
 
 Estimates_original_paper <- readxl::read_excel("data/estim_matrix_AMOC_paper.xlsx")
 
@@ -4419,10 +4450,61 @@ dynamic_estim_penalty <- optimize_dynamic_likelihood(
   alpha0 = paper_stationary$par[1],
   mu0 = paper_stationary$par[2],
   sigma = paper_stationary$par[3],
-  method = "Nelder-Mead",
   pen = 0.004)
 
 print(dynamic_estim_penalty$par)
+
+# Trace plots of optimization
+
+optimization_path_for_plot <- list(parameters = list(), objectives = numeric())
+
+OU_dynamic_likelihood_trace <- function(par, ...) {
+  obj_value <- OU_dynamic_likelihood(par, ...)
+
+  optimization_path_for_plot$parameters <<- append(optimization_path_for_plot$parameters, list(par))
+  optimization_path_for_plot$objectives <<- c(optimization_path_for_plot$objectives, obj_value)
+  
+  obj_value
+}
+
+dynamic_estim_penalty <- optimize_dynamic_likelihood(
+  likelihood_fun = OU_dynamic_likelihood_trace,
+  data = AMOC_data$AMOC2[AMOC_data$time > 1924],
+  init_par = c(100, 1),
+  delta = 1 / 12,
+  alpha0 = paper_stationary$par[1],
+  mu0 = paper_stationary$par[2],
+  sigma = paper_stationary$par[3],
+  pen = 0.004,
+  method = "Nelder-Mead")
+
+trace_optimization_tibble <- do.call(rbind, optimization_path_for_plot$parameters) |> as_tibble() |> 
+  mutate(n = row_number(), objective = optimization_path_for_plot$objectives) |> 
+   rename(tau = V1, A = V2) |>
+  mutate(tau = (tau - 100) / 100,
+         A = (A - 1) / 1)
+
+trace_optimization_long <- trace_optimization_tibble |> 
+  pivot_longer(-c(objective, n), names_to = "Variable", values_to = "Estimate")
+
+trace_plot <- trace_optimization_long |> 
+  ggplot(aes(x = n, y = Estimate, col = Variable)) + geom_step(linewidth = 1.5) +
+  facet_wrap(~Variable, scales = "free") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_color_manual(labels = c("A", expression(tau*phantom(.)[c])), values = thesis_palette) + 
+  theme(strip.text = element_blank(),
+        legend.title = element_blank(),
+        legend.key.height = unit(3, "lines"),
+        legend.text = element_text(size = 28),
+        axis.title = element_text(face = "bold", size = 20),
+        axis.text = element_text(size = 18)) + 
+  guides(color = guide_legend(override.aes = list(linewidth = 7.5))) +
+  xlab("N") + ylab("Relative deviation from init. value")
+
+ggsave(trace_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "trace_plot.jpeg",
+       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
 
 ## showcase of score along with likelihood
 true_param <- c(0.87, -1.51, -2.69, 1)
@@ -4485,3 +4567,17 @@ results_df_OU |> group_by(Method, Parameter) |>
   pivot_wider(id_cols = c(Method, Parameter), values_from = quantile, names_from = probs) |> 
   xtable::xtable()
   
+# Potential plot of co2 levels
+
+co2_annmean_mlo <- read_csv("data/co2_annmean_mlo.csv", 
+                            comment = "#")
+
+co2_annmean_mlo |> ggplot(aes(x = year, y = mean)) + geom_line()
+
+AMOC_data |> mutate(time = floor(time)) |> group_by(time) |> 
+  summarise(AMOC0 = mean(AMOC0), AMOC1 = mean(AMOC1), AMOC2 = mean(AMOC0), AMOC3 = mean(AMOC3)) |> 
+  inner_join(co2_annmean_mlo, by = join_by(time == year)) |> 
+  select(time, AMOC1, AMOC2, AMOC3, mean) |> 
+  pivot_longer(-c(time, mean), values_to = "Value", names_to = "Type") |> 
+  ggplot(aes(x = mean, y = Value, col = Type)) + geom_step() + 
+  scale_x_log10()
