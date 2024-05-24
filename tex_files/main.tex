@@ -49,6 +49,13 @@
 \newcommand{\indep}{\rotatebox[origin=c]{90}{$\models$}}
 %QED SYMBOL
 \renewcommand{\qedsymbol}{$\blacksquare$}
+% Custom command to center a specific section title and its content
+\newcommand{\centeredsection}[1]{%
+  \section*{\centering #1}%
+  \addcontentsline{toc}{section}{#1}%
+  \renewcommand\thesection{\hspace*{0pt}}% 
+}
+
 \def\code#1{\texttt{#1}}
 %AFSNIT OG HEADHEIGHT
 \setlength{\parindent}{0.5cm}
@@ -75,10 +82,15 @@
 Supervisor: Susanne Ditlevsen}
 \date{31st of May, 2024}
 \maketitle
-\section*{Abstract}\label{Abstract}
-\input{input_files/abstract.tex}
+\section*{Acknowledgements}
+\input{input_files/Acknowledgements.tex}
+\newpage
+\begin{abstract}
+\input{input_files/abstract.tex}    
+\end{abstract}
 \newpage
 \tableofcontents
+\newpage
 \section{Introduction}\label{Introduction}
 \input{input_files/introduction.tex}
 \section{Methods}\label{Methods}
