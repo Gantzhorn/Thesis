@@ -46,7 +46,7 @@ which is a surprising result. This is obviously not what we would get if we naï
     \mathrm{d}\varphi(X_t, t) = \left(\frac{\partial \varphi}{\partial t} + \frac{\partial\varphi}{\partial x}b(X_t, t) + \frac{1}{2} \frac{\partial^2 \varphi}{\partial x^2}\sigma^2(X_t, t) \right)\mathrm{d}t + \frac{\partial\varphi}{\partial x}\sigma(X_t, t) \mathrm{d}W_t, \label{eq:ItoFormula}
 \end{align}
 where $\varphi$ needs to be sufficiently regular such that the derivatives above exists. 
-There are countless of important corollaries and applications of this result. We apply this result mainly to find the resulting SDE when applying the lamperti-transform to some stochastic differential equation. This map is for an Ito process, $X_t$, given by (\ref{eq:firstSDE}) defined as
+There are countless of important corollaries and applications of this result. We apply this result mainly to find the resulting SDE when applying the lamperti-transform to some stochastic differential equation. This map is for an Ito process, $X_t$, given by (\ref{eq:firstSDE}), defined as
 \begin{align}
     \psi(x, t) = \int_{\xi}^x \frac{\mathrm{d}u}{\tilde{\sigma}(u, t)}, \label{eq:firstLamperti}
 \end{align}
@@ -190,7 +190,7 @@ By definition, this potential models the following dynamical system
 We depict this model for a few values of $\lambda$
 \begin{figure}[h]
     \begin{center}
-        \includegraphics[scale = .5]{figures/double_well_plot.jpeg}
+        \includegraphics[scale = .14]{figures/double_well_plot.jpeg}
         \caption{The flow of the DW-potential dynamical system for varying values of $\lambda$.}
         \label{figure:DW_dynamic_plot}
     \end{center}
@@ -223,7 +223,7 @@ where $A>0$. Note that $x_t$ is not the same as the one from the double-well pot
 The fixed points are one stable- and one unstable fixed point, when $\lambda<0$; and one half-stable when $\lambda=0$. Which of the two is stable or unstable depends on the sign of the normal form \ref{eq:standardform}. Instead of illustrating the bifurcation qua the flow graph, we depict the phenomenon with a so-called bifurcation diagram\\
 \begin{figure}[h]
 \begin{center}
-    \includegraphics[scale = .4]{figures/bifurcation_diagram.jpeg}
+    \includegraphics[scale = .125]{figures/bifurcation_diagram.jpeg}
     \caption{Bifurcation diagram of the scale and shifted normal saddle-node bifurcation.}
     \label{figure:bifurcationDiagram}
 \end{center}
@@ -460,7 +460,7 @@ When we are in a simulation setting, we assess our estimation methods using the 
 Of course, we are not able to calculate this quantity when we do not have access to the ground-truth parameters, so it is only relevant in a simulation setting In addition, we cannot use regular residuals to diagnose the fit, as each data point have different distributions depending on the previous point. Instead, we assess the fit qua so-called uniform residuals. These are constructed using the transition density, $p_\theta(x|\Delta t, x_0)$. Though, as is quite clear by now, this is rarely something we can compute. However, we can for instance use the approximation given from the Strang scheme in its stead. As this also gives us an approximation for the conditional distribution function, $F_\theta(x|\Delta t, x_0)$, and as $F_\theta(X_{t_{i}}|\Delta t, X_{t_{i - 1}})\sim \mathrm{Unif}(0,1)$ if $X_{t_{i}}|X_{t_{i - 1}} \sim p_\theta$. Still, it is sometimes difficult to detect outliers in the uniform distribution, so we introduce another transformation - this time with the quantile function of the standard gaussian distribution. Then by the quantile transformation theorem, the double-transformed samples should follow a standard gaussian, if the model is properly specified. To see whether this is the case, we use ordinary QQ-plots.\\\\
 As the approximately optimal martingale estimation functions approximate the score function, we do not have any approximation of the transition density here and cannot use uniform residuals. Even still with some creativity, we can do diagnostics, but only of the square-root process. If we let $X_t$ be governed by the square-root process, then
 \begin{align}
-    Y_{t_{i + 1}} := \frac{4\beta}{\sigma^2\left(\exp\left(-\beta \Delta t\right) - 1\right)}X_{t_{i + 1}}
+    Y_{t_{i + 1}} := \frac{4\alpha_0}{\sigma^2\left(\exp\left(-\alpha_0 \Delta t\right) - 1\right)}X_{t_{i + 1}}
 \end{align}
-has transition density of a non-central $\chi^2$-distribution with $\frac{4\beta\mu}{\sigma^2}$ degrees of freedom with non-centrality parameter $Y_{t_k}\exp\left(-\beta \Delta t\right)$ \cite[Equation (5.68)]{Srkk2019}. For the other diffusions, we do not have an analagous property to exploit, and we may only assess the martingale estimation equation based estimators by ensuring that the estimates are consistent with methods based on the transition density, where we can use uniform residuals.\\\\
+has transition density of a non-central $\chi^2$-distribution with $\frac{4\alpha_0\mu_0}{\sigma^2}$ degrees of freedom with non-centrality parameter $Y_{t_k}\exp\left(-\alpha_0 \Delta t\right)$ \cite[Equation (5.68)]{Srkk2019}. For the other diffusions, we do not have an analagous property to exploit, and we may only assess the martingale estimation equation based estimators by ensuring that the estimates are consistent with methods based on the transition density, where we can use uniform residuals.\\\\
 Finally note that we obviously have no hope of knowing the distribution of our estimators. Therefore to get an idea of our uncertainty of them, we use parametric bootstrap. That is, for a specific model we estimate its parameters from data. Then we sample from that model repeatedly using the parameters we estimated on the real data and estimate parameters on these artificial data sets. The distribution of the estimates achieved in this way then gives us the quantiles etc. for our estimator.

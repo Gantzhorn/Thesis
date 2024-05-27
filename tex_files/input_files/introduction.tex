@@ -4,7 +4,7 @@ Stochastic differential equations have long been a popular choice for modelling 
     \mathrm{d}X_t = b(X_t, t;\theta)\mathrm{d}t + \sigma\left(X_t, t; \theta\right)\mathrm{d}W_t,
 \end{align}
 where the solution, $X_t\in\mathbb{R}$, is called an Ito process. The stochasticity in the system comes from, $W_t$, which is a Wiener process. The functions in the deterministic- and stochastic part are named drift- and diffusion terms, respectively, and our overall goal is typically to do some sort of inference about the parameter, $\theta\in\Theta\subseteq\mathbb{R}^p$, that the functions depend on. \\\\
-An example of an application of stochastic differential equations is the modelling of bifurcation points, commonly known as tipping points in ecological systems. Deterministic dynamical systems can be thought of as models that describe the \textit{change} in the system depending on its current value. This could for instance by models where some value, $x_t\in\mathbb{R}$, is described by the differential equation
+An example of an application of stochastic differential equations is the modelling of bifurcation points, commonly known as tipping points in ecological systems. The study of bifucartion points stems from the study of deterministic dynamical systems. These systems are modelled by \textit{change} in the system depending on its current value. This could for instance be models where some value, $x_t\in\mathbb{R}$, is described by the differential equation
 \begin{align}
     \mathrm{d}x_t = f(x_t, \lambda)\mathrm{dt},
 \end{align}

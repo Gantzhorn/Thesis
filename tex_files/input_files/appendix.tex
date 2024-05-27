@@ -1,5 +1,5 @@
 \section{Source code}
-The source code for this project, licensed under the MIT License, is hosted on \href{https://github.com/Gantzhorn/Thesis}{Github}. In the repository the source code can be found in the \textit{"source\_code"}-directory. To recreate the main results from the thesis run the \code{R}-script: \textit{"main.R"}. The main-file has loads of boilerplate code; if one wants to understand the methods themselves it is easier to read the other \code{R}-files in the same directory. In those files there are, apart from the code itself, also information about the code as well as minimal examples on how to actually run it. 
+The source code for this project, licensed under the MIT License, is hosted on \href{https://github.com/Gantzhorn/Thesis}{Github}. In the repository the source code can be found in the \textit{"source\_code"}-directory. To recreate the main results from the thesis run the \code{R}-script: \textit{"main.R"}. The main-file is mostly boilerplate code to create setup the experiments, though. If one wants to understand the methods themselves, it is easier to read the other \code{R}-files in the same directory. In those files there are, apart from the code itself, also information about the code as well as minimal examples on how to actually run it. 
 \section{Simulation Methods}\label{appendix:simMethods}
 This section focuses on constructing the simulation schemes that support the analytical work presented in this thesis. We considered the Euler-maruyama - as well the Milstein scheme. However, as the processes are quite non-linear our final choice was the Scalar weak order 2.0 Ito–Taylor method \cite[algorithm 8.5]{Srkk2019}. In the general setup we simulate $X_0,X_{t_1},\dots, X_{t_N}$ according to the schemes by sampling $N$ random variables $\Delta W_{t_k}\sim\mathcal{N}\left(0, \Delta t_k\right)$. Note that we let $X_{t_0} = \mu_0$, i.e. mean-reverting parameter in the stationary parts of the processes. Recall that all six models use the same ramping of $\lambda_t$, given by (\ref{eq:lambdaRampDefinition}). To switch between the two versions of the normal form of the saddle-node bifurcation, we use positive or negative values for $A$ and correspondingly negative or positive values of $\lambda_0$. \\\\
 \noindent \textbf{Additive noise}\\
@@ -95,14 +95,14 @@ In the stationary part of the process a first order Taylor-expansion of the drif
 where $\alpha_0 = 2\sqrt{-A\lambda_0}$ and $\mu_0 = m + \sqrt{-\frac{\lambda_0}{A}}$.\\\\
 Let $\rho = \exp\left(-\alpha_0\Delta t\right)$ and $\gamma^2 = \sigma^2/2\alpha_0$. The OU-process is a gaussian process, thus it has transition density \cite[equation (S3)]{DitlevsenSupplementary}
 \begin{align}
-    p\left(\Delta t, x_{i-1}, x_i;\theta\right) = \frac{1}{\sqrt{2\pi\gamma^2\left(1-\rho^2\right)}}\exp\left(-\frac{\left(x_i-x_{i-1}\rho - \mu\left(1-\rho\right)\right)^2}{2\gamma^2\left(1-\rho^2\right)}\right), \label{eq:OULikelihood}
+    p\left(\Delta t, x_{i-1}, x_i;\theta\right) = \frac{1}{\sqrt{2\pi\gamma^2\left(1-\rho^2\right)}}\exp\left(-\frac{\left(x_i-x_{i-1}\rho - \mu_0\left(1-\rho\right)\right)^2}{2\gamma^2\left(1-\rho^2\right)}\right), \label{eq:OULikelihood}
 \end{align}
 which is the gaussian density with conditional mean and -variance
 \begin{align}
-    \mathbb{E}\left[X_i\middle|X_{i-1} = x_{i-1}\right] &= x_{i - 1}\rho - \mu\left(1-\rho\right),\\
+    \mathbb{E}\left[X_i\middle|X_{i-1} = x_{i-1}\right] &= x_{i - 1}\rho - \mu_0\left(1-\rho\right),\\
     \mathrm{Var}\left(X_i\middle|X_{i-1} = x_{i-1}\right) &= \gamma^2\left(1-\rho^2\right).
 \end{align}
-Unfortunately, we cannot get closed form solution to all of the estimators from this. However, we can still maximize (\ref{eq:OULikelihood}) with respect to $\theta$ to get the MLEs. Alternatively, we can derive the score equations by taking the derivative of the log-likelihood, and numerically solve the non-linear equations we get from doing so. The score equations are present in \cite[p.1, bottom]{DitlevsenSupplementary}. To solve the equations, we use the $\code{nleqslv::nleqslv}$-method \cite{nleqslv}. For starting values in both methods we use the approximation for the MLE of $\mu$ in equation \cite[(S4)]{DitlevsenSupplementary} along with (S5) and (S6) for $\rho$ $\gamma^2$, respectively. These values are good closed form approximations of the MLEs for thhe number of samples, $N$, sufficiently large.
+Unfortunately, we cannot get closed form solution to all of the estimators from this. However, we can still maximize (\ref{eq:OULikelihood}) with respect to $\theta$ to get the MLEs. Alternatively, we can derive the score equations by taking the derivative of the log-likelihood, and numerically solve the non-linear equations we get from doing so. The score equations are present in \cite[p.1, bottom]{DitlevsenSupplementary}. To solve the equations, we use the $\code{nleqslv::nleqslv}$-method \cite{nleqslv}. For starting values in both methods we use the approximation for the MLE of $\mu_0$ in equation \cite[(S4)]{DitlevsenSupplementary} along with (S5) and (S6) for $\rho$ $\gamma^2$, respectively. These values are good closed form approximations of the MLEs for thhe number of samples, $N$, sufficiently large.
 \subsubsection{Dynamic part}\label{subsubsec:OUprocessDynamic}
 This part of the estimation procedure has to do with the estimation of the parameters linked to the dynamic part of the process. Our estimation procedure mostly follows \cite{Ditlevsen2023}. We, of course, have the addition of the $\nu$-parameter. Additionally, \cite{Ditlevsen2023} uses regularization in the form of a penalization parameter that punishes values of $A$ significantly smaller than $1$; we do not explore this option here. Recall the dynamics for $t>t_0$
 \begin{align}
@@ -146,11 +146,20 @@ In the stationary part the usual first order Taylor-expansion of the drift of th
 which is the square-root process with $\alpha_0 = 2\sqrt{-\lambda_0A}$ and $\mu_0 = m + \sqrt{-\frac{\lambda_0}{A}}$. 
 We first introduce estimators based on the Strang splitting scheme, and then we consider an estimator based on martingale estimating equations.\\\\
 \noindent \textbf{The Strang-based Estimator}\\
-To obtain the strang estimator, we first use the lamperti transformation of (\ref{eq:squarerootAppendix}), which by table \ref{table:ergodicDiffusions} is $Y_t := 2\sqrt{X_t}$. To confirm this and get the resulting SDE, we use Ito's formula, which yields
+To obtain the Strang estimator, we first use the lamperti transformation of (\ref{eq:squarerootAppendix}), which by table \ref{table:ergodicDiffusions} is $Y_t := g(X_t, t) = 2\sqrt{X_t}$. To confirm this and get the resulting SDE, we use Ito's formula. First note
+\begin{align}
+    \frac{\partial}{\partial x}g(X_t, t) = \frac{1}{\sqrt{X_t}}, \qquad \frac{\partial^2}{\partial x^2}g(X_t, t) = - \frac{1}{2X_t^{3/2}}.
+\end{align}
+Therefore
+\begin{align}
+    \mathrm{d}g(X_t, t) &= \left(-\frac{\alpha_0\left(X_t - \mu_0\right)}{\sqrt{X_t}} + \frac{\sigma^2}{2}X_t \left(-\frac{1}{2X_t^{3/2}}\right)\right) + \sigma\mathrm{d}W_t \nonumber \\
+    &= -\frac{1}{\sqrt{X_t}}\left(\alpha_0\left(X_t - \mu_0\right) + \frac{\sigma^2}{2}\right) + \sigma\mathrm{d}W_t
+\end{align}
+Using $X_t = \frac{Y_t^2}{4}$, we get
 \begin{align}
     \mathrm{d}Y_t = - \frac{2}{Y_t}\left(\alpha_0 \frac{Y_t^2}{4} - \alpha_0 \mu_0 + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \label{eq:lampertiSquarerootAppendix}
 \end{align}
-by Ito's formula. Then, we use the heuristic from \cite[section 2.3 and 2.5]{SplittingSchemes}. First we calculate the fixed point of the drift. That is, we solve the equation
+Then, we use the heuristic from \cite[section 2.3 and 2.5]{SplittingSchemes}. First we calculate the fixed point of the drift. That is, we solve the equation
 \begin{align}
     f(y) := - \frac{2}{y}\left(\alpha_0 \frac{y^2}{4} - \alpha_0 \mu_0 + \frac{\sigma^2}{2}\right) = 0
 \end{align}
@@ -257,7 +266,12 @@ This particular choice of splitting is done by letting the square-root process p
 \end{align} 
 which gives rise to a pseudo-likelihood similar to \cite[(14)]{SplittingSchemes}. The approximation based on Kessler's method induces a gaussian likelihood, so the likelihood is a transformation with $\varphi_{\Delta t}^{(2)}$ of this, which by the density transformation theorem yields a likelihood very similar to (\ref{eq:Strang_likelihood}); we just have to adjust the conditional mean- and variance to fit the square-root process. The maximizer of the pseudo-likelihood, we call the alternative Strang based estimator.\\\\
 On the other hand,we can also construct a pseudo-likelihood with the regular Strang-likelihood that uses a splitting similar to (\ref{SDE_split}) and (\ref{ODE_Split}). For this we need the lamperti-transform. As this map only depends on the noise term, (\ref{eq:dynamicsquarerootSDE}) has the same lamperti-transform as the square-root process. To no surprise this reasoning generalizes to all the models.\\\\
-Let $Y_t:= 2\sqrt{X_t}$ and use Ito's formula on (\ref{eq:dynamicsquarerootSDE}), then
+Therefore let $Y_t:= g(X_t, t) = 2\sqrt{X_t}$ and use Ito's formula on (\ref{eq:dynamicsquarerootSDE})
+\begin{align}
+    \mathrm{d}g(X_t, t) &= \left(-\frac{A(X_t - m)^2 + \lambda_t}{\sqrt{X_t}} + \frac{\sigma^2}{2}X_t\left(-\frac{1}{2X_t^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t\nonumber \\
+    &= -\frac{1}{\sqrt{X_t}}\left(A\left(X_t - m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\right)\mathrm{d}t + \sigma\mathrm{d}W_t
+\end{align}
+Then as $X_t = \frac{Y_t^2}{4}$
 \begin{align}
     \mathrm{d}Y_t = - \frac{2}{Y_t}\left(A\left(\frac{Y_t^2}{4} - m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\right)\mathrm{d}t + \sigma \mathrm{d}W_t. \label{eq:lampertiTransformedDynamicSquareroot}
 \end{align}
@@ -273,7 +287,7 @@ By the quadratic formula, $z^* = \pm\frac{\sqrt{-A\left(\lambda_t + \frac{\sigma
 \begin{align}
     y^* = 2\sqrt{m + \frac{\sqrt{-A\left(\lambda_t + \frac{\sigma^2}{4}\right)}}{A}},
 \end{align}
-where we once again disregard the negative root branch of the square-root, as $y$ must be non-negative. To linearize around the fixed point we need to evaluate $f'(y^*)$. So we derive the derivate
+where we once again disregard the negative root branch of the square-root, as $y$ must be non-negative. To linearize around the fixed point we need to evaluate $f'(y^*)$. So we derive the derivative
 \begin{align}
     f'(y) = \frac{2}{y^2}\left(A\left(\frac{y^2}{4}-m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\right) - 2A\left(\frac{y^2}{4} - m\right)
 \end{align}
@@ -329,7 +343,16 @@ This is the transformation given by (\ref{eq:meanRevertingODESolution}) of a log
     l_S(\alpha_0, \mu_0, \sigma) = \sum_{i = 1}^{N} g(f_{\Delta t}^{-1}(x_i); \alpha_0,\mu_0, \sigma) - \frac{\alpha_0\Delta t(N - 1)}{2},
 \end{align}
 where $g$ is minus the logarithm of the log-normal density with parameters, $\mu_{\mathrm{log}}$ and $\sigma_{\mathrm{log}}$, and $N$ the number of samples.\\\\
-Conversely, we can use the lamperti transformation of the mean-reverting GBM and the familiar Strang likelihood (\ref{eq:Strang_likelihood}). The lamperti transform of (\ref{eq:GBM_simple}) is $Y_t = \log(X_t)$ and by Itos formula the resulting SDE is
+Conversely, we can use the lamperti transformation of the mean-reverting GBM and the familiar Strang likelihood (\ref{eq:Strang_likelihood}). The lamperti transform of (\ref{eq:GBM_simple}) is $Y_t = g(X_t, t) = \log(X_t)$, so
+\begin{align}
+    \frac{\partial}{\partial x}g(X_t, t) = \frac{1}{X_t}, \qquad \frac{\partial^2}{\partial x^2}g(X_t, t) = -\frac{1}{X_t^2},
+\end{align}
+and by Itos formula
+\begin{align}
+    \mathrm{d}g(X_t, t) &= \left(-\frac{\alpha_0\left(X_t - \mu_0\right)}{X_t}+\frac{\sigma^2}{2}X_t^2\left(-\frac{1}{X_t^2}\right)\right) + \sigma\mathrm{d}W_t\nonumber\\
+    &= -\left(\alpha_0\left(1-\mu_0X_t^{-1}\right) + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma\mathrm{d}W_t
+\end{align}
+As $X_t = \exp(Y_t)$, the resulting SDE is
 \begin{align}
     \mathrm{d}Y_t = -\left(\alpha_0\left(1 - \mu_0\exp(-Y_t)\right) + \frac{1}{2}\sigma^2\right)\mathrm{d}t + \sigma \mathrm{d}W_t. \label{eq:GBM_lamperti}
 \end{align}
@@ -383,7 +406,7 @@ and thus
 Now since 
 \begin{align}
     \left(\mathbb{E}\left[X_\Delta\middle|X=x\right]\right)^2 &= \left(\exp\left(-\alpha_0\Delta\right)\left(x-\mu_0\right) + \mu_0\right)^2 \nonumber\\
-    &= \exp\left(-2\alpha_0\Delta\right)\left(x-\mu\right)^2 + \mu_0^2 + 2\mu_0\exp\left(-\alpha_0\Delta\right)\left(x-\mu_0\right). \label{GBM_firstmoment_square}
+    &= \exp\left(-2\alpha_0\Delta\right)\left(x-\mu_0\right)^2 + \mu_0^2 + 2\mu_0\exp\left(-\alpha_0\Delta\right)\left(x-\mu_0\right). \label{GBM_firstmoment_square}
 \end{align}
 We get the desired result by combining (\ref{GBM_secondmoment}) and (\ref{GBM_firstmoment_square}) and using the definition of conditional variance
 \begin{align}
@@ -418,7 +441,12 @@ However, as we did with the square-root process, we also explore the option of f
     \zeta &= \frac{2mA - \frac{1}{2}\sigma^2 + \sqrt{\sigma^4/4 - A\left(2m\sigma^2 + 4\lambda_t\right)}}{2A},\\
     A_{\mathrm{linear\_part}} &= - \frac{1}{\zeta}\left(A \zeta^2 - \lambda_t - Am^2\right).
 \end{align}
-As in the stationary part (\ref{eq:GBM_dynamic_SDE}) has lamperti transform $Y_t:=\log(X_t)$. Therefore, we get from Ito's formula
+As in the stationary part (\ref{eq:GBM_dynamic_SDE}) has lamperti transform $Y_t:= g(X_t, t) = \log(X_t)$. Therefore, we get from Ito's formula
+\begin{align}
+    \mathrm{d}g(X_t, t) &= \left(-\frac{A\left(X_t-m\right)^2 + \lambda_t}{X_t} + \frac{\sigma^2}{2}X_t^2\left(-\frac{1}{X_t^{2}}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t \nonumber \\
+    &= -\left(\frac{A\left(X_t-m\right)^2 + \lambda_t}{X_t} + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma \mathrm{d}W_t
+\end{align}
+Which means that
 \begin{align}
     \mathrm{d}Y_t = - \left(\frac{A\left(\exp\left(Y_t\right)-m\right)^2 + \lambda_t}{\exp(Y_t)} + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma \mathrm{d}W_t \label{eq:GBMdynamicLamperti}
 \end{align}
@@ -496,7 +524,7 @@ This corresponds to the equation
     \sinh(y) &= \frac{\mu_0\alpha_0}{\alpha_0 + \frac{\sigma^2}{2}}, \nonumber\\
     y^* &= \sinh^{-1}\left(\frac{2\mu_0\alpha_0}{2\alpha_0 + \sigma^2}\right)
 \end{align}
-Computing the derivate, $f'(y)$
+Computing the derivative, $f'(y)$
 \begin{align}
     f'(y) = \frac{\sinh(y)}{\cosh^2(y)}\left(\sinh(y)\left(\alpha_0 + \frac{\sigma^2}{2}\right) - \mu_0\alpha_0\right) - \left(\alpha_0 + \frac{\sigma^2}{2}\right).
 \end{align}
@@ -530,7 +558,7 @@ Note that $b_{\textrm{intercept}}$ is the fixed point of (\ref{eq:LampertiTDistr
 \begin{align}
     f(y) := -\frac{1}{\cosh(y)}\left(A\left(\sinh(y) - m\right)^2 + \lambda_t + \frac{\sigma^2}{2}\sinh(y)\right).
 \end{align}
-Solving $f(y) = 0$ is clearly equivalent to finding the roots in the following quadractic equation in $\sinh(y)$
+Solving $f(y) = 0$ is clearly equivalent to finding the roots in the following quadratic equation in $\sinh(y)$
 \begin{align}
     A\sinh^2(y) + \left(\frac{\sigma^2}{2} - 2Am\right)\sinh(y) + \lambda_t + m^2A = 0.
 \end{align}
@@ -584,7 +612,7 @@ Now, using $X_t = \sinh^2\left(\frac{Y_t}{2}\right)$.
      &\overset{(\dagger_2)}{=} -\frac{\left(\frac{\alpha_0}{2}\left(\cosh(Y_t) - 2\mu_0 - 1\right)+\frac{\sigma^2}{4}\cosh(Y_t)\right)}{\sqrt{\frac{\sinh^2(Y_t)}{4}}} + \sigma\mathrm{d}W_t \nonumber \\
      &= - \frac{1}{\sinh(Y_t)}\left(\left(\alpha_0 + \frac{\sigma^2}{2}\right)\cosh(Y_t) - \alpha_0\left(2\mu_0 + 1\right)\right) \mathrm{d}t + \sigma \mathrm{d}W_t. \label{eq:F_diffusion_lamperti_SDE}
 \end{align}
-Where $(\dagger_1)$ uses the identity from earlier in the denominator and the following half-angle identity twice
+Where $(\dagger_1)$ uses the identity from earlier in the denominator and the following double-angle identity twice
 \begin{align*}
     2\sinh^2\left(\frac{x}{2}\right) = \cosh(x)
 \end{align*}
@@ -600,7 +628,7 @@ Solving $f(y) = 0$ is equivalent to solving the following equation
 \begin{align}
     0 &= \left(\alpha_0 + \frac{\sigma^2}{2}\right)\cosh(y) - \alpha_0\left(2\mu_0 + 1\right) \nonumber \\
     \cosh(y) &= \frac{2\alpha_0\left(2\mu_0 + 1\right)}{2\alpha_0 + \sigma^2} \nonumber\\
-    y^* &= \cosh^{-1}\left(\frac{2\alpha_0\left(2\mu + 1\right)}{2\alpha_0 + \sigma^2}\right).
+    y^* &= \cosh^{-1}\left(\frac{2\alpha_0\left(2\mu_0 + 1\right)}{2\alpha_0 + \sigma^2}\right).
 \end{align}
 We compute the derivative of $f$
 \begin{align}
@@ -638,7 +666,7 @@ $(\dagger_1)$ follows by the same identities, we used in the stationary part. Th
     2A\left(\sinh^2\left(\frac{Y_t}{2}\right) - m\right)^2 &\overset{(\dagger_2)}{=} \frac{A}{2}\left(\cosh(Y_t) - \left(2m + 1\right)\right)^2 \\
     &= \frac{A}{2}\cosh^2(Y_t) + \frac{A}{2}\left(2m +1\right)^2 - A\left(2m + 1\right)\cosh(Y_t),
 \end{align*}
-expanding the last quadratic binomial and using this result in the equation above yields (\ref{eq:dynamicScaledFLamperti}). Note that $(\dagger_2)$ follows by the hyperbolic half angle identity.
+expanding the last quadratic binomial and using this result in the equation above yields (\ref{eq:dynamicScaledFLamperti}). Note that $(\dagger_2)$ follows by the hyperbolic double-angle identity.
 We construct the splitting as earlier. We first find the fixed-point of the drift of (\ref{eq:dynamicScaledFLamperti}), so define
 \begin{align}
     f(y) := \frac{-1}{\sinh\left(y\right)}\left(\frac{A}{2}\cosh^2\left(y\right) + \left(\frac{\sigma^2}{2} - A \left(2m + 1\right)\right)\cosh\left(y\right) + 2\lambda_t + 2Am^2 + \frac{A}{2} + 2Am\right). \nonumber
@@ -647,7 +675,7 @@ Solving $f(y) = 0$ is equivalent to solving the following equation
 \begin{align}
     0 &= \frac{A}{2}\cosh^2\left(y\right) + \left(\frac{\sigma^2}{2} - A \left(2m + 1\right)\right)\cosh\left(y\right) + 2\lambda_t + 2Am^2 + \frac{A}{2} + 2Am,
 \end{align}
-which is a quadractic equation in $\cosh(y)$. By the quadractic formula
+which is a quadratic equation in $\cosh(y)$. By the quadratic formula
 \begin{align}
     \cosh(y^*) &= \frac{A\left(2m + 1\right) - \frac{\sigma^2}{2} \pm \sqrt{\left(\frac{\sigma^2}{2} - A \left(2m + 1\right)\right)^2 - 2A\left(2\lambda_t + 2Am^2 + \frac{A}{2} + 2Am\right)}}{A}.\nonumber\\
 \end{align}
@@ -662,7 +690,7 @@ Thus
 \begin{align}
     \cosh(y^*) = \frac{A\left(2m + 1\right) - \frac{\sigma^2}{2} + \sqrt{\frac{\sigma^4}{4}-A\left(\sigma^2\left(2m + 1\right) + 4 \lambda_t\right)}}{A}.
 \end{align}
-The fixed point is the inverse hyperbolic cosine of the right hand side. Continuing, the derivate of $f$ is
+The fixed point is the inverse hyperbolic cosine of the right hand side. Continuing, the derivative of $f$ is
 \begin{align}
     f'(y) &= \frac{\cosh(y)}{\sinh^2\left(y\right)}\left(\frac{A}{2}\cosh^2\left(y\right) + \left(\frac{\sigma^2}{2} - A \left(2m + 1\right)\right)\cosh\left(y\right) + 2\lambda_t + 2Am^2 + \frac{A}{2} + 2Am\right) \nonumber\\
     &-A\cosh(y) - \frac{\sigma^2}{2} + A \left(2m + 1\right).
@@ -698,13 +726,13 @@ Note that
 And we get by Ito's formula
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(\frac{-\alpha_0\left(X_t - \mu_0\right)}{\sqrt{X_t\left(1 - X_t\right)}} + \frac{\sigma^2}{2}X_t\left(1 - X_t\right)\left(-\frac{1 - 2X_t}{2\left(X_t\left(1 - X_t\right)\right)^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t \nonumber \\
-    &= -\frac{1}{\sqrt{X_t\left(1 - X_t\right)}}\left(\alpha_0\left(X_t - \mu_0\right) + \frac{\sigma^2}{2}\left(1 - 2X_t\right)\right) + \sigma\mathrm{d}W_t.
+    &= -\frac{1}{\sqrt{X_t\left(1 - X_t\right)}}\left(\alpha_0\left(X_t - \mu_0\right) + \frac{\sigma^2}{4}\left(1 - 2X_t\right)\right) + \sigma\mathrm{d}W_t.
 \end{align}
 Note that $X_t = \sin^2\left(\frac{Y_t}{2}\right)$, thus
 \begin{align}
-    \mathrm{d}Y_t & = -\frac{\left(\alpha_0\left(\sin^2\left(\frac{Y_t}{2}\right) - \mu_0\right) + \frac{\sigma^2}{2}\left(1 - 2\sin^2\left(\frac{Y_t}{2}\right)\right)\right)}{\sqrt{\sin^2\left(\frac{Y_t}{2}\right)\left(1 - \sin^2\left(\frac{Y_t}{2}\right)\right)}} + \sigma\mathrm{d}W_t \nonumber \\
-    & \overset{(\dagger_1)}{=} -\frac{\left(-\frac{\alpha_0}{2}\left(\sin\left(Y_t\right) + 2\mu_0 - 1\right) + \frac{\sigma^2}{2}\cos(Y_t)\right)}{\sqrt{\sin^2\left(\frac{Y_t}{2}\right)\cos^2\left(\frac{Y_t}{2}\right)}} + \sigma\mathrm{d}W_t \nonumber \\
-    & \overset{(\dagger_2)}{=} -\frac{1}{\sin\left(Y_t\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(Y_t) + \alpha_0 - 2\alpha_0\mu\right)\mathrm{d}t + \sigma \mathrm{d}W_t. \label{eq:JacobiLampertiSDE}
+    \mathrm{d}Y_t & = -\frac{\left(\alpha_0\left(\sin^2\left(\frac{Y_t}{2}\right) - \mu_0\right) + \frac{\sigma^2}{4}\left(1 - 2\sin^2\left(\frac{Y_t}{2}\right)\right)\right)}{\sqrt{\sin^2\left(\frac{Y_t}{2}\right)\left(1 - \sin^2\left(\frac{Y_t}{2}\right)\right)}} + \sigma\mathrm{d}W_t \nonumber \\
+    & \overset{(\dagger_1)}{=} -\frac{\left(-\frac{\alpha_0}{2}\left(\sin\left(Y_t\right) + 2\mu_0 - 1\right) + \frac{\sigma^2}{4}\cos(Y_t)\right)}{\sqrt{\sin^2\left(\frac{Y_t}{2}\right)\cos^2\left(\frac{Y_t}{2}\right)}} + \sigma\mathrm{d}W_t \nonumber \\
+    & \overset{(\dagger_2)}{=} -\frac{1}{\sin\left(Y_t\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(Y_t) + \alpha_0 - 2\alpha_0\mu_0\right)\mathrm{d}t + \sigma \mathrm{d}W_t. \label{eq:JacobiLampertiSDE}
 \end{align}
 Where we have used the following trigonometric identity in $(\dagger_1)$
 \begin{align*}
@@ -716,17 +744,17 @@ as well as the identity
 \end{align*}
 in $(\dagger_2)$. Now to find the fixed point of this SDE, define and set
 \begin{align}
-    f(y) := -\frac{1}{\sin\left(y\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(y) + \alpha_0 - 2\alpha_0\mu\right) = 0,
+    f(y) := -\frac{1}{\sin\left(y\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(y) + \alpha_0 - 2\alpha_0\mu_0\right) = 0,
 \end{align}
 which is equivalent to solving
 \begin{align}
-    0 &= \left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(y) + \alpha_0 - 2\alpha_0\mu \nonumber\\
-    \cos(y) &= \left(\frac{2\alpha_0\left(2\mu - 1\right)}{\sigma^2 - 2\alpha_0}\right) \nonumber\\
-    y^* &= \cos^{-1}\left(\frac{2\alpha_0\left(2\mu - 1\right)}{\sigma^2 - 2\alpha_0}\right).
+    0 &= \left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(y) + \alpha_0 - 2\alpha_0\mu_0 \nonumber\\
+    \cos(y) &= \left(\frac{2\alpha_0\left(2\mu_0 - 1\right)}{\sigma^2 - 2\alpha_0}\right) \nonumber\\
+    y^* &= \cos^{-1}\left(\frac{2\alpha_0\left(2\mu_0 - 1\right)}{\sigma^2 - 2\alpha_0}\right).
 \end{align}
-The derivate of $f$ is
+The derivative of $f$ is
 \begin{align}
-    f'(y) = \frac{\cos(y)}{\sin^2\left(y\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(y) + \alpha_0 - 2\alpha_0\mu\right) + \left(\frac{\sigma^2}{2}-\alpha_0\right),
+    f'(y) = \frac{\cos(y)}{\sin^2\left(y\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(y) + \alpha_0 - 2\alpha_0\mu_0\right) + \left(\frac{\sigma^2}{2}-\alpha_0\right),
 \end{align}
 and obviously the first term of $f'(y^*)$ is zero, meaning
 \begin{align}
@@ -734,23 +762,60 @@ and obviously the first term of $f'(y^*)$ is zero, meaning
 \end{align}
 We linearize around the fixed point; this gives us the splitting
 \begin{align}
-    \mathrm{d}Y_t^{[1]} &= \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[1]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t,\\
-    \mathrm{d}Y_t^{[2]} &= -\left(\frac{1}{\sin\left(Y_t^{[2]}\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(Y_t^{[2]}) + \alpha_0 - 2\alpha_0\mu\right) \right. \nonumber \\
-    &- \left. \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[2]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right) \right)\mathrm{d}t. \label{eq:jacobiODE}
+    \mathrm{d}Y_t^{[1]} &= \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[1]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu_0 - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t,\\
+    \mathrm{d}Y_t^{[2]} &= -\left(\frac{1}{\sin\left(Y_t^{[2]}\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(Y_t^{[2]}) + \alpha_0 - 2\alpha_0\mu_0\right) \right. \nonumber \\
+    &- \left. \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[2]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu_0 - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right) \right)\mathrm{d}t. \label{eq:jacobiODE}
 \end{align}
 We solve the linear SDE by the well-known formulas (\ref{eq:OU_mean}) and (\ref{eq:OU_variance}). Given its complexity (\ref{eq:jacobiODE}), its inverse and the derivative of the inverse must be found using the fourth-order Runge-kutta method. The remaining steps in the construction of the Strang pseudo-likelihood is composing the flow from the linear SDE and the ODE in the appropriate way and the maximizing this value over the parameters.
 \subsubsection{Dynamic part}
-In the dynamic part, we assume that the process can be modelled as
+In the dynamic part, the model is
 \begin{align}
     \mathrm{d}X_t &= -\left(A(X_t - m)^2 + \lambda_t\right)\mathrm{d}t + \sigma \sqrt{X_t\left(1 - X_t\right)}\mathrm{d}W_t,\\
     \lambda_t &= \lambda_0 \left(1 - \frac{t - t_0}{\tau_c}\right)^\nu.
 \end{align}
-As we did in the stationary part, let $Y_t := 2 \sin^{-1}\left(\sqrt{X_t}\right)$. Then we get 
+As we did in the stationary part, let $Y_t := g(X_t, t) = 2 \sin^{-1}\left(\sqrt{X_t}\right)$. Then we get 
 \begin{align}
-    \mathrm{d}Y_t &= - \frac{1}{\sin(Y_t)}\left(\frac{A}{2}\cos^2(Y_t) + \left(\frac{\sigma^2}{2} + 2 Am - A\right)\cos(Y_t) \right. \nonumber \\
+    \mathrm{d}g(X_t, t) &= \left(-\frac{A(X_t - m)^2 + \lambda_t}{\sqrt{X_t\left(1 - X_t\right)}} + \frac{\sigma^2}{2}X_t\left(1 - X_t\right)\left(-\frac{1 - 2X_t}{2\left(X_t\left(1 - X_t\right)\right)^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t \nonumber\\
+    &= -\frac{1}{\sqrt{X_t\left(1 - X_t\right)}}\left(A\left(X_t - m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\left(1 - 2X_t\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t
+\end{align}
+by Ito's formula. Using $X_t = \sin^2\left(\frac{Y_t}{2}\right)$, we get
+\begin{align}
+    \mathrm{d}Y_t &= -\frac{\left(A\left(\sin^2\left(\frac{Y_t}{2}\right) - m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\left(1 - 2\sin^2\left(\frac{Y_t}{2}\right)\right)\right)}{\sqrt{\sin^2\left(\frac{Y_t}{2}\right)\left(1 - \sin^2\left(\frac{Y_t}{2}\right)\right)}}\mathrm{d}t + \sigma\mathrm{d}W_t \nonumber \\
+    &= -\frac{2}{\sin(Y_t)}\left(\frac{A}{4}\left(\left(1 - 2m\right) - \cos(Y_t)\right)^2 + \lambda_t + \frac{\sigma^2}{4}\cos(Y_t)\right)\mathrm{d}t + \sigma\mathrm{d}W_t\nonumber \\
+    &= - \frac{1}{\sin(Y_t)}\left(\frac{A}{2}\cos^2(Y_t) + \left(\frac{\sigma^2}{2} + 2 Am - A\right)\cos(Y_t) \right. \nonumber \\
     &+ \left. A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \label{eq:JacobiLampertiDynamicSDE}
 \end{align}
-by Ito's formula. Now, the splitting is done in the ususal manner. The linearization around the fixed point yields the slope and intercept for the linear SDE
+where the last two steps involve expansions of the quadratic binomial as well as the double-angle identity from earlier. Define and set
+\begin{align*}
+    f(y):= -\frac{1}{\sin(y)}\left(\frac{A}{2}\cos^2(y) + \left(\frac{\sigma^2}{2} + 2 Am - A\right)\cos(y)
+    + A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t\right) = 0.
+\end{align*}
+Solving this is equivalent to the following quadratic equation in $\cos(y)$
+\begin{align}
+    \frac{A}{2}\cos^2(y) + \left(\frac{\sigma^2}{2} + 2 Am - A\right)\cos(y)
+    + A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t = 0.
+\end{align}
+So, by the quadratic formula
+\begin{align}
+    \cos(y^*) = \frac{-A\left(2m - 1\right) - \frac{\sigma^2}{2}\pm\sqrt{\left(\frac{\sigma^2}{2}+A\left(2m - 1\right)\right)^2 - 2A\left(A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t\right)}}{A}\nonumber
+\end{align}
+Focusing on the terms under the square-root
+\begin{align*}
+    &\left(\frac{\sigma^2}{2}+A\left(2m - 1\right)\right)^2 - 2A\left(A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t\right) \\
+    &= \frac{\sigma^4}{4} + A^2\left(2m - 1\right)^2 + \sigma^2A\left(2m - 1\right)- A^2- 4A^2m^2 + 4A^2m-4A\lambda_t\\
+    &= \frac{\sigma^4}{4} + +\sigma^2A\left(2m - 1\right) - 4A\lambda_t
+\end{align*}
+Combine this with the quadratic formula and apply the inverse of the cosine. To do the linearization compute $f'$
+\begin{align}
+    f'(y) &= \frac{\cos(y)}{\sin^2(y)}\left(\frac{A}{2}\cos^2(y) + \left(\frac{\sigma^2}{2} + 2 Am - A\right)\cos(y)
+    + A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t\right) \nonumber\\
+    &+ A\cos(y) + \frac{\sigma^2}{2} + 2Am - A
+\end{align}
+The first term is obviously zero when evaluated in the fixed point so
+\begin{align}
+    f'(y^*) = \pm \sqrt{\frac{\sigma^4}{2} + \sigma^2A\left(2m - 1\right) - 4A\lambda_t}
+\end{align}
+Now, the splitting is done in the usual manner. We experimented with the two branches and it turned out the negative worked the best, so the linearization around the fixed point uses the following parameters 
 \begin{align}
     A_{\mathrm{linear\_part}} &= -\sqrt{\frac{\sigma^4}{4} + \sigma^2A\left(2m - 1\right) - 4A\lambda_t},\\
     b_{\mathrm{intercept}} &= \cos^{-1}\left(\frac{-A\left(2m - 1\right) - \frac{\sigma^2}{2} - \sqrt{\frac{\sigma^4}{4} + \sigma^2A\left(2m - 1\right) - 4A\lambda_t}}{A}\right),
@@ -761,7 +826,7 @@ The ODE is found residually and solved using our fourth-order Runge-kutta. That 
     \mathrm{d}Y_t^{[2]} &=- \frac{1}{\sin(Y_t^{[2]})}\left(\frac{A}{2}\cos^2(Y_t^{[2]}) + \left(\frac{\sigma^2}{2} + 2 Am - A\right)\cos(Y_t^{[2]}) \right. \nonumber \\
     &+ \left. A \left(\frac{1}{2} + 2m^2 - 2m\right) + 2\lambda_t\right) \mathrm{d}t - A_{\mathrm{linear\_part}}\left(Y_t^{[2]} -  b_{\mathrm{intercept}}\right)\mathrm{d}t  \label{eq:dynamicjacobiODE}.
 \end{align}
-Both of which can be solved as we have done so numerous times in the above sections. Likewise, we can construct the Strang estimator in the way we have done many times before.
+Both of which can be solved as we have done so numerous times in other sections. Likewise, we can construct the Strang estimator in the way we have done many times before.
 \newpage
 \section{Benchmark and auxilliary plots}\label{section:benchmark}
 In this section we show the results of a few benchmarks using the \code{microbenchmark} package \cite{microbenchmark} along with other auxilliary figures that underpin the analysis. The figures are put in the order in which they appear in the project. The code was run on a machine with the following hardware and software.

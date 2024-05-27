@@ -76,7 +76,7 @@ fixed_point_lines <- tibble(
 
 sample_paths_plot_small_scale <- ggplot(xs_all, aes(x = t, y = X_t, color = Model)) +
   geom_line(data = fixed_point_lines, aes(x = t, y = upper), linewidth = 1, linetype = "solid", color = "grey25") +
-  geom_line(data = fixed_point_lines, aes(x = t, y = lower), linewidth = 0.75, linetype = "dashed", color = "grey25") +
+  geom_line(data = fixed_point_lines, aes(x = t, y = lower), linewidth = 0.85, linetype = "dashed", color = "grey25") +
   geom_step(linewidth = 0.5) + 
   geom_hline(yintercept = true_param[2], linetype = "dashed") +
   facet_grid(sample_id ~ Model) +
@@ -85,12 +85,14 @@ sample_paths_plot_small_scale <- ggplot(xs_all, aes(x = t, y = X_t, color = Mode
   labs(y = expression(X[t])) + 
   guides(color = guide_legend(override.aes = list(linewidth = 5))) +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) + 
-  theme(legend.text=element_text(size=18),
+  theme(legend.text=element_text(size=20),
         legend.title = element_text(size = 22),
+        axis.title = element_text(size = 22),
         strip.text.x = element_blank(),
         strip.text.y = element_blank(),
         legend.key.width = unit(2, "lines"),
-        legend.key.height = unit(1, "lines"))
+        legend.key.height = unit(1, "lines"),
+        legend.position = "bottom")
 
 ggsave(sample_paths_plot_small_scale, path = paste0(getwd(), "/tex_files/figures"),
        filename = "sample_paths_plot_small_scale.jpeg",
@@ -138,12 +140,14 @@ sample_paths_plot_big_scale <- ggplot(xs_all, aes(x = t, y = X_t, color = Model)
   facet_grid(sample_id ~ Model) +
   scale_color_manual(values = thesis_palette) +
   labs(y = expression(X[t])) + 
-  theme(
-    strip.text.x = element_blank(),
-    strip.text.y = element_blank(),
-    legend.key.width = unit(2, "lines"),
-    legend.key.height = unit(1, "lines")
-  ) +
+  theme(legend.text=element_text(size=20),
+        legend.title = element_text(size = 22),
+        axis.title = element_text(size = 22),
+        strip.text.x = element_blank(),
+        strip.text.y = element_blank(),
+        legend.key.width = unit(2, "lines"),
+        legend.key.height = unit(1, "lines"),
+        legend.position = "bottom") +
   guides(color = guide_legend(override.aes = list(linewidth = 5))) +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) + 
   ylim(min(fixed_point_lines_big$lower)-0.1, max(fixed_point_lines_big$upper)+1)
@@ -225,7 +229,7 @@ dat_half_circle$lambda <- factor(lambda_double_well_vec[3])
 
 
 double_well_plot_neg <- ggplot(double_well_plot_data, aes(x = x_prime, y = force)) +
-  geom_line(aes(col = lambda), linewidth = 1) +
+  geom_line(aes(col = lambda), linewidth = 1.25) +
   geom_hline(yintercept = 0) +
   geom_point(data = roots_data_neglambda, aes(x = root, y = 0, fill = root_color), size = 3, pch = 21) +
   scale_fill_manual(values = c("black", "white"), guide = "none") + 
@@ -234,8 +238,9 @@ double_well_plot_neg <- ggplot(double_well_plot_data, aes(x = x_prime, y = force
   facet_grid(. ~ lambda) + 
   scale_color_manual(values = thesis_palette, labels = c("0", "0.25", expression(lambda * phantom()[" c"]))) +
   theme(strip.text = element_blank(),
-        legend.text = element_text(size = 14)) +
-  guides(color = guide_legend(title = expression(lambda))) + 
+        legend.text = element_text(size = 14),
+        axis.title = element_text(size = 18)) +
+  guides(color = guide_legend(title = expression(lambda), override.aes = list(linewidth = 5))) + 
   coord_fixed()
 
 
@@ -323,8 +328,10 @@ bifurcation_diagram <- tibble(lambda = seq(-1.5, 0, length.out = 5000), stable =
             parse = TRUE, vjust = -0.5, hjust = 0, size = 4.5) +
   labs(linetype = "Type of fixed point") + 
   ylab(expression(mu)) + xlab(expression(lambda)) + 
-  theme(axis.title.y = element_text(size = 18),
-        axis.title.x = element_text(margin = margin(t = 20), size = 18))
+  theme(axis.title.y = element_text(size = 16, angle = 90),
+        legend.title = element_text(size = 16),
+        legend.text = element_text(size = 16),
+        axis.title.x = element_text(margin = margin(t = 20), size = 20))
 
 
 
@@ -372,11 +379,14 @@ nu_plot <- ggplot(nu_plot_data, aes(x = t, y = Value, color = nu, linetype = Fix
   scale_color_manual(values = thesis_palette) +
   scale_linetype(guide = "none") + 
   guides(color = guide_legend(override.aes = list(linewidth = 5))) +
-  theme(plot.margin = unit(c(0, 0, 0, 0.5), "cm"),  panel.border = element_blank())
+  theme(plot.margin = unit(c(0, 0, 0, 0.5), "cm"),  panel.border = element_blank(),
+        axis.title = element_text(size = 18),
+        axis.text = element_text(size = 18), legend.title = element_text(size = 20),
+        legend.text = element_text(size = 17))
   
 
 # ggsave(nu_plot, path = paste0(getwd(), "/tex_files/figures"), filename = "nu_plot.jpeg",
-#        height = 6, width = 10, dpi = 300, units = "in", device = "jpeg",
+#        height = 7, width = 11, dpi = 300, units = "in", device = "jpeg",
 #        limitsize = FALSE, scale = 1)
 
 
@@ -908,6 +918,11 @@ Stationary_estimation_all <- bind_rows(OU_likelihood_tibble, OU_score_tibble, sq
 #   Stationary_estimation_all <- read_csv("data/Stationary_estimation_all.csv")
 # }
 
+Stationary_estimation_all <- Stationary_estimation_all |> 
+  mutate(Model = factor(Model, levels = c("Additive", "Square-root", "Linear", 
+       "t-diffusion", "F-diffusion", "Jacobi-diffusion")),
+       Type = factor(Type, levels = c("Likelihood", "Estimation eq.", "Likelihood (Alt.)")))
+
 parameter_precision_stationary <- Stationary_estimation_all |> filter(Parameter != "running_time") |> 
   ggplot(aes(x = t_0 * 1 / delta, y = ARE, color = Parameter, linetype = Type)) +
   geom_line(linewidth = 1.5) +  
@@ -919,9 +934,12 @@ parameter_precision_stationary <- Stationary_estimation_all |> filter(Parameter 
   scale_color_manual(values = thesis_palette[4:6],
                      labels = expression(alpha*phantom(.)[0], mu*phantom(.)[0], sigma)) +
   labs(x = "N", y = "Absolute Relative Error") +  
-  theme(strip.text = element_text(face = "bold", size = 14), panel.spacing = unit(2, "lines"),
-        axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
-        legend.text  = element_text(size = 16), axis.text = element_text(face = "bold", size = 14)) +
+  theme(strip.text = element_text(face = "bold", size = 18), panel.spacing = unit(2, "lines"),
+        axis.title.x = element_text(face = "bold", size = 18),
+        axis.title.y = element_text(face = "bold", size = 18),
+        legend.text  = element_text(size = 18),
+        legend.title = element_text(face = "bold", size = 18),
+        axis.text = element_text(face = "bold", size = 14)) +
   guides(color = guide_legend(override.aes = list(shape = NA, linewidth = 5)), 
   linetype = guide_legend(override.aes = list(linewidth = 0.75))) +
   scale_linetype_manual(values=c("solid", "dashed", "dotted"))
@@ -934,15 +952,19 @@ parameter_precision_stationary <- Stationary_estimation_all |> filter(Parameter 
 estimation_duration_stationary <- Stationary_estimation_all |>
   filter(Parameter == "running_time") |>
   ggplot(aes(x = t_0 * 1 / delta, y = ARE, linetype = Type, color = Model)) +
-  geom_line(linewidth = 1.95) +  
+  geom_line(linewidth = 2.25) +  
   geom_point(size = 3.5) +
   scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
                 labels = scales::trans_format("log10", scales::math_format(10^.x))) +
   scale_x_log10(breaks = t_0 * 1 / actual_dts) +
   labs(x = "N", y = "Running time (s)") +  
-  theme(axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
-  legend.text  = element_text(size = 14), axis.text = element_text(face = "bold", size = 14),
-  panel.border = element_blank()) +
+  theme(axis.title.x = element_text(face = "bold", size = 18), 
+        axis.title.y = element_text(face = "bold", size = 18),
+  legend.text  = element_text(size = 17),
+  legend.title = element_text(face = "bold", size = 18),
+  axis.text = element_text(face = "bold", size = 16),
+  panel.border = element_blank(),
+  ) +
   scale_color_manual(values = thesis_palette[1:6]) +
   guides(color = guide_legend(override.aes = list(shape = NA, linewidth = 5)), 
          linetype = guide_legend(override.aes = list(linewidth = 0.75))) +
@@ -996,11 +1018,15 @@ Type = factor(Type, levels = c("Strang", "Strang (Alt.)")))
 # } else{
 #   Dynamic_estimation_all <- read_csv("data/Dynamic_estimation_all.csv")
 # }
+Dynamic_estimation_all <- Dynamic_estimation_all |> 
+mutate(Model = factor(Model, levels = c("Additive", "Square-root", "Linear", 
+                                        "t-diffusion", "F-diffusion", "Jacobi-diffusion")),
+       Type = factor(Type, levels = c("Strang", "Strang (Alt.)")))
 
 
 parameter_precision_dynamic <- Dynamic_estimation_all |> filter(Parameter != "running_time") |> 
   ggplot(aes(x = tau * 1 / delta, y = ARE, color = Parameter, linetype = Type)) +
-  geom_line(linewidth = 1.5) +  
+  geom_line(linewidth = 2.25) +  
   geom_point(size = 3) +
   facet_wrap(~Model) + 
   scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -1009,9 +1035,12 @@ parameter_precision_dynamic <- Dynamic_estimation_all |> filter(Parameter != "ru
   scale_color_manual(values = thesis_palette[4:6],
                      labels = expression(A, tau*phantom(.)[c])) +
   labs(x = "N", y = "Absolute Relative Error") +  
-  theme(strip.text = element_text(face = "bold", size = 14), panel.spacing = unit(2, "lines"),
-        axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
-        legend.text  = element_text(size = 16), axis.text = element_text(face = "bold", size = 14)) +
+  theme(strip.text = element_text(face = "bold", size = 18), panel.spacing = unit(2, "lines"),
+        axis.title.x = element_text(face = "bold", size = 18),
+        axis.title.y = element_text(face = "bold", size = 18),
+        legend.text  = element_text(size = 18),
+        legend.title = element_text(face = "bold", size = 18),
+        axis.text = element_text(face = "bold", size = 14)) + 
   guides(color = guide_legend(override.aes = list(shape = NA, linewidth = 5)), 
          linetype = guide_legend(override.aes = list(linewidth = 0.75))) +
   scale_linetype_manual(values=c("solid", "dashed", "dotted"))
@@ -1029,8 +1058,10 @@ estimation_duration_dynamic <-  Dynamic_estimation_all |> filter(Parameter == "r
                 labels = scales::trans_format("log10", scales::math_format(10^.x))) +
   scale_x_log10(breaks = tau * 1 / actual_dts) +
   labs(x = "N", y = "Running time (s)") + 
-  theme(axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
-        legend.text  = element_text(size = 14), axis.text = element_text(face = "bold", size = 14),
+  theme(axis.title.x = element_text(face = "bold", size = 14),
+        axis.title.y = element_text(face = "bold"),
+        legend.text  = element_text(size = 14),
+        axis.text = element_text(face = "bold", size = 14),
         panel.border = element_blank()) +
   scale_color_manual(values = thesis_palette[1:6]) +
   guides(color = guide_legend(override.aes = list(shape = NA, linewidth = 5)), 
@@ -1214,23 +1245,28 @@ error_count_tibble_long <- error_count_tibble |>
          Model = factor(Model, levels = c("Additive", "t-diffusion", "Both")),
   error_proportion = Error_count / (Error_count + numSim))
 
-if(!file.exists("data/error_count_nu_data.csv")){
-  utils::write.table(error_count_tibble_long, file="data/error_count_nu_data.csv",
-                     sep = ",", row.names = FALSE)
-} else{
-  error_count_tibble_long <- read_csv("data/error_count_nu_data.csv")
-}
+# if(!file.exists("data/error_count_nu_data.csv")){
+#   utils::write.table(error_count_tibble_long, file="data/error_count_nu_data.csv",
+#                      sep = ",", row.names = FALSE)
+# } else{
+#   error_count_tibble_long <- read_csv("data/error_count_nu_data.csv")
+# }
+error_count_tibble_long <- error_count_tibble_long |> 
+mutate(nu = factor(round(as.numeric(nu), 2)),
+       Model = factor(Model, levels = c("Additive", "t-diffusion", "Both")))
 
-error_count_plot <- error_count_tibble_long |> ggplot(aes(x = nu, y = error_proportion, fill = Model)) +
-  geom_col(position = "dodge2", col = "black") +
+error_count_plot <- error_count_tibble_long |>
+  ggplot(aes(x = nu, y = error_proportion, fill = Model)) +
+  geom_col(position = "dodge2", col = "black", linewidth = 0.5) +
   facet_wrap(~factor(N)) +
   scale_fill_manual(values = thesis_palette) +
   scale_y_continuous(labels = scales::percent) + 
   labs(x = expression(nu*phantom(.)[sim]), y = "") +  
-  theme(strip.text = element_text(face = "bold", size = 14), panel.spacing = unit(2, "lines"),
-        axis.title.x = element_text(size = 18), axis.title.y = element_text(face = "bold"),
-        legend.text  = element_text(size = 16), axis.text = element_text(size = 14)) +
-  guides(fill = guide_legend(override.aes = list(shape = NA, col = NA)))
+  theme(strip.text = element_text(face = "bold", size = 18), panel.spacing = unit(2, "lines"),
+        axis.title.x = element_text(size = 22), axis.title.y = element_text(face = "bold"),
+        legend.title = element_text(size = 20),
+        legend.text  = element_text(size = 20), axis.text = element_text(size = 16)) +
+  guides(fill = guide_legend(override.aes = list(size = 5, shape = NA, col = NA)))
 
 ggsave(error_count_plot, path = paste0(getwd(), "/tex_files/figures"),
        filename = "error_count_plot.jpeg",
@@ -1255,16 +1291,25 @@ combined_nus_tibble_long <- combined_nus_tibble |>
 #   combined_nus_tibble_long <- read_csv("data/nu_estimation_ARE.csv")
 # }
 
+
+combined_nus_tibble_long <- combined_nus_tibble_long |> 
+  mutate(nu = factor(round(as.numeric(nu), 2)))
+
 combined_nus_plot <- combined_nus_tibble_long |> ggplot(aes(x = N, y = ARE, col = nu)) +
-  geom_line(linewidth = 1.5) + geom_point(size = 3) + 
+  geom_line(linewidth = 2.25) + geom_point(size = 3) + 
   facet_grid(Model ~ Parameter, 
              scales = "free_y", labeller = label_parsed) +
   scale_x_log10(breaks = tau / actual_dt) +
   scale_color_manual(values = thesis_palette) +
   labs(x = "N", y = "Absolute Relative Error", color = expression(nu*phantom(.)[sim])) +  
-  theme(strip.text = element_text(face = "bold", size = 16), panel.spacing = unit(2, "lines"),
-        axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
-        legend.text  = element_text(size = 14), axis.text = element_text(size = 14)) +
+  theme(strip.text = element_text(face = "bold", size = 22),
+        panel.spacing = unit(2.25, "lines"),
+        axis.title.x = element_text(face = "bold", size = 20),
+        axis.title.y = element_text(face = "bold", size = 20),
+        legend.text  = element_text(size = 20),
+        legend.title = element_text(size = 22),
+        axis.text = element_text(size = 16, face = "bold"),
+        axis.text.x = element_text(size = 16, face = "bold", angle = 315)) +
   guides(color = guide_legend(override.aes = list(shape = NA, linewidth = 7.5)))
   
 ggsave(combined_nus_plot, path = paste0(getwd(), "/tex_files/figures"),
@@ -1421,7 +1466,7 @@ ggplot(combined_data, aes(x = x, y = median, fill = model)) +
   xlab("Observations until time") + ylab("Relative deviation from tipping time")
 
 
-### Numeric Strang splitting
+### Numerical Strang splitting
 ## F-diffusion based model
 F_lamperti_drift <- function(y, par){
   beta  <- par[1]
@@ -1832,30 +1877,42 @@ ARE_dist_result <- bind_rows(ARE_F_closed_alpha_tibble, ARE_F_numeric_alpha_tibb
 # }
 
 ARE_dist_result_plot_Linear <- ARE_dist_result |> filter(Model == "Linear") |> 
+  mutate(Type = ifelse(Type == "Numeric", "Numerical", Type)) |> 
   ggplot(aes(x = Type, y = ARE, fill = Parameter)) +
   geom_violin(scale = "width") + 
   facet_wrap(~factor(N), ncol = 5) +
   scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
                 labels = scales::trans_format("log10", scales::math_format(10^.x))) + 
-  theme(axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
-        legend.text  = element_text(size = 14), axis.text = element_text(face = "bold", size = 14)) +
-  scale_fill_manual(values = thesis_palette, labels = expression(alpha*phantom(.)[0], mu*phantom(.)[0], sigma)) +
+  theme(axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold", size = 18),
+        legend.text  = element_text(size = 20),
+        strip.text = element_text(size = 20),
+        legend.title = element_text(size = 18),
+        axis.text = element_text(face = "bold", size = 13)) +
+  scale_fill_manual(values = thesis_palette,
+                    labels = expression(alpha*phantom(.)[0], mu*phantom(.)[0], sigma)) +
   xlab("")
 
-# ggsave(ARE_dist_result_plot_Linear, path = paste0(getwd(), "/tex_files/figures"),
-#        filename = "ARE_dist_result_plot_Linear.jpeg",
-#        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
-#        limitsize = FALSE, scale = 1)
+ggsave(ARE_dist_result_plot_Linear, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "ARE_dist_result_plot_Linear.jpeg",
+       height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
 
 ARE_dist_result_plot_F <- ARE_dist_result |> filter(Model == "F-diffusion") |> 
+  mutate(Type = ifelse(Type == "Numeric", "Numerical", Type)) |> 
   ggplot(aes(x = Type, y = ARE, fill = Parameter)) +
   geom_violin(scale = "width") + 
   facet_wrap(~factor(N), ncol = 5) + 
   scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
                 labels = scales::trans_format("log10", scales::math_format(10^.x))) + 
-  theme(axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
-        legend.text  = element_text(size = 14), axis.text = element_text(face = "bold", size = 14)) +
-  scale_fill_manual(values = thesis_palette, labels = expression(alpha*phantom(.)[0], mu*phantom(.)[0], sigma)) +
+  theme(axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold", size = 18),
+        legend.text  = element_text(size = 20),
+        strip.text = element_text(size = 20),
+        legend.title = element_text(size = 18),
+        axis.text = element_text(face = "bold", size = 13)) +
+  scale_fill_manual(values = thesis_palette,
+                    labels = expression(alpha*phantom(.)[0], mu*phantom(.)[0], sigma)) +
   xlab("")
 
 # ggsave(ARE_dist_result_plot_F, path = paste0(getwd(), "/tex_files/figures"),
@@ -1936,20 +1993,25 @@ Running_result <- bind_rows(
 # }
 
 Running_result_numeric_plot <- Running_result |> 
-  ggplot(aes(x = N, y = Median, col = Type, fill = Type)) + geom_line(linewidth = 1.5) + geom_point(size = 3) + 
-  geom_ribbon(aes(ymin = Lower, ymax = Upper), alpha = 0.2) + 
+  ggplot(aes(x = N, y = Median, col = Type, fill = Type)) +
+  geom_line(linewidth = 2) + geom_point(size = 4) + 
+  geom_ribbon(aes(ymin = Lower, ymax = Upper), alpha = 0.15) + 
   facet_wrap(~Model) +
   scale_x_log10(breaks = t_0 / actual_dts) + scale_y_log10() + 
   scale_fill_manual(values = thesis_palette) + scale_color_manual(values = thesis_palette) +
-  theme(strip.text = element_text(face = "bold", size = 16), panel.spacing = unit(3, "lines"),
-        axis.title.x = element_text(face = "bold", size = 14), axis.title.y = element_text(face = "bold"),
-        legend.text  = element_text(size = 14), axis.text = element_text(size = 14)) + 
+  theme(strip.text = element_text(face = "bold", size = 20),
+        panel.spacing = unit(3, "lines"),
+        axis.title.x = element_text(face = "bold", size = 18),
+        axis.title.y = element_text(face = "bold", size = 18),
+        legend.title = element_text(face = "bold", size = 20),
+        legend.text  = element_text(size = 22), axis.text = element_text(size = 15),
+        axis.text.y = element_text(size = 18)) + 
   ylab("Running time (s)")
 
-# ggsave(Running_result_numeric_plot, path = paste0(getwd(), "/tex_files/figures"),
-#        filename = "Running_result_numeric.jpeg",
-#        height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
-#        limitsize = FALSE, scale = 1)
+ggsave(Running_result_numeric_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "Running_result_numeric.jpeg",
+       height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
 
 
 # Number of iterations
@@ -1984,38 +2046,47 @@ function_gradient_count_result_long <- function_gradient_count_result |>
 # } else{
 #   function_gradient_count_result_long <- read_csv("data/gradientAndFunctionCount.csv")
 # }
-# function_gradient_count_Linear_plot <- function_gradient_count_result_long |>
-#   filter(Model == "Linear") |>
-#   ggplot(aes(x = Method, y = Count, fill = Type)) + 
-#   geom_boxplot(alpha = 0.85) + scale_y_log10() + 
-#   facet_wrap(~factor(N), ncol = 5) + 
-#   scale_fill_manual(values = thesis_palette) +
-#   xlab("") + 
-#   ylab("Number of Evaluations") + 
-#   theme(
-#     strip.text = element_text(size = 14, face = "bold"),
-#     axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
-#     axis.text.y = element_text(size = 14),
-#     legend.key.size = unit(2, 'lines')
-#   )
 
-# ggsave(function_gradient_count_Linear_plot, path = paste0(getwd(), "/tex_files/figures"),
-#        filename = "function_gradient_count_Linear_plot.jpeg",
-#        height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
-#        limitsize = FALSE, scale = 1)
+function_gradient_count_Linear_plot <- function_gradient_count_result_long |>
+  filter(Model == "Linear") |> 
+  mutate(Method = ifelse(Method == "Numeric", "Numerical", Method)) |> 
+  ggplot(aes(x = Method, y = Count, fill = Type)) +
+  geom_boxplot(alpha = 0.85) + scale_y_log10() +
+  facet_wrap(~factor(N), ncol = 5) +
+  scale_fill_manual(values = thesis_palette) +
+  xlab("") +
+  ylab("Number of Evaluations") +
+  theme(
+    strip.text = element_text(size = 22, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 20),
+    legend.title = element_text(size = 22, face = "bold"),
+    legend.text = element_text(size = 22),
+    axis.text.y = element_text(size = 20),
+    axis.title.y = element_text(size = 20),
+    legend.key.size = unit(2, 'lines')
+  )
+
+ggsave(function_gradient_count_Linear_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "function_gradient_count_Linear_plot.jpeg",
+       height = 8, width = 16, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
 
 function_gradient_count_F_plot <- function_gradient_count_result_long |>
   filter(Model == "F-diffusion") |>
-  ggplot(aes(x = Method, y = Count, fill = Type)) + 
-  geom_boxplot(alpha = 0.85) + scale_y_log10() + 
-  facet_wrap(~factor(N), ncol = 5) + 
+  mutate(Method = ifelse(Method == "Numeric", "Numerical", Method)) |>  
+  ggplot(aes(x = Method, y = Count, fill = Type)) +
+  geom_boxplot(alpha = 0.85) + scale_y_log10() +
+  facet_wrap(~factor(N), ncol = 5) +
   scale_fill_manual(values = thesis_palette) +
-  xlab("") + 
-  ylab("Number of Evaluations") + 
+  xlab("") +
+  ylab("Number of Evaluations") +
   theme(
-    strip.text = element_text(size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
-    axis.text.y = element_text(size = 14),
+    strip.text = element_text(size = 22, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 20),
+    legend.title = element_text(size = 22, face = "bold"),
+    legend.text = element_text(size = 22),
+    axis.text.y = element_text(size = 20),
+    axis.title.y = element_text(size = 20),
     legend.key.size = unit(2, 'lines')
   )
 
@@ -2274,16 +2345,16 @@ quantiles_plot_tau <- final_combined_tau_quantiles_long |>
   labs(color = expression(tau)) + xlab("Theoretical quantiles") + 
   ylab("Empirical quantiles") + 
   theme(
-    strip.text = element_text(size = 22, face = "bold"),
-    axis.title = element_text(face = "bold", size = 22),
+    strip.text = element_text(size = 24, face = "bold"),
+    axis.title = element_text(face = "bold", size = 24),
     legend.title = element_text(size = 30),
-    legend.text = element_text(size = 18),
-    axis.text = element_text(size = 18)
+    legend.text = element_text(size = 28),
+    axis.text = element_text(size = 24)
   )
 
 # ggsave(quantiles_plot_tau, path = paste0(getwd(), "/tex_files/figures"),
 #        filename = "quantiles_plot_tau.jpeg",
-#        height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+#        height = 7, width = 16, dpi = 300, units = "in", device = "jpeg",
 #        limitsize = FALSE, scale = 1)
 
 stationary_parameters_misspecification <- map2_dfr(results_list$stationary_estim_param, tau_values, ~{
@@ -2335,15 +2406,15 @@ RE_dist_tau <- dynamic_parameters_misspecification_long |>
   xlab(expression(tau)) +
   theme(
     axis.title.x = element_text(size = 30, face = "bold", margin = margin(t = 20)),
-    axis.title.y = element_text(size = 20, face = "bold"),
-    axis.text = element_text(size = 16, face = "bold"),
+    axis.title.y = element_text(size = 25, face = "bold"),
+    axis.text = element_text(size = 24, face = "bold"),
     legend.title = element_text(size = 26, face = "bold"),
     legend.text = element_text(size = 24)
   )
 
 # ggsave(RE_dist_tau, path = paste0(getwd(), "/tex_files/figures"),
 #        filename = "RE_dist_tau.jpeg",
-#        height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+#        height = 7, width = 16, dpi = 300, units = "in", device = "jpeg",
 #        limitsize = FALSE, scale = 1)
 
 ###------------------------------------------------------------------------###
@@ -2586,16 +2657,17 @@ AMOC_data_plot <- AMOC_data_longer  |>
     legend.title = element_blank(),
     strip.text = element_blank(),
     legend.key.size = unit(1, 'lines'),
+    legend.position = "bottom",
     legend.text = element_text(face = "bold", size = 22),
     axis.text = element_text(face = "bold", size = 24),
     axis.title = element_text(face = "bold", size = 26),
   ) + 
   xlab("Year") + ylab("[K]") + 
-  guides(col = guide_legend(override.aes = list(linewidth = 6)))
+  guides(col = guide_legend(override.aes = list(linewidth = 10)))
 
 ggsave(AMOC_data_plot, path = paste0(getwd(), "/tex_files/figures"),
        filename = "AMOC_data_plot.jpeg",
-       height = 10, width = 22, dpi = 300, units = "in", device = "jpeg",
+       height = 12, width = 22, dpi = 300, units = "in", device = "jpeg",
        limitsize = FALSE, scale = 1)
 
 AMOC_alt_plot <- AMOC_data_longer  |> 
@@ -3012,9 +3084,9 @@ estim_tibble_plot <- estim_tibble_long |> ggplot(aes(x = value, y = after_stat(d
   scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) + 
   theme(strip.text.x = element_blank(),
         panel.spacing = unit(1.5, "lines"),
-        axis.title.x = element_text(face = "bold", size = 16),
+        axis.title.x = element_text(face = "bold", size = 20),
         legend.title = element_text(size = 20),
-        legend.text = element_text(size = 14)
+        legend.text = element_text(size = 20)
         ) + 
   scale_fill_manual(values = thesis_palette,
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
@@ -3407,13 +3479,14 @@ estim_tibble_additive_plot <- estim_tibble_additive_long |> ggplot(aes(x = value
   scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) + 
   theme(strip.text.x = element_blank(),
         panel.spacing = unit(1.5, "lines"),
-        axis.title.x = element_text(face = "bold", size = 16),
+        axis.title.x = element_text(face = "bold", size = 20),
         legend.title = element_text(size = 20),
-        legend.text = element_text(size = 14)
+        legend.text = element_text(size = 20)
   ) + 
   scale_fill_manual(values = thesis_palette,
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
+
 
 ggsave(estim_tibble_additive_plot, path = paste0(getwd(), "/tex_files/figures"),
        filename = "estim_tibble_additive_plot.jpeg",
@@ -3644,13 +3717,14 @@ estim_tibble_AMOC1_plot <- estim_tibble_AMOC1_long |>
   scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) + 
   theme(strip.text.x = element_blank(),
         panel.spacing = unit(1.5, "lines"),
-        axis.title.x = element_text(face = "bold", size = 16),
+        axis.title.x = element_text(face = "bold", size = 20),
         legend.title = element_text(size = 20),
-        legend.text = element_text(size = 14)
+        legend.text = element_text(size = 20)
   ) + 
   scale_fill_manual(values = thesis_palette,
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
+
 
 ggsave(estim_tibble_AMOC1_plot, path = paste0(getwd(), "/tex_files/figures"),
        filename = "estim_tibble_AMOC1_plot.jpeg",
@@ -3833,9 +3907,9 @@ estim_tibble_AMOC3_plot <- estim_tibble_AMOC3_long |> ggplot(aes(x = value, y = 
   scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) + 
   theme(strip.text.x = element_blank(),
         panel.spacing = unit(1.5, "lines"),
-        axis.title.x = element_text(face = "bold", size = 16),
+        axis.title.x = element_text(face = "bold", size = 20),
         legend.title = element_text(size = 20),
-        legend.text = element_text(size = 14)
+        legend.text = element_text(size = 20)
   ) + 
   scale_fill_manual(values = thesis_palette,
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
@@ -4032,9 +4106,9 @@ estim_tibble_additive_AMOC1_plot <- estim_tibble_additive_AMOC1_long |> ggplot(a
   scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) + 
   theme(strip.text.x = element_blank(),
         panel.spacing = unit(1.5, "lines"),
-        axis.title.x = element_text(face = "bold", size = 16),
+        axis.title.x = element_text(face = "bold", size = 20),
         legend.title = element_text(size = 20),
-        legend.text = element_text(size = 14)
+        legend.text = element_text(size = 20)
   ) + 
   scale_fill_manual(values = thesis_palette,
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
@@ -4232,9 +4306,9 @@ estim_tibble_additive_AMOC3_plot <- estim_tibble_additive_AMOC3_long |>
   scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) + 
   theme(strip.text.x = element_blank(),
         panel.spacing = unit(1.5, "lines"),
-        axis.title.x = element_text(face = "bold", size = 16),
+        axis.title.x = element_text(face = "bold", size = 20),
         legend.title = element_text(size = 20),
-        legend.text = element_text(size = 14)
+        legend.text = element_text(size = 20)
   ) + 
   scale_fill_manual(values = thesis_palette,
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
