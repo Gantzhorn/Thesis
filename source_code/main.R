@@ -1,3 +1,14 @@
+# Title: Main function for the thesis
+# Author: Anders Gantzhorn Kristensen (University of Copenhagen, andersgantzhorn@gmail.com)
+# Date: 2024-01-31 (Last Updated: 2024-05-27)
+#-----------------------------------------------------------------------------------------------------------------------------#
+# Project: Tipping Point Estimation in Ecological Systems using Stochastic Differential Equations
+# Description: This script builds an runs all the experiments and results shown in the thesis.
+#-----------------------------------------------------------------------------------------------------------------------------#
+# License: MIT License (for more information, see LICENSE file in the repository).
+# Dependencies: tidyverse and requirements from sourced files.
+#-----------------------------------------------------------------------------------------------------------------------------#
+
 library(tidyverse)
 source("source_code/tipping_simulations.R")
 source("source_code/model_fitting.R")
@@ -48,6 +59,7 @@ simulate_multiple_times <- function(simulate_function, n_times, ...) {
   simulate_res$sample_id <- factor(simulate_res$sample_id)
   simulate_res
 }
+
 numSim <- 3
 methodPlotseed <- 210424 
 xs_all <- bind_rows(
@@ -94,8 +106,55 @@ sample_paths_plot_small_scale <- ggplot(xs_all, aes(x = t, y = X_t, color = Mode
         legend.key.height = unit(1, "lines"),
         legend.position = "bottom")
 
-ggsave(sample_paths_plot_small_scale, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "sample_paths_plot_small_scale.jpeg",
+# ggsave(sample_paths_plot_small_scale, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "sample_paths_plot_small_scale.jpeg",
+#        height = 8, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
+
+# For the appendix create the same plot but reversed
+true_param_reversed <- c(-1.5, 0.4, 0.2, 0.1)
+
+methodPlotseed <- 210424 
+xs_all_reversed <- bind_rows(
+  simulate_multiple_times(simulate_additive_noise_tipping_model, numSim, actual_dt, true_param_reversed, tau, t_0)  |> 
+    mutate(Model = "Additive"),
+  simulate_multiple_times(simulate_squareroot_noise_tipping_model, numSim, actual_dt, true_param_reversed, tau, t_0) |>
+    mutate(Model = "Square root"),
+  simulate_multiple_times(simulate_linear_noise_tipping_model, numSim, actual_dt, true_param_reversed, tau, t_0) |>
+    mutate(Model = "Linear"),
+  simulate_multiple_times(simulate_t_distribution_tipping_model, numSim, actual_dt, true_param_reversed, tau, t_0) |>
+    mutate(Model = "t-distribution"),
+  simulate_multiple_times(simulate_F_distribution_tipping_model, numSim, actual_dt, true_param_reversed, tau, t_0) |>
+    mutate(Model = "F-distribution"),
+  simulate_multiple_times(simulate_jacobi_diffusion_tipping_model, numSim, actual_dt, true_param_reversed, tau, t_0) |>
+    mutate(Model = "Jacobi diffusion")
+) |> 
+  mutate(Model = factor(Model,
+                        levels = c("Additive", "Square root", "Linear",
+                                   "t-distribution", "F-distribution", "Jacobi diffusion")))
+
+sample_paths_plot_small_scale_reversed <- ggplot(xs_all_reversed, aes(x = t, y = X_t, color = Model)) +
+  geom_line(data = fixed_point_lines, aes(x = t, y = upper), linewidth = 1, linetype = "dashed", color = "grey25") +
+  geom_line(data = fixed_point_lines, aes(x = t, y = lower), linewidth = 0.85, linetype = "solid", color = "grey25") +
+  geom_step(linewidth = 0.5) + 
+  geom_hline(yintercept = true_param[2], linetype = "dashed") +
+  facet_grid(sample_id ~ Model) +
+  ylim(-0.2, 0.8) +
+  scale_color_manual(values = thesis_palette) +
+  labs(y = expression(X[t])) + 
+  guides(color = guide_legend(override.aes = list(linewidth = 5))) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) + 
+  theme(legend.text=element_text(size=20),
+        legend.title = element_text(size = 22),
+        axis.title = element_text(size = 22),
+        strip.text.x = element_blank(),
+        strip.text.y = element_blank(),
+        legend.key.width = unit(2, "lines"),
+        legend.key.height = unit(1, "lines"),
+        legend.position = "bottom")
+
+ggsave(sample_paths_plot_small_scale_reversed, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "sample_paths_plot_small_scale_reversed.jpeg",
        height = 8, width = 13, dpi = 300, units = "in", device = "jpeg",
        limitsize = FALSE, scale = 1)
 
@@ -154,6 +213,51 @@ sample_paths_plot_big_scale <- ggplot(xs_all, aes(x = t, y = X_t, color = Model)
 
 ggsave(sample_paths_plot_big_scale, path = paste0(getwd(), "/tex_files/figures"),
        filename = "sample_paths_plot_big_scale.jpeg",
+       height = 8, width = 13, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
+
+# For the appendix create the same plot but reversed
+true_param_reversed <- c(-1.5, 3, 1.75, 0.1)
+
+methodPlotseed <- 210424 
+xs_all_reversed <- bind_rows(
+  simulate_multiple_times(simulate_additive_noise_tipping_model, numSim, actual_dt, true_param_reversed, tau, t_0)  |> 
+    mutate(Model = "Additive"),
+  simulate_multiple_times(simulate_squareroot_noise_tipping_model, numSim, actual_dt, true_param_reversed, tau, t_0) |>
+    mutate(Model = "Square root"),
+  simulate_multiple_times(simulate_linear_noise_tipping_model, numSim, actual_dt, true_param_reversed, tau, t_0) |>
+    mutate(Model = "Linear"),
+  simulate_multiple_times(simulate_t_distribution_tipping_model, numSim, actual_dt, true_param_reversed, tau, t_0) |>
+    mutate(Model = "t-distribution"),
+  simulate_multiple_times(simulate_F_distribution_tipping_model, numSim, actual_dt, true_param_reversed, tau, t_0) |>
+    mutate(Model = "F-distribution")
+) |> 
+  mutate(Model = factor(Model,
+                        levels = c("Additive", "Square root", "Linear",
+                                   "t-distribution", "F-distribution")))
+
+sample_paths_plot_big_scale_reversed <- ggplot(xs_all_reversed, aes(x = t, y = X_t, color = Model)) +
+  geom_line(data = fixed_point_lines_big, aes(x = t, y = upper), linewidth = 1, linetype = "dashed", color = "grey25") +
+  geom_line(data = fixed_point_lines_big, aes(x = t, y = lower), linewidth = 0.85, linetype = "solid", color = "grey25") +
+  geom_step(linewidth = 0.5) + 
+  geom_hline(yintercept = true_param[2], linetype = "dashed") +
+  facet_grid(sample_id ~ Model) +
+  ylim(1.5, 5) +
+  scale_color_manual(values = thesis_palette) +
+  labs(y = expression(X[t])) + 
+  guides(color = guide_legend(override.aes = list(linewidth = 5))) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) + 
+  theme(legend.text=element_text(size=20),
+        legend.title = element_text(size = 22),
+        axis.title = element_text(size = 22),
+        strip.text.x = element_blank(),
+        strip.text.y = element_blank(),
+        legend.key.width = unit(2, "lines"),
+        legend.key.height = unit(1, "lines"),
+        legend.position = "bottom")
+
+ggsave(sample_paths_plot_big_scale_reversed, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "sample_paths_plot_big_scale_reversed.jpeg",
        height = 8, width = 13, dpi = 300, units = "in", device = "jpeg",
        limitsize = FALSE, scale = 1)
 

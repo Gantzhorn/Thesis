@@ -828,8 +828,8 @@ The ODE is found residually and solved using our fourth-order Runge-kutta. That 
 \end{align}
 Both of which can be solved as we have done so numerous times in other sections. Likewise, we can construct the Strang estimator in the way we have done many times before.
 \newpage
-\section{Benchmark and auxilliary plots}\label{section:benchmark}
-In this section we show the results of a few benchmarks using the \code{microbenchmark} package \cite{microbenchmark} along with other auxilliary figures that underpin the analysis. The figures are put in the order in which they appear in the project. The code was run on a machine with the following hardware and software.
+\section{Benchmark and auxiliary plots}\label{section:benchmark}
+In this section we show the results of a few benchmarks using the \code{microbenchmark} package \cite{microbenchmark} along with other auxiliary figures that underpin the analysis. The figures are put in the order in which they appear in the project. The code was run on a machine with the following hardware and software.
 \begin{table}[ht]
     \centering
     \begin{tabular}{@{}ll@{}}
@@ -851,7 +851,23 @@ In this section we show the results of a few benchmarks using the \code{microben
     \caption{Hardware specifications}
     \label{tab:specs}
     \end{table}
+\newpage
+\subsection{Methods}
+\begin{figure}[h!]
+    \begin{center}
+        \includegraphics[scale = .1]{figures/sample_paths_plot_small_scale_reversed.jpeg}
+        \caption{The same dynamics as shown in \ref{figure:samplesFromAllDifferentModels}, though we use the other branch of (\ref{eq:standardform}).}
+        \label{figure:samplesFromAllDifferentModelsReversed}
+    \end{center}
+\end{figure}
 
+\begin{figure}[h!]
+    \begin{center}
+        \includegraphics[scale = .1]{figures/sample_paths_plot_big_scale_reversed.jpeg}
+        \caption{The same dynamics as shown in \ref{figure:samplesFromFiveDifferentModels}, though we use the other branch of (\ref{eq:standardform}).}
+        \label{figure:samplesFromFiveDifferentModelsReversed}
+    \end{center}
+\end{figure}
 \subsection{Simulation studies}
 \begin{figure}[h!]
     \begin{center}
