@@ -1,6 +1,6 @@
 # Title: Simulation of Stochastic Differential Equations for Tipping Points Analysis
 # Author: Anders Gantzhorn Kristensen (University of Copenhagen, andersgantzhorn@gmail.com)
-# Date: 2024-01-31 (Last Updated: 2024-04-19)
+# Date: 2024-01-31 (Last Updated: 2024-05-28)
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Project: Tipping Point Estimation in Ecological Systems using Stochastic Differential Equations
 # Description: This script implements methods for simulating different types of Stochastic differential equation to model
@@ -13,6 +13,7 @@
 # Acknowledgements: For algorithm see: Applied Stochastic Differential Equations Särkkä, Simo and Solin, Arno - Algorithm 8.5.
 # Keywords: Stochastic Differential Equations, Tipping Points, Simulation, Itô-taylor weak order 2.0
 #-----------------------------------------------------------------------------------------------------------------------------#
+
 # Implementation for model with additive noise structure
 simulate_additive_noise_tipping_model <- function(step_length, par,
                                                   tau = 100, t_0 = 10,
@@ -24,6 +25,7 @@ simulate_additive_noise_tipping_model <- function(step_length, par,
   sigma    <- par[4]
   nu       <- if(length(par) == 5) par[5] else 1
   
+  # Initial point in fixed point of process if none specified
   if(is.na(X_0)){
     X_0 <- m + ifelse(A >=0, 1, -1) * sqrt(abs(lambda_0 / A))
   }
@@ -36,7 +38,7 @@ simulate_additive_noise_tipping_model <- function(step_length, par,
   X_t    <- numeric(N + 1) # N + 1 to include the initial point
   X_t[1] <- X_0
   
-  if(!is.na(seed)){dqrng::dqset.seed(seed)}
+  if(!is.na(seed)){dqrng::dqset.seed(seed)} #sets seed for dqrng based on specified seed
   dW            <- dqrng::dqrnorm(N, mean = 0, sd = sqrt(step_length))
   time          <- step_length * 0:N
   lambda_t      <- numeric(N + 1)
@@ -45,9 +47,9 @@ simulate_additive_noise_tipping_model <- function(step_length, par,
   mu_t          <- m + sqrt(abs(lambda_t/A))
   
   for(i in (2:(N+1))){
-    X_t[i] <- X_t[i - 1] - (A*(X_t[i - 1] - m)^2 + lambda_t[i - 1]) * step_length +
-      sigma * dW[i - 1] - 2 * A *(X_t[i - 1] - m) * sigma * (1 / 2 * dW[i - 1] * step_length) + 
-      1 / 2 * (2 * A * (X_t[i - 1] - m) * (A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) - A * sigma^2) * step_length^2
+    X_t[i] <- X_t[i - 1] - (A*(X_t[i - 1] - m)^2 + lambda_t[i - 1]) * step_length + sigma * dW[i - 1] -
+    2 * A *(X_t[i - 1] - m) * sigma * (1 / 2 * dW[i - 1] * step_length) + 
+    (A * (X_t[i - 1] - m) * (A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) - 1/2 * A * sigma^2) * step_length^2
     
   }
   
@@ -70,6 +72,7 @@ simulate_squareroot_noise_tipping_model<- function(step_length, par,
   sigma    <- par[4]
   nu       <- if(length(par) == 5) par[5] else 1
   
+  # Initial point in fixed point of process if none specified
   if(is.na(X_0)){
     X_0 <- m + ifelse(A >=0, 1, -1) * sqrt(abs(lambda_0 / A))
   }
@@ -81,8 +84,8 @@ simulate_squareroot_noise_tipping_model<- function(step_length, par,
   # Initialize the process
   X_t    <- numeric(N + 1) # N + 1 to include the initial point
   X_t[1] <- X_0
-  
-  if(!is.na(seed)){dqrng::dqset.seed(seed)}
+
+  if(!is.na(seed)){dqrng::dqset.seed(seed)} #sets seed for dqrng based on specified seed
   dW            <- dqrng::dqrnorm(N, mean = 0, sd = sqrt(step_length))
   time          <- step_length * 0:N
   lambda_t      <- numeric(N + 1)
@@ -91,14 +94,14 @@ simulate_squareroot_noise_tipping_model<- function(step_length, par,
   mu_t          <- m + sqrt(abs(lambda_t/A))
   
   for(i in (2:(N+1))){
-    X_t[i] <- X_t[i - 1] - (A*(X_t[i - 1] - m)^2 + lambda_t[i - 1]) * step_length +
-      sigma * sqrt(X_t[i - 1]) * dW[i - 1] +
-      1/4 * sigma^2 * (dW[i - 1]^2 - step_length) -
-      2 * A * (X_t[i - 1] - m) * sigma * sqrt(X_t[i - 1]) * (1/2 * dW[i - 1] * step_length) +
-      ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * (A * (X_t[i - 1] - m)) -
-         1/2 * A * sigma^2 * X_t[i - 1]) * (step_length)^2 -
-      1 / (4 * sqrt(X_t[i - 1])) * ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) + sigma^3 / 4) *
-      (dW[i - 1] * step_length)
+    X_t[i] <- X_t[i - 1] - (A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * step_length +
+    sigma * sqrt(X_t[i - 1]) * dW[i - 1] +
+    1/4 * sigma^2 * (dW[i - 1]^2 - step_length) -
+    A * (X_t[i - 1] - m) * sigma * sqrt(X_t[i - 1]) * (dW[i - 1] * step_length) +
+    ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * (A * (X_t[i - 1] - m)) -
+        1/2 * A * sigma^2 * X_t[i - 1]) * (step_length)^2 -
+    1 / (4 * sqrt(X_t[i - 1])) * ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) + sigma^3 / 4) *
+        (dW[i - 1] * step_length)
   }
   tibble::tibble(t = time,
          X_t,
@@ -118,7 +121,7 @@ simulate_linear_noise_tipping_model<- function(step_length, par,
   lambda_0 <- par[3]
   sigma    <- par[4]
   nu       <- if(length(par) == 5) par[5] else 1
-  
+  # Initial point in fixed point of process if none specified
   if(is.na(X_0)){
     X_0 <- m + ifelse(A >= 0, 1, -1) * sqrt(abs(lambda_0 / A))
   }
@@ -131,7 +134,7 @@ simulate_linear_noise_tipping_model<- function(step_length, par,
   X_t    <- numeric(N + 1) # N + 1 to include the initial point
   X_t[1] <- X_0
   
-  if(!is.na(seed)){dqrng::dqset.seed(seed)}
+  if(!is.na(seed)){dqrng::dqset.seed(seed)} #sets seed for dqrng based on specified seed
   dW            <- dqrng::dqrnorm(N, mean = 0, sd = sqrt(step_length))
   time          <- step_length * 0:N
   lambda_t      <- numeric(N + 1)
@@ -141,16 +144,13 @@ simulate_linear_noise_tipping_model<- function(step_length, par,
   
   for(i in (2:(N+1))){
     # Weak-order 2.0 Itô taylor based sampler
-    X_t[i] <- X_t[i - 1] -(A*(X_t[i - 1] - m)^2 + lambda_t[i - 1]) * step_length +
+    X_t[i] <- X_t[i - 1] - (A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * step_length +
       sigma * X_t[i - 1] * dW[i - 1] +
       1/2 * sigma^2 * X_t[i - 1] * (dW[i - 1]^2 - step_length) -
-      2 * A * (X_t[i - 1] - m) * sigma * X_t[i - 1] * (1/2 * dW[i - 1] * step_length) +
-      1/2 * (2 * A * (X_t[i - 1] - m) * (A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) -
-               A * sigma^2 * X_t[i - 1]^2) * step_length^2 -
-      ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * sigma) *
-      (1/2 * dW[i - 1] * step_length)
-    
-    
+      A * (X_t[i - 1] - m) * sigma * X_t[i - 1] * (dW[i - 1] * step_length) +
+      (A * (X_t[i - 1] - m) * (A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) -
+               1/2 * A * sigma^2 * X_t[i - 1]^2) * step_length^2 -
+      sigma / 2 * (A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * (dW[i - 1] * step_length)
   }
   tibble::tibble(t = time,
          X_t,
@@ -171,6 +171,7 @@ simulate_t_distribution_tipping_model <- function(step_length, par,
   sigma    <- par[4]
   nu       <- if(length(par) == 5) par[5] else 1
   
+  # Initial point in fixed point of process if none specified
   if(is.na(X_0)){
     X_0 <- m + ifelse(A >=0, 1, -1) * sqrt(abs(lambda_0 / A))
   }
@@ -183,7 +184,7 @@ simulate_t_distribution_tipping_model <- function(step_length, par,
   X_t    <- numeric(N + 1) # N + 1 to include the initial point
   X_t[1] <- X_0
   
-  if(!is.na(seed)){dqrng::dqset.seed(seed)}
+  if(!is.na(seed)){dqrng::dqset.seed(seed)} #sets seed for dqrng based on specified seed
   dW            <- dqrng::dqrnorm(N, mean = 0, sd = sqrt(step_length))
   time          <- step_length * 0:N
   lambda_t      <- numeric(N + 1)
@@ -196,10 +197,10 @@ simulate_t_distribution_tipping_model <- function(step_length, par,
       sigma * sqrt(X_t[i - 1]^2 + 1) * dW[i - 1] + 
       1 / 2 * sigma^2 * X_t[i - 1] * (dW[i - 1]^2 - step_length) - 
       A * (X_t[i - 1] - m) * sigma * sqrt(X_t[i - 1]^2 + 1) * dW[i - 1] * step_length + 
-      (((A * (X_t[i - 1] - m)^2) + lambda_t[i - 1]) * (A * (X_t[i - 1] - m)) -
-                 1 / 2 * A * sigma^2 * (X_t[i - 1]^2 + 1)) * step_length^2 + 
-      (- (A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * sigma * X_t[i - 1] + 
-         sigma^3 / 2) * (dW[i - 1] * step_length) / (2 * sqrt(X_t[i - 1]^2 + 1))
+      ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * (A * (X_t[i - 1] - m)) -
+                 1 / 2 * A * sigma^2 * (X_t[i - 1]^2 + 1)) * step_length^2 - 
+      ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * sigma * X_t[i - 1] - sigma^3 / 2) *
+                 (dW[i - 1] * step_length) / (2 * sqrt(X_t[i - 1]^2 + 1))
   }
   
   tibble::tibble(t = time,
@@ -222,6 +223,7 @@ simulate_F_distribution_tipping_model <- function(step_length, par,
   sigma    <- par[4]
   nu       <- if(length(par) == 5) par[5] else 1
   
+  # Initial point in fixed point of process if none specified
   if(is.na(X_0)){
     X_0 <- m + ifelse(A >=0, 1, -1) * sqrt(abs(lambda_0 / A))
   }
@@ -234,7 +236,7 @@ simulate_F_distribution_tipping_model <- function(step_length, par,
   X_t    <- numeric(N + 1) # N + 1 to include the initial point
   X_t[1] <- X_0
   
-  if(!is.na(seed)){dqrng::dqset.seed(seed)}
+  if(!is.na(seed)){dqrng::dqset.seed(seed)} #sets seed for dqrng based on specified seed
   dW            <- dqrng::dqrnorm(N, mean = 0, sd = sqrt(step_length))
   time          <- step_length * 0:N
   lambda_t      <- numeric(N + 1)
@@ -248,12 +250,11 @@ simulate_F_distribution_tipping_model <- function(step_length, par,
       1 / 4 * sigma^2 * (2 * X_t[i - 1] + 1) * (dW[i - 1]^2 - step_length) -
       A * (X_t[i - 1] - m) * sigma * sqrt(X_t[i - 1] * (X_t[i - 1] + 1)) * dW[i - 1] * step_length +
       ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * A * (X_t[i - 1] - m) - 
-         sigma^2 * A / 2 * (X_t[i - 1] * (X_t[i - 1] + 1))) * step_length^2 -
-      1 / (4 * sqrt(X_t[i - 1] * (X_t[i - 1] + 1))) *
-      ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * sigma * (2 * X_t[i - 1] + 1) +
-      sigma^3 / 4) * step_length * dW[i - 1]
+            sigma^2 * A / 2 * (X_t[i - 1] * (X_t[i - 1] + 1))) * step_length^2 -
+      ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * sigma * (2 * X_t[i - 1] + 1) + sigma^3 / 4) *
+            step_length * dW[i - 1] / (4 * sqrt(X_t[i - 1] * (X_t[i - 1] + 1)))
   }
-  
+
   tibble::tibble(t = time,
                  X_t,
                  lambda_t,
@@ -274,6 +275,7 @@ simulate_jacobi_diffusion_tipping_model <- function(step_length, par,
   sigma    <- par[4]
   nu       <- if(length(par) == 5) par[5] else 1
   
+  # Initial point in fixed point of process if none specified
   if(is.na(X_0)){
     X_0 <- m + ifelse(A >=0, 1, -1) * sqrt(abs(lambda_0 / A))
   }
@@ -286,7 +288,7 @@ simulate_jacobi_diffusion_tipping_model <- function(step_length, par,
   X_t    <- numeric(N + 1) # N + 1 to include the initial point
   X_t[1] <- X_0
   
-  if(!is.na(seed)){dqrng::dqset.seed(seed)}
+  if(!is.na(seed)){dqrng::dqset.seed(seed)} #sets seed for dqrng based on specified seed
   dW            <- dqrng::dqrnorm(N, mean = 0, sd = sqrt(step_length))
   time          <- step_length * 0:N
   lambda_t      <- numeric(N + 1)
@@ -297,12 +299,12 @@ simulate_jacobi_diffusion_tipping_model <- function(step_length, par,
   for(i in (2:(N+1))){
     X_t[i] <- X_t[i - 1] - (A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * step_length + 
       sigma * sqrt(X_t[i - 1] * (1 - X_t[i - 1])) * dW[i - 1] +
-      sigma^2 / 4 * (1 - 2 * X_t[i - 1]) * (dW[i - 1] - step_length) -
+      sigma^2 / 4 * (1 - 2 * X_t[i - 1]) * (dW[i - 1]^2 - step_length) -
       A * (X_t[i - 1] - m) * sigma * sqrt(X_t[i - 1] * (1 - X_t[i - 1])) * dW[i - 1] * step_length +
       ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * (A * (X_t[i - 1] - m)) -
-         sigma^2 * A / 2 * (X_t[i - 1] * (1 - X_t[i - 1]))) * step_length^2 - 
+            sigma^2 * A / 2 * (X_t[i - 1] * (1 - X_t[i - 1]))) * step_length^2 - 
       ((A * (X_t[i - 1] - m)^2 + lambda_t[i - 1]) * sigma * (1 - 2 * X_t[i - 1]) + sigma^3 / 2) *
-      dW[i - 1] * step_length / (4 * sqrt(X_t[i - 1] * (1 - X_t[i - 1])))
+            dW[i - 1] * step_length / (4 * sqrt(X_t[i - 1] * (1 - X_t[i - 1])))
   
     
   }
@@ -315,7 +317,7 @@ simulate_jacobi_diffusion_tipping_model <- function(step_length, par,
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 ## Example usage of each of the methods
-ggplot2::theme_set(ggthemes::theme_base())
+# ggplot2::theme_set(ggthemes::theme_base())
 
 # # Additive noise example
 # true_param <- c(0.87, -1.51, -2.69, 0.3, 1)
@@ -333,8 +335,8 @@ ggplot2::theme_set(ggthemes::theme_base())
 
 
 ## Square-root noise example
-# true_param <- c(-1, 1.5, 1, 0.1, 0.85)
-# 
+# true_param <- c(-0.5, 2, 1, 0.1, 0.85)
+#
 # actual_dt <- 0.005
 # tau <- 100
 # t_0 <- 50
@@ -342,7 +344,7 @@ ggplot2::theme_set(ggthemes::theme_base())
 # sim_res_sqrt |> ggplot2::ggplot(ggplot2::aes(x = t, y = X_t)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = true_param[2], linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = t_0)
-# 
+
 # sim_res_sqrt |> ggplot2::ggplot(ggplot2::aes(x = t, y = lambda_t)) +
 #   ggplot2::geom_step() + ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
 #   ggplot2::geom_vline(xintercept = c(t_0, tau + t_0))

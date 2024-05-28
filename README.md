@@ -5,15 +5,14 @@ This repository contains my thesis and accompanying source code.
 The thesis was written during my final semester of my master's degree in statistics at The University of Copenhagen in the spring of 2024 under the supervision of Susanne Ditlevsen.
 
 ## Structure of Repository
-The repository is divided into folders *"project"* and *"Source code"* containg the files necessary for compiling the project *pdf* and the code used in the project respectively.
+The repository is divided into folders *"tex_files"* and *"source_code"* containing the files necessary for compiling the project *pdf* and the code used in the project, respectively.
 
 ### Project-folder
 The project folder contains images, *tex*-files etc. used to create the *pdf* of the project.
 
 ### Source code
-The source code can be run via. the *"main.R"* file. The main file sources the project's code contained in the *"src"* folder.
-To run the code make sure to have the newest version of *R* available (as of writing this, it is 4.3.2) as well as the included packages installed.
-Note that to use the *Rcpp* package one needs a valid *C++* compiler.
+The source code can be run via. the *"main.R"* file. The main file sources the project's code contained in the *"Source code"* folder.
+To run the code make sure to have the newest version of *R* available (as of writing this, it is 4.4.0) as well as the included packages installed.
 
 ### License
 Note that this project is licensed with an **MIT-license**. 

@@ -1,37 +1,20 @@
-numeric_strang_splitting <- function(par, data, delta, drift_lamperti_sde) {
-  x0 <- data[1:(length(data) - 1)]
-  x1 <- data[2:length(data)]
-  
-  beta  <- par[1]
-  mu    <- par[2]
-  sigma <- par[3]
-
-  b <- nleqslv::nleqslv(x = mu, fn = drift_lamperti_sde, par = par)$x
-  
-  A <- numDeriv::grad(func = drift_lamperti_sde, x = b, par = par)
-  
-  diff_f <- function(t, y){drift_lamperti_sde(y, par) - A * (y - b)}
-  
-  # Solution to ODE
-  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
-  
-  
-  mu_f <- exp(A * delta) * (f_h - b) + b
-  sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
-  
-  # Inverse of non-linear ODE
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
-  
-  # Derivative of inverse using Richardson Extrapolation.
-  inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
-  inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
-  df     <- (inv_f2 - inv_f3) / (2 * 0.01)
-  
-  # Strang likelihood
-  -sum(stats::dnorm(inv_f, mean = mu_f, sd = sd_f, log = TRUE)) - sum(log(abs(df)))
-}
-
-
+# Title: Random test and
+# Author: Anders Gantzhorn Kristensen (University of Copenhagen, andersgantzhorn@gmail.com)
+# Date: 2024-04-20 (Last Updated: 2024-05-28)
+#-----------------------------------------------------------------------------------------------------------------------------#
+# Project: Tipping Point Estimation in Ecological Systems using Stochastic Differential Equations
+# Description: This script holds legacy code that did not end up in the final thesis and various
+# test conducted on the methods.
+#-----------------------------------------------------------------------------------------------------------------------------#
+# License: MIT License (for more information, see LICENSE file in the repository).
+# Dependencies: Requirements from sourced files.
+#-----------------------------------------------------------------------------------------------------------------------------#
+source("source_code/tipping_simulations.R")
+source("source_code/model_fitting.R")
+source("source_code/model_diagnostics.R")
+#-----------------------------------------------------------------------------------------------------------------------------#
+# Tests
+#-----------------------------------------------------------------------------------------------------------------------------#
 CIR_lamperti_drift <- function(y, par){
   beta  <- par[1]
   mu    <- par[2]
@@ -61,7 +44,7 @@ optimize_stationary_likelihood(likelihood_fun = CIR_strang_splitting,
                                init_par = stationary_part_true_param,
                                delta = actual_dt, exp_sigma = FALSE)
                      
-optimize_stationary_likelihood(likelihood_fun = numeric_strang_splitting,
+optimize_stationary_likelihood(likelihood_fun = numerical_strang_splitting,
                                data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t < t_0]),
                                init_par = stationary_part_true_param,
                                delta = actual_dt,
@@ -97,7 +80,7 @@ GBM_lamperti_drift <- function(y, par){
   -beta * (1 - mu * exp(-y) + sigma^2 / 2)
 }
 
-optimize_stationary_likelihood(numeric_strang_splitting,
+optimize_stationary_likelihood(numerical_strang_splitting,
                                data = log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
                                init_par = stationary_part_true_param, delta = actual_dt,
                                exp_sigma = FALSE,
@@ -135,7 +118,7 @@ optimize_stationary_likelihood(
   exp_sigma = TRUE)
 
 optimize_stationary_likelihood(
-  likelihood_fun = numeric_strang_splitting,
+  likelihood_fun = numerical_strang_splitting,
   data = asinh(sim_res_t_distribution$X_t[sim_res_t_distribution$t < t_0]),
   init_par = stationary_part_true_param,
   delta = actual_dt,
@@ -176,14 +159,14 @@ optimize_stationary_likelihood(
   exp_sigma = FALSE)
 
 optimize_stationary_likelihood(
-  likelihood_fun = numeric_strang_splitting,
+  likelihood_fun = numerical_strang_splitting,
   data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
   init_par = stationary_part_true_param,
   delta = actual_dt,
   exp_sigma = FALSE,
   drift_lamperti_sde = F_lamperti_drift)
 
-numeric_strang_splitting(par = stationary_part_true_param,
+numerical_strang_splitting(par = stationary_part_true_param,
                          data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
                          delta = actual_dt,
                          drift_lamperti_sde = F_lamperti_drift)
@@ -195,13 +178,6 @@ mu    <- par[2]
 sigma <- par[3]
 (beta + sigma^2 / 2) * cosh(y) - beta * (2 * mu + 1)
 }
-
-
-(beta + sigma^2 / 2) * cosh(nleqslv::nleqslv(x = mu, fn = dummy_func, par = par)$x) - beta * (2 * mu + 1)
-
-
-nleqslv::nleqslv(x = mu, fn = dummy_func, par = par)$x
-numDeriv::grad(func = F_lamperti_drift, x = b, par = par)
 
 # Jacobi
 true_param <- c(5, 0.1, -0.8, 0.05)
@@ -238,14 +214,14 @@ optimize_stationary_likelihood(
   exp_sigma = TRUE)
 
 optimize_stationary_likelihood(
-  likelihood_fun = numeric_strang_splitting,
+  likelihood_fun = numerical_strang_splitting,
   data = 2 * asin(sqrt(sim_res_jacobi$X_t[sim_res_jacobi$t<t_0])),
   init_par = stationary_part_true_param,
   delta = actual_dt,
   exp_sigma = FALSE,
   drift_lamperti_sde = jacobi_lamperti_drift)
 
-pure_numeric_strang_splitting <- function(par,
+pure_numerical_strang_splitting <- function(par,
                                      data,
                                      delta,
                                      diffusion_term,
@@ -335,7 +311,7 @@ jacobi_diffusion_term <- function(y){
 }
 
 optimize_stationary_likelihood(
-  likelihood_fun = pure_numeric_strang_splitting,
+  likelihood_fun = pure_numerical_strang_splitting,
   data = sim_res_jacobi$X_t[sim_res_jacobi$t<t_0],
   init_par = stationary_part_true_param,
   delta = actual_dt,
@@ -343,7 +319,281 @@ optimize_stationary_likelihood(
   diffusion_term = jacobi_diffusion_term,
   xi = 0.01)
 
+#-----------------------------------------------------------------------------------------------------------------------------#
+# Legacy code
+#-----------------------------------------------------------------------------------------------------------------------------#
 
+# Old Likelihood implementations
 
+# Simulated likelihood methods
+OU_dynamic_simulation_likelihood <- function(par, data, times,
+                                             M, N, alpha0, mu0,
+                                             sigma, t_0){
+  tau <- par[1]
+  A   <- par[2]
+  nu  <- if(length(par) == 3) par[3] else 1
+  
+  m_tip   <- mu0 - alpha0/(2 * A)
+  lambda0 <- -alpha0^2 / (4 * A)
+  delta   <- 1 / M
+  
+  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)^nu
+  lam_mat <- t(matrix(rep(lam_seq, length.out = N * length(lam_seq)), nrow = length(lam_seq), ncol = N))
+  # Number of data points
+  numData <- length(data) - 1
+  
+  
+  dW <- array(dqrng::dqrnorm(N * M * numData, mean = 0, sd = sqrt(delta)), dim = c(M, N, numData))
+  # Initialize the process array
+  X  <- array(NA, dim = c(M, N, numData))
+  
+  X[1, , ] <- rep(data[-length(data)], each = N)
+  for (m in 2:M){
+    X[m, , ] <- X[m - 1, , ] - (A * (X[m - 1, , ] - m_tip)^2 + lam_mat) * delta + sigma * dW[m - 1, , ]
+  }
+  
+  second_to_last_X <- t(X[M - 1, , ])
+  
+  sigma_t   <- sigma * sqrt(delta)
+  
+  mu_t      <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
+  
+  densities <- dnorm(data[-1], mean = mu_t, sd = sigma_t, log = TRUE)
+  
+  loglik    <- -mean(colMeans(densities))
+  if(is.na(loglik) | is.infinite(loglik)){
+    print("NA Likelihood")
+    return(1000000)
+  }
+  loglik
+}
 
+CIR_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
+  tau <- par[1]
+  A   <- par[2]
+  nu  <- if(length(par) == 3) par[3] else 1
+  
+  m_tip   <- mu0 - alpha0/(2 * A)
+  lambda0 <- -alpha0^2 / (4 * A)
+  
+  delta   <- 1 / M
+  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)^nu
+  lam_mat <- t(matrix(rep(lam_seq, length.out = N * length(lam_seq)), nrow = length(lam_seq), ncol = N))
+  numData <- length(data) - 1
+  
+  
+  dW <- array(dqrng::dqrnorm(N * M * numData, mean = 0, sd = sqrt(delta)), dim = c(M, N, numData))
+  # Initialize the process array
+  X <- array(NA, dim = c(M, N, numData))
+  
+  X[1, , ] <- rep(data[-length(data)], each = N)
+  for (m in 2:M){
+    if(any(X[m - 1, , ] < 0 | any(is.na(sqrt(X[m - 1, , ]))))){ 
+      return(50000 + runif(1))
+    }
+    
+    X[m, , ] <- X[m - 1, , ] - (A * (abs(X[m - 1, , ]) - m_tip)^2 + lam_mat) * delta + sigma * sqrt(abs(X[m - 1, , ])) * dW[m - 1, , ]
+  }
+  
+  second_to_last_X <- t(X[M - 1, , ])
+  
+  sigma_t   <- sigma * sqrt(delta) * sqrt(second_to_last_X)
+  
+  mu_t      <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
+  
+  densities <- dnorm(data[-1], mean = mu_t, sd = sigma_t, log = TRUE)
+  
+  loglik    <- -mean(colMeans(densities))
+  
+  if(is.na(loglik) | is.infinite(loglik)){
+    print("NA Likelihood")
+    return(1000000)
+  }
+  
+  loglik
+}
 
+mean_reverting_GBM_dynamic_simulation_likelihood <- function(par, data, times, M, N, alpha0, mu0, sigma, t_0){
+  tau <- par[1]
+  A  <- par[2]
+  nu <- if(length(par) == 3) par[3] else 1
+  
+  m_tip   <- mu0 - alpha0/(2 * A)
+  lambda0 <- -alpha0^2 / (4 * A)
+  delta   <- 1 / M
+  
+  lam_seq <- lambda0 * (1 - (times[-length(times)]-t_0) / tau)^nu
+  lam_mat <- t(matrix(rep(lam_seq, length.out = N * length(lam_seq)), nrow = length(lam_seq), ncol = N))
+  # Number of data points
+  numData <- length(data) - 1
+  
+  
+  dW <- array(dqrng::dqrnorm(N * M * numData, mean = 0, sd = sqrt(delta)), dim = c(M, N, numData))
+  # Initialize the process array
+  X <- array(NA, dim = c(M, N, numData))
+  
+  X[1, , ] <- rep(data[-length(data)], each = N)
+  for (m in 2:M){
+    if(any(X[m - 1, , ] < 0 | any(is.na(X[m - 1, , ])))){ 
+      return(50000 + runif(1))
+    }
+    X[m, , ] <- X[m - 1, , ] - (A * (X[m - 1, , ] - m_tip)^2 + lam_mat) * delta +
+      sigma * X[m - 1, , ] * dW[m - 1, , ]
+  }
+  
+  second_to_last_X <- t(X[M - 1, , ])
+  
+  sigma_t   <- sigma * sqrt(delta) * second_to_last_X
+  
+  mu_t      <- data[1:numData] - (A * (second_to_last_X - m_tip)^2 + lam_seq) * delta
+  
+  densities <- dnorm(data[-1], mean = mu_t, sd = sigma_t, log = TRUE)
+  
+  # Compute the mean log likelihood for each time point
+  loglik <- -mean(colMeans(densities))
+  print(loglik)
+  if(is.na(loglik) | is.infinite(loglik)){
+    print("NA Likelihood")
+    return(1000000)
+  }
+  loglik
+}
+
+# Other likelihoods
+
+CIR_alt_strang_splitting <- function(par, data, delta, exp_sigma = FALSE) {
+  Xlow <- data[1:(length(data) - 1)]
+  Xupp <- data[2:length(data)]
+  
+  beta  <- par[1]
+  mu    <- par[2]
+  if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
+  
+  # Discourage method to pick undefined values
+  if(4 * beta * mu - sigma^2 < 0){return(100000)}
+  
+  diff_f <- function(t, y){y/2 * ((4 * beta * mu - sigma^2)/log(y) - beta * log(y))}
+  
+  f <- runge_kutta(Xlow, delta / 2, diff_f)
+  
+  mu_log <- log(f)
+  
+  sd_log <- sigma * sqrt(delta)
+  
+  inv_f  <- runge_kutta(Xupp, -delta / 2, diff_f)
+  
+  inv_f2 <- runge_kutta(Xupp + 0.01, -delta / 2, diff_f)
+  inv_f3 <- runge_kutta(Xupp - 0.01, -delta / 2, diff_f)
+  
+  df <- (inv_f2 - inv_f3) / (2 * 0.01)
+  
+  -sum(stats::dlnorm(inv_f, meanlog = mu_log, sdlog = sd_log, log = TRUE), na.rm = TRUE) -
+    sum(log(abs(df)), na.rm = TRUE)
+}
+
+mean_reverting_GBM_EM_likelihood <- function(par, data, delta){
+  beta  <- par[1]
+  mu    <- par[2]
+  sigma <- exp(par[3])
+  
+  N <- length(data)
+  
+  Xupp <- data[2:N]
+  Xlow <- data[1:(N - 1)]
+  
+  sd.part <- sqrt(delta) * sigma * Xlow
+  
+  mu.part <- Xlow - beta * (Xlow - mu) * delta
+  -sum(stats::dnorm(Xupp, mu.part, sd.part, log = TRUE), na.rm = TRUE)
+}
+
+mean_reverting_GBM_Kessler_likelihood <- function(par, data, delta){
+  beta  <- par[1]
+  mu    <- par[2]
+  sigma <- exp(par[3])
+  
+  N <- length(data)
+  
+  Xupp <- data[2:N]
+  Xlow <- data[1:(N - 1)]
+  
+  mu_ks  <- exp(-beta * delta) * (Xlow - mu) + mu
+  
+  var_ks <- ((Xlow-mu)^2  * (1 - exp(-sigma^2 * delta)) -
+               2 * mu * sigma^2 / (beta - sigma^2) * (Xlow - mu) * (1 - exp(-(sigma^2 - beta) * delta)) - 
+               mu^2 * sigma^2 / (2 * beta - sigma^2) * (1 - exp(-(sigma^2 - 2 * beta) * delta))) * exp(-(2 * beta - sigma^2) * delta)
+  
+  sd_ks  <- sqrt(var_ks)
+  
+  -sum(dnorm(Xupp, mean = mu_ks, sd = sd_ks, log = TRUE), na.rm = TRUE) 
+}
+
+t_diffusion_martingale <- function(par, data, delta){
+  Xlow <- data[1:(length(data) - 1)]
+  Xupp <- data[2:length(data)]
+  
+  beta  <- par[1]
+  mu    <-  par[2]
+  sigma <- par[3]
+  
+  F_i   <- exp(-beta * delta) * (Xlow - mu) + mu
+  
+  phi_i <- exp(-2 * beta * delta) * expm1(sigma^2 * delta) * Xlow^2 +
+    (2 * beta * mu / (sigma^2 - beta) * expm1(-(beta - sigma^2) * delta) +
+       2 * mu * expm1(-beta * delta) ) * Xlow * exp(-beta * delta) + 
+    (sigma^2 * (beta - sigma^2) - 2 * beta^2 * mu^2) / ( (2 * beta - sigma^2) * (beta - sigma^2) ) *
+    expm1(-(2 * beta - sigma^2) * delta) -
+    (2 * beta / (sigma^2 - beta) * expm1(-beta * delta) - 
+       1 + exp(-beta * delta) * (1 - expm1(-beta * delta))) * mu^2
+  
+  
+  
+  eq1 <-  sum(1 / (Xlow^2 + 1) * (Xupp - F_i))
+  eq2 <-  -sum(Xlow / (Xlow^2 + 1) * (Xupp - F_i))
+  eq3 <-  sum(1 / ((Xlow^2 + 1)) * ((Xupp - F_i)^2 - phi_i))
+  
+  c(eq1, eq2, eq3)
+}
+
+t_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
+  tau     <-  par[1]
+  A       <-  par[2]
+  nu      <- if(length(par) == 3) par[3] else 1
+  
+  N       <- length(data)
+  Xupp    <- data[2:N]
+  Xlow    <- data[1:(N-1)]
+  time    <- delta * (1:(N-1))
+  
+  m          <- mu0 - alpha0 / (2 * A)
+  lambda0    <- -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
+  alpha_seq  <- 2 * sqrt(abs(A * lam_seq))
+  mu_seq     <- m + ifelse(A >= 0, 1, -1) * sqrt(abs(lam_seq / A))
+  
+  # ## Calculating the Strang splitting scheme pseudo likelihood
+  fh_half_tmp_low <-  A * delta * (Xlow - mu_seq) / 2
+  fh_half_tmp_upp <-  A * delta * (Xupp - mu_seq) / 2
+  
+  fh_half     <- (mu_seq * fh_half_tmp_low + Xlow) / (fh_half_tmp_low+1)
+  
+  fh_half_inv <- (mu_seq * fh_half_tmp_upp - Xupp) / (fh_half_tmp_upp-1)
+  
+  det_Dfh_half_inv <- 1 / (fh_half_tmp_upp-1)^2
+  
+  phi_dot <- exp(-2 * alpha_seq * delta) * expm1(sigma^2 * delta) * fh_half^2 +
+    (2 * alpha_seq * mu_seq / (sigma^2 - alpha_seq) * expm1(-(alpha_seq - sigma^2) * delta) +
+       2 * mu_seq * expm1(-alpha_seq * delta) ) * fh_half * exp(-alpha_seq * delta) +
+    (sigma^2 * (alpha_seq - sigma^2) - 2 * alpha_seq^2 * mu_seq^2) / ( (2 * alpha_seq - sigma^2) * (alpha_seq - sigma^2) ) *
+    expm1(-(2 * alpha_seq - sigma^2) * delta) -
+    (2 * alpha_seq / (sigma^2 - alpha_seq) * expm1(-alpha_seq * delta) -
+       1 + exp(-alpha_seq * delta) * (1 - expm1(-alpha_seq * delta))) * mu_seq^2
+  
+  if(any(phi_dot < 0) | any(is.na(phi_dot))){return(100000 + runif(1, min = -5, max = 1))}
+  
+  sd.part  <- sigma * sqrt(phi_dot)
+  
+  mu.part  <- exp(-alpha_seq * delta) * (fh_half - mu_seq) + mu_seq
+  
+  -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
+}

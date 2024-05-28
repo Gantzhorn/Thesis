@@ -1,6 +1,6 @@
 # Title: Main file for the thesis
 # Author: Anders Gantzhorn Kristensen (University of Copenhagen, andersgantzhorn@gmail.com)
-# Date: 2024-01-31 (Last Updated: 2024-05-27)
+# Date: 2024-01-31 (Last Updated: 2024-05-28)
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Project: Tipping Point Estimation in Ecological Systems using Stochastic Differential Equations
 # Description: This script builds an runs all the experiments and results shown in the thesis.
@@ -153,10 +153,10 @@ sample_paths_plot_small_scale_reversed <- ggplot(xs_all_reversed, aes(x = t, y =
         legend.key.height = unit(1, "lines"),
         legend.position = "bottom")
 
-ggsave(sample_paths_plot_small_scale_reversed, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "sample_paths_plot_small_scale_reversed.jpeg",
-       height = 8, width = 13, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(sample_paths_plot_small_scale_reversed, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "sample_paths_plot_small_scale_reversed.jpeg",
+#        height = 8, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 # Create plot of path for figures in "Tipping in stochastic systems"
 # Choose parameters appropriate for all but jacobi diffusion
@@ -211,10 +211,10 @@ sample_paths_plot_big_scale <- ggplot(xs_all, aes(x = t, y = X_t, color = Model)
   scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) + 
   ylim(min(fixed_point_lines_big$lower)-0.1, max(fixed_point_lines_big$upper)+1)
 
-ggsave(sample_paths_plot_big_scale, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "sample_paths_plot_big_scale.jpeg",
-       height = 8, width = 13, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(sample_paths_plot_big_scale, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "sample_paths_plot_big_scale.jpeg",
+#        height = 8, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 # For the appendix create the same plot but reversed
 true_param_reversed <- c(-1.5, 3, 1.75, 0.1)
@@ -256,10 +256,10 @@ sample_paths_plot_big_scale_reversed <- ggplot(xs_all_reversed, aes(x = t, y = X
         legend.key.height = unit(1, "lines"),
         legend.position = "bottom")
 
-ggsave(sample_paths_plot_big_scale_reversed, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "sample_paths_plot_big_scale_reversed.jpeg",
-       height = 8, width = 13, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(sample_paths_plot_big_scale_reversed, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "sample_paths_plot_big_scale_reversed.jpeg",
+#        height = 8, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 
 # Potential, flow and bifurcation plots for "Deterministic Dynamical Systems and bifurcations
@@ -313,7 +313,6 @@ roots_data_neglambda <- do.call(rbind, roots_neglambda)
 roots_data_neglambda <- roots_data_neglambda |>
   mutate(
     root_color = case_when(
-      #abs(double_well_doublederiv(root)) < 0.1 ~ "grey",
       double_well_doublederiv(root) < 0 ~ "black",
       TRUE ~ "white"
     ),
@@ -321,6 +320,7 @@ roots_data_neglambda <- roots_data_neglambda |>
   ) |>
   as_tibble()
 
+# Make half circle
 circleFun <- function(center=c(0,0), diameter=1, npoints=100, start=0, end=2)
 {
   tt <- seq(start*pi, end*pi, length.out=npoints)
@@ -349,9 +349,9 @@ double_well_plot_neg <- ggplot(double_well_plot_data, aes(x = x_prime, y = force
 
 
 
-ggsave(double_well_plot_neg, path = paste0(getwd(), "/tex_files/figures"), filename = "double_well_plot_neg.jpeg",
-       height = 8, width = 10, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(double_well_plot_neg, path = paste0(getwd(), "/tex_files/figures"), filename = "double_well_plot_neg.jpeg",
+#        height = 8, width = 10, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 # Plot the potential
 
@@ -437,13 +437,9 @@ bifurcation_diagram <- tibble(lambda = seq(-1.5, 0, length.out = 5000), stable =
         legend.text = element_text(size = 16),
         axis.title.x = element_text(margin = margin(t = 20), size = 20))
 
-
-
-ggsave(bifurcation_diagram, path = paste0(getwd(), "/tex_files/figures"), filename = "bifurcation_diagram.jpeg",
-       height = 6, width = 10, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
-
-
+# ggsave(bifurcation_diagram, path = paste0(getwd(), "/tex_files/figures"), filename = "bifurcation_diagram.jpeg",
+#        height = 6, width = 10, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 # Plot of different nu-parameters
 # Parameters used in the simulation
@@ -1074,8 +1070,6 @@ estimation_duration_stationary <- Stationary_estimation_all |>
          linetype = guide_legend(override.aes = list(linewidth = 0.75))) +
   scale_linetype_manual(values=c("solid", "dashed", "dotted"))
   
-
-
 # ggsave(estimation_duration_stationary, path = paste0(getwd(), "/tex_files/figures"),
 #        filename = "estimation_duration_stationary.jpeg",
 #        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
@@ -1122,6 +1116,7 @@ Type = factor(Type, levels = c("Strang", "Strang (Alt.)")))
 # } else{
 #   Dynamic_estimation_all <- read_csv("data/Dynamic_estimation_all.csv")
 # }
+
 Dynamic_estimation_all <- Dynamic_estimation_all |> 
 mutate(Model = factor(Model, levels = c("Additive", "Square-root", "Linear", 
                                         "t-diffusion", "F-diffusion", "Jacobi-diffusion")),
@@ -1129,7 +1124,7 @@ mutate(Model = factor(Model, levels = c("Additive", "Square-root", "Linear",
 
 
 parameter_precision_dynamic <- Dynamic_estimation_all |> filter(Parameter != "running_time") |> 
-  ggplot(aes(x = tau * 1 / delta, y = ARE, color = Parameter, linetype = Type)) +
+  ggplot(aes(x = tau / delta, y = ARE, color = Parameter, linetype = Type)) +
   geom_line(linewidth = 2.25) +  
   geom_point(size = 3) +
   facet_wrap(~Model) + 
@@ -1149,10 +1144,10 @@ parameter_precision_dynamic <- Dynamic_estimation_all |> filter(Parameter != "ru
          linetype = guide_legend(override.aes = list(linewidth = 0.75))) +
   scale_linetype_manual(values=c("solid", "dashed", "dotted"))
 
-ggsave(parameter_precision_dynamic, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "parameter_precision_dynamic.jpeg",
-       height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(parameter_precision_dynamic, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "parameter_precision_dynamic.jpeg",
+#        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 estimation_duration_dynamic <-  Dynamic_estimation_all |> filter(Parameter == "running_time") |>
   ggplot(aes(x = tau * 1 / delta, y = ARE, linetype = Type, color = Model)) +
@@ -1372,10 +1367,10 @@ error_count_plot <- error_count_tibble_long |>
         legend.text  = element_text(size = 20), axis.text = element_text(size = 16)) +
   guides(fill = guide_legend(override.aes = list(size = 5, shape = NA, col = NA)))
 
-ggsave(error_count_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "error_count_plot.jpeg",
-       height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(error_count_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "error_count_plot.jpeg",
+#        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 combined_nus_tibble <- bind_rows(add_dynamic_nus_tibble, t_dynamic_nus_tibble,
                                  add_dynamic_tau_tibble, t_dynamic_tau_tibble,
@@ -1416,10 +1411,10 @@ combined_nus_plot <- combined_nus_tibble_long |> ggplot(aes(x = N, y = ARE, col 
         axis.text.x = element_text(size = 16, face = "bold", angle = 315)) +
   guides(color = guide_legend(override.aes = list(shape = NA, linewidth = 7.5)))
   
-ggsave(combined_nus_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "combined_nus_plot.jpeg",
-       height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(combined_nus_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "combined_nus_plot.jpeg",
+#        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 
 # Early Warning signals
@@ -1724,7 +1719,7 @@ for (i in 1:numSim){
   
   tryCatch({
   F_numeric_res <- optimize_stationary_likelihood(
-                   likelihood_fun = numeric_strang_splitting,
+                   likelihood_fun = numerical_strang_splitting,
                    init_par = stationary_part_true_param * random_noise_numeric_test, 
                    data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
                    delta = actual_dts[j],
@@ -1771,7 +1766,7 @@ for (i in 1:numSim){
   
   tryCatch({
   Linear_numeric_res <- optimize_stationary_likelihood(
-                       likelihood_fun = numeric_strang_splitting,
+                       likelihood_fun = numerical_strang_splitting,
                        data = log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
                        init_par = stationary_part_true_param * random_noise_numeric_test,
                        delta = actual_dts[j],
@@ -1806,7 +1801,7 @@ for (i in 1:numSim){
          delta = actual_dts[j], exp_sigma = TRUE), times = 1, unit = "us")$time / 1e9
   
   numeric_dist_F[i, j] <- microbenchmark::microbenchmark(
-    optimize_stationary_likelihood(likelihood_fun = numeric_strang_splitting,
+    optimize_stationary_likelihood(likelihood_fun = numerical_strang_splitting,
      init_par = stationary_part_true_param * random_noise_numeric_test, 
      data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
      delta = actual_dts[j],
@@ -1823,7 +1818,7 @@ for (i in 1:numSim){
   
   numeric_dist_Linear[i, j] <- microbenchmark::microbenchmark(
     optimize_stationary_likelihood(
-      likelihood_fun = numeric_strang_splitting,
+      likelihood_fun = numerical_strang_splitting,
       data = log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
       init_par = stationary_part_true_param * random_noise_numeric_test,
       delta = actual_dts[j],
@@ -1997,10 +1992,10 @@ ARE_dist_result_plot_Linear <- ARE_dist_result |> filter(Model == "Linear") |>
                     labels = expression(alpha*phantom(.)[0], mu*phantom(.)[0], sigma)) +
   xlab("")
 
-ggsave(ARE_dist_result_plot_Linear, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "ARE_dist_result_plot_Linear.jpeg",
-       height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(ARE_dist_result_plot_Linear, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "ARE_dist_result_plot_Linear.jpeg",
+#        height = 6, width = 13, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 ARE_dist_result_plot_F <- ARE_dist_result |> filter(Model == "F-diffusion") |> 
   mutate(Type = ifelse(Type == "Numeric", "Numerical", Type)) |> 
@@ -2112,10 +2107,10 @@ Running_result_numeric_plot <- Running_result |>
         axis.text.y = element_text(size = 18)) + 
   ylab("Running time (s)")
 
-ggsave(Running_result_numeric_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "Running_result_numeric.jpeg",
-       height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(Running_result_numeric_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "Running_result_numeric.jpeg",
+#        height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 
 # Number of iterations
@@ -2170,10 +2165,10 @@ function_gradient_count_Linear_plot <- function_gradient_count_result_long |>
     legend.key.size = unit(2, 'lines')
   )
 
-ggsave(function_gradient_count_Linear_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "function_gradient_count_Linear_plot.jpeg",
-       height = 8, width = 16, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(function_gradient_count_Linear_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "function_gradient_count_Linear_plot.jpeg",
+#        height = 8, width = 16, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 function_gradient_count_F_plot <- function_gradient_count_result_long |>
   filter(Model == "F-diffusion") |>
@@ -2194,10 +2189,10 @@ function_gradient_count_F_plot <- function_gradient_count_result_long |>
     legend.key.size = unit(2, 'lines')
   )
 
-ggsave(function_gradient_count_F_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "function_gradient_count_F_plot.jpeg",
-       height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(function_gradient_count_F_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "function_gradient_count_F_plot.jpeg",
+#        height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 summarized_function_gradient_count_result <- function_gradient_count_result_long |>
   group_by(Model, Type, Method, N) |> 
@@ -2524,194 +2519,6 @@ RE_dist_tau <- dynamic_parameters_misspecification_long |>
 ###------------------------------------------------------------------------###
 ###-----------------------------Result-------------------------------------###
 ###------------------------------------------------------------------------###
-
-### Estimation on the ice core data
-
-ice_core <- readr::read_csv("data/icecore_data.csv", col_types = c("i", "d", "d"))
-ice_core_clean <- ice_core  |>  
-  dplyr::filter(dplyr::between(age, 55000, 86000)) |>  #23000 #40000
-  dplyr::group_by(age) |> 
-  dplyr::summarise(
-    d180 = mean(d18O),
-    Ca2 = mean(Ca2)
-  ) |> 
-  dplyr::mutate(
-    age = age / 1000,
-    logCa2 = -log(Ca2) - mean(-log(Ca2)),
-    Y = 2 * sqrt(Ca2)
-  ) |> mutate(delta = age- lag(age))
-
-ice_core_plot <- ice_core_clean |> 
-  ggplot(aes(x = age, y = Ca2)) +
-  geom_step(linewidth = 0.5) +
-  geom_vline(xintercept = c(84.74, 77.7, 59.42, 63.22), 
-             linewidth = 0.95, linetype = "dashed") +
-  xlab("Time before present (kyrs)") +
-  ylab(expression(Ca^{2*"+"})) +
-  scale_x_reverse(breaks = scales::pretty_breaks()) +
-  theme(
-    axis.title = element_text(face = "bold", size = 26),
-    axis.text = element_text(size = 22)
-  )
-
-ggsave(ice_core_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "ice_core_plot.jpeg",
-       height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
-
-
-ice_core_zoom_plot <- ice_core_clean |> filter(dplyr::between(age, 77, 84.74) | dplyr::between(age, 59.34, 63.22)) |> 
-  mutate(type = ifelse(dplyr::between(age, 77, 84.74), "1", "2")) |> 
-  ggplot(aes(x = age, y = Ca2)) +
-  geom_step(linewidth = .5) +
-  facet_wrap(~type, scales = "free") + 
-  xlab("Time before present (kyrs)") +
-  scale_x_reverse(breaks = scales::pretty_breaks()) + 
-  theme(
-    strip.text = element_blank(),
-    axis.title = element_text(face = "bold", size = 26),
-    axis.text = element_text(size = 22),
-    panel.spacing = unit(4, "lines")
-  ) +
-  scale_y_continuous(breaks = scales::pretty_breaks()) +
-  ylab(expression(Ca^{2*"+"}))
-
-ggsave(ice_core_zoom_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "ice_core_zoom_plot.jpeg",
-       height = 6, width = 16, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
-
-# First period analysis
-
-ice_core_clean |> filter(age > 77.7 & age < 84.74) |> 
-  ggplot(mapping = aes(x = age, y = Ca2)) +
-  geom_step() + scale_x_reverse()
-
-end_point_period_1 <- 78
-
-ice_core_period_1 <- ice_core_clean |> filter(age > end_point_period_1 & age < 84.74)
-
-actual_dt <- 0.02
-
-t_0 <- 82.8
-
-ice_core_period_1 |> filter(age >= t_0) |> ggplot(aes(x = age, y = Ca2)) + geom_step()
-
-linear_ice_par_1_mar <- mean_reverting_GBM_martingale(
-                         par = c(5, mean(rev(ice_core_period_1$Ca2[ice_core_period_1$age >= t_0])), 
-                                 1),
-                         data = rev(ice_core_period_1$Ca2[ice_core_period_1$age >= t_0]),
-                         delta = actual_dt)
-
-linear_ice_par_1 <- optimize_stationary_likelihood(
-  likelihood_fun = CIR_strang_splitting,
-  data = 2 * sqrt(log(rev(ice_core_period_1$Ca2[ice_core_period_1$age >= t_0]))),
-  init_par = c(1,1,1),
-  delta = actual_dt,
-  exp_sigma = FALSE
-)$par
-
-
-linear_ice_par_dynamic_1 <- optimize_dynamic_likelihood(
-  likelihood_fun = CIR_transform_dynamic_likelihood,
-  data = 2 * sqrt(log(rev(ice_core_period_1$Ca2[ice_core_period_1$age < t_0]))),
-  init_par = c(t_0, -7),
-  delta = actual_dt,
-  alpha0 = linear_ice_par_1[1],
-  mu0 = linear_ice_par_1[2],
-  sigma= linear_ice_par_1[3],
-  return_all = TRUE,
-  control = list(reltol = sqrt(.Machine$double.eps) /10000)
-)
-
-linear_ice_par_dynamic_1
-ice_tipping_1 <- t_0 - linear_ice_par_dynamic_1$par[1]
-
-ice_core_clean |> filter(age > 77.4 & age < 84.74) |> 
-  ggplot(mapping = aes(x = age, y = Ca2)) +
-  geom_step() + scale_x_reverse()  + geom_vline(xintercept = ice_tipping_1)
-
-
-
-
-
-
-initital_param_stationary_ice <- OU_init_params(stat_ice_path, actual_dt)
-
-ice_strang_stat <- optimize_stationary_likelihood(
-  likelihood_fun = OU_likelihood,
-  data = rev(stat_ice_path),
-  init_par = initital_param_stationary_ice,
-  delta = 0.02,
-  exp_sigma = TRUE
-  )$par
-
-data_up_to <- 77.8
-
-dyn_part_ice <- ice_core_clean |> filter(age > data_up_to & age < t_0)
-
-dyn_part_ice |> ggplot(aes(x = age, y = logCa2)) + geom_step() + scale_x_reverse()
-
-(ice_strang_dyn <- optimize_dynamic_likelihood(
-  likelihood_fun = OU_dynamic_likelihood,
-  data = rev(dyn_part_ice$logCa2),
-  init_par =  c(5, 20),
-  delta = 0.02,
-  alpha0 = ice_strang_stat[1],
-  mu0 = ice_strang_stat[2],
-  sigma  = ice_strang_stat[3],
-  control = list(reltol = sqrt(.Machine$double.eps))
-))
-
-tipping_point_ice <- t_0 - ice_strang_dyn$par[1]
-
-
-ice_core_clean |> #filter(age > 75 & age < 84.75) |> 
-  ggplot(mapping = aes(x = age, y = logCa2)) +
-  geom_step() + scale_x_reverse() + geom_vline(xintercept = tipping_point_ice, linetype = "dashed")
-
-# Another section
-
-data_up_to <- 59.6
-t_0 <- 62
-
-ice_core_clean |> filter(age > data_up_to & age < 63.22) |> 
-  ggplot(mapping = aes(x = age, y = Ca2)) +
-  geom_step() + scale_x_reverse() + geom_vline(xintercept = t_0)
-
-initital_param_stationary_ice <- OU_init_params(rev(stat_part_ice$Ca2), actual_dt)
-
-ice_strang_stat <- optimize_stationary_likelihood(
-  likelihood_fun = OU_likelihood,
-  data = rev(stat_part_ice$Ca2),
-  init_par = initital_param_stationary_ice,
-  delta = 0.02,
-  exp_sigma = FALSE
-)$par
-
-dyn_part_ice <- ice_core_clean |> filter(age > data_up_to & age < t_0)
-
-dyn_part_ice |> ggplot(aes(x = age, y = Ca2)) + geom_step() + scale_x_reverse()
-
-(ice_strang_dyn <- optimize_dynamic_likelihood(
-  likelihood_fun = OU_dynamic_likelihood,
-  data =  rev(dyn_part_ice$Ca2),
-  init_par =  c(t_0 - data_up_to, 0.05),
-  delta = 0.02,
-  alpha0 = ice_strang_stat[1],
-  mu0 = ice_strang_stat[2],
-  sigma  = ice_strang_stat[3],
-  control = list(reltol = sqrt(.Machine$double.eps) / 10000)
-))
-
-tipping_point_ice <- t_0 - ice_strang_dyn$par[1]
-
-
-ice_core_clean |> filter(age > tipping_point_ice -2  & age < 63.24) |> 
-  ggplot(mapping = aes(x = age, y = Ca2)) +
-  geom_step() + scale_x_reverse() + geom_vline(xintercept = tipping_point_ice)
-
-
 ### Estimation on the AMOC
 
 # Map of the AMOC
@@ -2769,10 +2576,10 @@ AMOC_data_plot <- AMOC_data_longer  |>
   xlab("Year") + ylab("[K]") + 
   guides(col = guide_legend(override.aes = list(linewidth = 10)))
 
-ggsave(AMOC_data_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "AMOC_data_plot.jpeg",
-       height = 12, width = 22, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(AMOC_data_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "AMOC_data_plot.jpeg",
+#        height = 12, width = 22, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 AMOC_alt_plot <- AMOC_data_longer  |> 
   filter((Type %in% c("AMOC1", "AMOC2", "AMOC3")))  |> 
@@ -2793,10 +2600,10 @@ AMOC_alt_plot <- AMOC_data_longer  |>
   xlab("Year") + ylab("[K]") + 
   guides(col = guide_legend(override.aes = list(linewidth = 4)))
 
-ggsave(AMOC_alt_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "AMOC_alt_plot.jpeg",
-       height = 7, width = 14, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(AMOC_alt_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "AMOC_alt_plot.jpeg",
+#        height = 7, width = 14, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 # Temporal resolution 
 actual_dt <- 1 / 12 
@@ -2929,10 +2736,10 @@ ramping_year_likelihood_plot <- likelihood_tibble |>
     theme(panel.spacing = unit(2, "lines"))
   )
 
-ggsave(ramping_year_likelihood_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "ramping_year_likelihood_plot.jpeg",
-       height = 5, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(ramping_year_likelihood_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "ramping_year_likelihood_plot.jpeg",
+#        height = 5, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 # Add min likelihood points to estimate plot 
 min_dynamic_value_wide <- likelihood_tibble |>
@@ -2991,10 +2798,10 @@ geom_point(data = highlight_points, aes(x = index, y = Estimate, col = Part), si
   scale_color_manual(labels = c("1924", "1912"), values = thesis_palette[5:6]) +
   guides(col = guide_legend(override.aes = list(linewidth = 4), title = expression(t[0])))
 
-ggsave(estimators_full_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "estimators_full_plot.jpeg",
-       height = 8, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(estimators_full_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "estimators_full_plot.jpeg",
+#        height = 8, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 
 ## QQ-analysis
@@ -3063,10 +2870,10 @@ QQ_table_data |>
 ) |> xtable::xtable()
 
 
-ggsave(QQ_plot_parts, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "QQ_plot_parts.jpeg",
-       height = 8, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(QQ_plot_parts, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "QQ_plot_parts.jpeg",
+#        height = 8, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 # Estimation in the AMOC
 
@@ -3096,13 +2903,6 @@ original_estim <- tibble(true_value = c(A_estim,
                                         alpha_0_estim, lambda_0_estim,  m_estim,
                                         mu0_estim, sigma_estim, tau_estim, tc_estim))
 
-# if(!file.exists("data/original_estim.csv")){
-#   utils::write.table(original_estim, file="data/original_estim.csv", sep = ",", row.names = FALSE)
-# } else{
-#   original_estim <- read_csv("data/original_estim.csv")
-# }
-
-#dynamic_part_init <- c(max(AMOC_data$time) - t_0, 1)
 estim_matrix <- matrix(data = NA, nrow = numSim, ncol = 8)
 #tc_vector <- numeric(numSim)
 set.seed(07052024)
@@ -3166,11 +2966,17 @@ estim_tibble <- as_tibble(estim_matrix)
 
 names(estim_tibble) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
 
-# if(!file.exists("data/estim_tibble.csv")){
-#   utils::write.table(estim_tibble, file="data/estim_tibble.csv", sep = ",", row.names = FALSE)
-# } else{
-#   estim_tibble <- read_csv("data/estim_tibble.csv")
-# }
+if(!file.exists("data/original_estim.csv")){
+  utils::write.table(original_estim, file="data/original_estim.csv", sep = ",", row.names = FALSE)
+} else{
+  original_estim <- read_csv("data/original_estim.csv")
+}
+
+if(!file.exists("data/estim_tibble.csv")){
+  utils::write.table(estim_tibble, file="data/estim_tibble.csv", sep = ",", row.names = FALSE)
+} else{
+  estim_tibble <- read_csv("data/estim_tibble.csv")
+}
 
 original_estim <- original_estim |> mutate(Parameter = names(estim_tibble))
 
@@ -3196,11 +3002,11 @@ estim_tibble_plot <- estim_tibble_long |> ggplot(aes(x = value, y = after_stat(d
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
 
-ggplot2::ggsave(filename = "tex_files/figures/estim_tibble_plot.jpeg",
-                plot = estim_tibble_plot,
-                width = 15,
-                height = 7.5,
-                dpi = 300)
+# ggplot2::ggsave(filename = "tex_files/figures/estim_tibble_plot.jpeg",
+#                 plot = estim_tibble_plot,
+#                 width = 15,
+#                 height = 7.5,
+#                 dpi = 300)
 
 # Extreme observations
 estim_tibble |> filter(!(A < 10 & lambda_0 > -7.5)) |> arrange(lambda_0) |> 
@@ -3239,11 +3045,11 @@ qqplot_after_t0 <-  tibble::tibble(obsSample =
 qqplot_combined <- gridExtra::grid.arrange(qqplot_before_t0, qqplot_after_t0, ncol = 2)
 
 
-ggplot2::ggsave(filename = "tex_files/figures/qqplot_combined.jpeg",
-                plot = qqplot_combined,
-                width = 15,
-                height = 7.5,
-                dpi = 300)
+# ggplot2::ggsave(filename = "tex_files/figures/qqplot_combined.jpeg",
+#                 plot = qqplot_combined,
+#                 width = 15,
+#                 height = 7.5,
+#                 dpi = 300)
 
 # Using additive model but without penalization 
 
@@ -3492,12 +3298,6 @@ original_estim_additive <- tibble(true_value = c(A_estim_additive,
                                         alpha_0_estim_additive, lambda_0_estim_additive,  m_estim_additive,
                                         mu0_estim_additive, sigma_estim_additive, tau_estim_additive, tc_estim_additive))
 
-# if(!file.exists("data/original_estim_additive.csv")){
-#   utils::write.table(original_estim_additive, file="data/original_estim_additive.csv", sep = ",", row.names = FALSE)
-# } else{
-#   original_estim_additive <- read_csv("data/original_estim_additive.csv")
-# }
-
 #dynamic_part_init <- c(max(AMOC_data$time) - t_0, 1)
 estim_matrix_additive <- matrix(data = NA, nrow = numSim, ncol = 8)
 #tc_vector <- numeric(numSim)
@@ -3564,11 +3364,17 @@ estim_tibble_additive <- as_tibble(estim_matrix_additive)
 
 names(estim_tibble_additive) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
 
-# if(!file.exists("data/estim_tibble_additive.csv")){
-#   utils::write.table(estim_tibble_additive, file="data/estim_tibble_additive.csv", sep = ",", row.names = FALSE)
-# } else{
-#   estim_tibble_additive <- read_csv("data/estim_tibble_additive.csv")
-# }
+if(!file.exists("data/original_estim_additive.csv")){
+  utils::write.table(original_estim_additive, file="data/original_estim_additive.csv", sep = ",", row.names = FALSE)
+} else{
+  original_estim_additive <- read_csv("data/original_estim_additive.csv")
+}
+
+if(!file.exists("data/estim_tibble_additive.csv")){
+  utils::write.table(estim_tibble_additive, file="data/estim_tibble_additive.csv", sep = ",", row.names = FALSE)
+} else{
+  estim_tibble_additive <- read_csv("data/estim_tibble_additive.csv")
+}
 
 original_estim_additive <- original_estim_additive |> mutate(Parameter = names(estim_tibble_additive))
 
@@ -3592,10 +3398,10 @@ estim_tibble_additive_plot <- estim_tibble_additive_long |> ggplot(aes(x = value
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
 
 
-ggsave(estim_tibble_additive_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "estim_tibble_additive_plot.jpeg",
-       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(estim_tibble_additive_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "estim_tibble_additive_plot.jpeg",
+#        height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 tibble::tibble(
   Quantile = c("2.5%", "16.5%", "50%", "83.5%", "97.5%"),
@@ -3621,10 +3427,10 @@ OU_vs_t_diffusion_QQ_plot <- bind_rows(QQ_data_parts_additive |> mutate(model = 
   guides(col = guide_legend(override.aes = list(size = 4))) + 
   xlab("Theoretical Quantiles") + ylab("Empirical Quantiles") 
 
-ggsave(OU_vs_t_diffusion_QQ_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "OU_vs_t_diffusion_QQ_plot.jpeg",
-       height = 6, width = 14, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(OU_vs_t_diffusion_QQ_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "OU_vs_t_diffusion_QQ_plot.jpeg",
+#        height = 6, width = 14, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 OU_vs_t_diffusion_table <- bind_rows(QQ_data_parts_additive |> mutate(model = "Additive"),
           QQ_data_parts |> mutate(model = "t-diffusion")) |> 
@@ -3728,12 +3534,6 @@ original_estim_AMOC1 <- tibble(true_value = c(A_estim_AMOC1,
                                         alpha_0_estim_AMOC1, lambda_0_estim_AMOC1,  m_estim_AMOC1,
                                         mu0_estim_AMOC1, sigma_estim_AMOC1, tau_estim_AMOC1, tc_estim_AMOC1))
 
-# if(!file.exists("data/original_estim_AMOC1.csv")){
-#   utils::write.table(original_estim_AMOC1, file="data/original_estim_AMOC1.csv", sep = ",", row.names = FALSE)
-# } else{
-#   original_estim_AMOC1 <- read_csv("data/original_estim_AMOC1.csv")
-# }
-
 numSim <- 2000
 estim_matrix_AMOC1 <- matrix(data = NA, nrow = numSim, ncol = 8)
 
@@ -3800,11 +3600,17 @@ estim_tibble_AMOC1 <- as_tibble(estim_matrix_AMOC1)
 
 names(estim_tibble_AMOC1) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
 
-# if(!file.exists("data/estim_tibble_AMOC1.csv")){
-#   utils::write.table(estim_tibble_AMOC1, file="data/estim_tibble_AMOC1.csv", sep = ",", row.names = FALSE)
-# } else{
-#   estim_tibble_AMOC1 <- read_csv("data/estim_tibble_AMOC1.csv")
-# }
+if(!file.exists("data/original_estim_AMOC1.csv")){
+  utils::write.table(original_estim_AMOC1, file="data/original_estim_AMOC1.csv", sep = ",", row.names = FALSE)
+} else{
+  original_estim_AMOC1 <- read_csv("data/original_estim_AMOC1.csv")
+}
+
+if(!file.exists("data/estim_tibble_AMOC1.csv")){
+  utils::write.table(estim_tibble_AMOC1, file="data/estim_tibble_AMOC1.csv", sep = ",", row.names = FALSE)
+} else{
+  estim_tibble_AMOC1 <- read_csv("data/estim_tibble_AMOC1.csv")
+}
 
 original_estim_AMOC1 <- original_estim_AMOC1 |> mutate(Parameter = names(estim_tibble_AMOC1))
 
@@ -3830,10 +3636,10 @@ estim_tibble_AMOC1_plot <- estim_tibble_AMOC1_long |>
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
 
 
-ggsave(estim_tibble_AMOC1_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "estim_tibble_AMOC1_plot.jpeg",
-       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(estim_tibble_AMOC1_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "estim_tibble_AMOC1_plot.jpeg",
+#        height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 # Set starting point of tau to be the time between initialization of ramping and max year in data set
 
@@ -3920,12 +3726,6 @@ original_estim_AMOC3 <- tibble(true_value = c(A_estim_AMOC3,
                                               alpha_0_estim_AMOC3, lambda_0_estim_AMOC3,  m_estim_AMOC3,
                                               mu0_estim_AMOC3, sigma_estim_AMOC3, tau_estim_AMOC3, tc_estim_AMOC3))
 
-# if(!file.exists("data/original_estim_AMOC3.csv")){
-#   utils::write.table(original_estim_AMOC3, file="data/original_estim_AMOC3.csv", sep = ",", row.names = FALSE)
-# } else{
-#   original_estim_AMOC3 <- read_csv("data/original_estim_AMOC3.csv")
-# }
-
 numSim <- 2000
 estim_matrix_AMOC3 <- matrix(data = NA, nrow = numSim, ncol = 8)
 
@@ -3992,11 +3792,17 @@ estim_tibble_AMOC3 <- as_tibble(estim_matrix_AMOC3)
 
 names(estim_tibble_AMOC3) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
 
-# if(!file.exists("data/estim_tibble_AMOC3.csv")){
-#   utils::write.table(estim_tibble_AMOC3, file="data/estim_tibble_AMOC3.csv", sep = ",", row.names = FALSE)
-# } else{
-#   estim_tibble_AMOC3 <- read_csv("data/estim_tibble_AMOC3.csv")
-# }
+if(!file.exists("data/original_estim_AMOC3.csv")){
+  utils::write.table(original_estim_AMOC3, file="data/original_estim_AMOC3.csv", sep = ",", row.names = FALSE)
+} else{
+  original_estim_AMOC3 <- read_csv("data/original_estim_AMOC3.csv")
+}
+
+if(!file.exists("data/estim_tibble_AMOC3.csv")){
+  utils::write.table(estim_tibble_AMOC3, file="data/estim_tibble_AMOC3.csv", sep = ",", row.names = FALSE)
+} else{
+  estim_tibble_AMOC3 <- read_csv("data/estim_tibble_AMOC3.csv")
+}
 
 original_estim_AMOC3 <- original_estim_AMOC3 |> mutate(Parameter = names(estim_tibble_AMOC3))
 
@@ -4019,10 +3825,10 @@ estim_tibble_AMOC3_plot <- estim_tibble_AMOC3_long |> ggplot(aes(x = value, y = 
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
 
-ggsave(estim_tibble_AMOC3_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "estim_tibble_AMOC3_plot.jpeg",
-       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(estim_tibble_AMOC3_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "estim_tibble_AMOC3_plot.jpeg",
+#        height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 
 # AMOC1 for additive model
@@ -4080,8 +3886,7 @@ likelihood_tibble_additive_AMOC1 <- tibble(stationary_likelihood = stationary_pa
                                      sigma = stationary_params_additive_AMOC1[, 3],
                                      tau = dynamic_params_additive_AMOC1[, 1],
                                      tipping_point = tau + t_0s,
-                                     A = dynamic_params_additive_AMOC1[, 2]#,
-                                     #nu = dynamic_params_additive[, 3]
+                                     A = dynamic_params_additive_AMOC1[, 2]
 ) |> 
   mutate(dynamic_likelihood = dynamic_likelihood / n_dynamic_add,
          stationary_likelihood = stationary_likelihood / n_stationary_add) |> 
@@ -4108,7 +3913,8 @@ lambda_0_estim_additive_AMOC1 <- -alpha_0_estim_additive_AMOC1^2 / (4 * A_estim_
 m_estim_additive_AMOC1 <- mu0_estim_additive_AMOC1 - alpha_0_estim_additive_AMOC1 / (2 * A_estim_additive_AMOC1)
 
 tc_estim_additive_AMOC1 <- tau_estim_additive_AMOC1 + t_0_additive_AMOC1
-# Parameters needed for sim method along with time to tipping from largest year in data set (we stop simulating at that point)
+# Parameters needed for sim method along with time to tipping from largest year 
+# in data set (we stop simulating at that point)
 sim_param_additive_AMOC1 <- c(A_estim_additive_AMOC1, m_estim_additive_AMOC1, 
                               lambda_0_estim_additive_AMOC1, sigma_estim_additive_AMOC1)
 time_to_tipping_additive_AMOC1 <- tc_estim_additive_AMOC1 - max(AMOC_data$time) 
@@ -4119,15 +3925,8 @@ original_estim_additive_AMOC1 <- tibble(true_value = c(A_estim_additive_AMOC1,
                            alpha_0_estim_additive_AMOC1, lambda_0_estim_additive_AMOC1,  m_estim_additive_AMOC1,
                            mu0_estim_additive_AMOC1, sigma_estim_additive_AMOC1, tau_estim_additive_AMOC1, tc_estim_additive_AMOC1))
 
-# if(!file.exists("data/original_estim_additive_AMOC1.csv")){
-#   utils::write.table(original_estim_additive_AMOC1, file="data/original_estim_additive_AMOC1.csv", sep = ",", row.names = FALSE)
-# } else{
-#   original_estim_additive_AMOC1 <- read_csv("data/original_estim_additive_AMOC1.csv")
-# }
 
-#dynamic_part_init <- c(max(AMOC_data$time) - t_0, 1)
 estim_matrix_additive_AMOC1 <- matrix(data = NA, nrow = numSim, ncol = 8)
-#tc_vector <- numeric(numSim)
 set.seed(07052024)
 for (i in 1:numSim) {
   if (i %% 5 == 1) {
@@ -4191,11 +3990,19 @@ estim_tibble_additive_AMOC1 <- as_tibble(estim_matrix_additive_AMOC1)
 
 names(estim_tibble_additive_AMOC1) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
 
-# if(!file.exists("data/estim_tibble_additive_AMOC1.csv")){
-#   utils::write.table(estim_tibble_additive_AMOC1, file="data/estim_tibble_additive_AMOC1.csv", sep = ",", row.names = FALSE)
-# } else{
-#   estim_tibble_additive_AMOC1 <- read_csv("data/estim_tibble_additive_AMOC1.csv")
-# }
+if(!file.exists("data/original_estim_additive_AMOC1.csv")){
+  utils::write.table(original_estim_additive_AMOC1, file="data/original_estim_additive_AMOC1.csv",
+                     sep = ",", row.names = FALSE)
+} else{
+  original_estim_additive_AMOC1 <- read_csv("data/original_estim_additive_AMOC1.csv")
+}
+
+if(!file.exists("data/estim_tibble_additive_AMOC1.csv")){
+  utils::write.table(estim_tibble_additive_AMOC1, file="data/estim_tibble_additive_AMOC1.csv",
+                     sep = ",", row.names = FALSE)
+} else{
+  estim_tibble_additive_AMOC1 <- read_csv("data/estim_tibble_additive_AMOC1.csv")
+}
 
 original_estim_additive_AMOC1 <- original_estim_additive_AMOC1 |> mutate(Parameter = names(estim_tibble_additive_AMOC1))
 
@@ -4218,10 +4025,10 @@ estim_tibble_additive_AMOC1_plot <- estim_tibble_additive_AMOC1_long |> ggplot(a
                     labels = c("A", expression(alpha*phantom(.)[0]), expression(lambda*phantom(.)[0]), "m",
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
 
-ggsave(estim_tibble_additive_AMOC1_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "estim_tibble_additive_AMOC1_plot.jpeg",
-       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(estim_tibble_additive_AMOC1_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "estim_tibble_additive_AMOC1_plot.jpeg",
+#        height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 
 
@@ -4318,11 +4125,7 @@ original_estim_additive_AMOC3 <- tibble(true_value = c(A_estim_additive_AMOC3,
                                                        alpha_0_estim_additive_AMOC3, lambda_0_estim_additive_AMOC3,  m_estim_additive_AMOC3,
                                                        mu0_estim_additive_AMOC3, sigma_estim_additive_AMOC3, tau_estim_additive_AMOC3, tc_estim_additive_AMOC3))
 
-if(!file.exists("data/original_estim_additive_AMOC3.csv")){
-  utils::write.table(original_estim_additive_AMOC3, file="data/original_estim_additive_AMOC3.csv", sep = ",", row.names = FALSE)
-} else{
-  original_estim_additive_AMOC3 <- read_csv("data/original_estim_additive_AMOC3.csv")
-}
+
 
 #dynamic_part_init <- c(max(AMOC_data$time) - t_0, 1)
 estim_matrix_additive_AMOC3 <- matrix(data = NA, nrow = numSim, ncol = 8)
@@ -4390,8 +4193,16 @@ estim_tibble_additive_AMOC3 <- as_tibble(estim_matrix_additive_AMOC3)
 
 names(estim_tibble_additive_AMOC3) <- c("A", "alpha_0", "lambda_0", "m", "mu0", "sigma", "tau", "tc")
 
+if(!file.exists("data/original_estim_additive_AMOC3.csv")){
+  utils::write.table(original_estim_additive_AMOC3, file="data/original_estim_additive_AMOC3.csv",
+                     sep = ",", row.names = FALSE)
+} else{
+  original_estim_additive_AMOC3 <- read_csv("data/original_estim_additive_AMOC3.csv")
+}
+
 if(!file.exists("data/estim_tibble_additive_AMOC3.csv")){
-  utils::write.table(estim_tibble_additive_AMOC3, file="data/estim_tibble_additive_AMOC3.csv", sep = ",", row.names = FALSE)
+  utils::write.table(estim_tibble_additive_AMOC3, file="data/estim_tibble_additive_AMOC3.csv",
+                     sep = ",", row.names = FALSE)
 } else{
   estim_tibble_additive_AMOC3 <- read_csv("data/estim_tibble_additive_AMOC3.csv")
 }
@@ -4419,10 +4230,10 @@ estim_tibble_additive_AMOC3_plot <- estim_tibble_additive_AMOC3_long |>
                                expression(mu*phantom(.)[0]), expression(sigma), expression(tau*phantom(.)[c], "Tipping year")))
 
 
-ggsave(estim_tibble_additive_AMOC3_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "estim_tibble_additive_AMOC3_plot.jpeg",
-       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(estim_tibble_additive_AMOC3_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "estim_tibble_additive_AMOC3_plot.jpeg",
+#        height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 Estimates_original_paper <- readxl::read_excel("data/estim_matrix_AMOC_paper.xlsx")
 
@@ -4461,10 +4272,10 @@ distribution_tau_models <- tau_distribution_all |> ggplot(aes(x = tipping_year, 
   ) + 
   guides(col = guide_legend(override.aes = list(linewidth = 4)))
 
-ggsave(distribution_tau_models, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "distribution_tau_models.jpeg",
-       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(distribution_tau_models, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "distribution_tau_models.jpeg",
+#        height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 tau_quantiles_table <- tau_distribution_all |> group_by(Fingerprint, Model) |> 
   reframe(quantiles = quantile(tipping_year, prob = c(0.025, 0.165, 0.5, 0.835, 0.975)),
@@ -4514,12 +4325,15 @@ surival_curve_first97.5 <- tau_survival_curve |>
   guides(col = guide_legend(override.aes = list(linewidth = 8))) + 
   xlab("Year") + ylab("Survival prob.")
 
-ggsave(surival_curve_first97.5, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "surival_curve_first97.5.jpeg",
-         height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(surival_curve_first97.5, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "surival_curve_first97.5.jpeg",
+#          height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
-# Discussion
+
+###------------------------------------------------------------------------###
+###-----------------------------Discussion---------------------------------###
+###------------------------------------------------------------------------###
 
 true_param <- c(0.8, -1.5, -2, 0.3)
 actual_dt <- 1/12 * 1/2
@@ -4578,10 +4392,10 @@ mu_simulations_discussion_plot <- all_simulations |>
   guides(color = guide_legend(override.aes = list(linewidth = 5), title = expression(nu)))
 
 
-ggsave(mu_simulations_discussion_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "mu_simulations_discussion_plot.jpeg",
-       height = 7, width = 11, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(mu_simulations_discussion_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "mu_simulations_discussion_plot.jpeg",
+#        height = 7, width = 11, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 # Correlation between A and the tipping year
 correlation_between_A_and_tau_plot <- tau_distribution_all |> filter(A < 100, tipping_year < 2300) |>
@@ -4603,10 +4417,10 @@ correlation_between_A_and_tau_plot <- tau_distribution_all |> filter(A < 100, ti
   guides(col = guide_legend(override.aes = list(size = 5, linewidth = 0, alpha = 1))) +
   ylab("Year") + xlab("A")
 
-ggsave(correlation_between_A_and_tau_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "correlation_between_A_and_tau_plot.jpeg",
-       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(correlation_between_A_and_tau_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "correlation_between_A_and_tau_plot.jpeg",
+#        height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 # Estimate with the penalization in the model like in the paper
 # AMOC2
@@ -4679,10 +4493,10 @@ trace_plot <- trace_optimization_long |>
   guides(color = guide_legend(override.aes = list(linewidth = 7.5))) +
   xlab("N") + ylab("Relative deviation from init. value")
 
-ggsave(trace_plot, path = paste0(getwd(), "/tex_files/figures"),
-       filename = "trace_plot.jpeg",
-       height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
-       limitsize = FALSE, scale = 1)
+# ggsave(trace_plot, path = paste0(getwd(), "/tex_files/figures"),
+#        filename = "trace_plot.jpeg",
+#        height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        limitsize = FALSE, scale = 1)
 
 ## showcase of score along with likelihood
 true_param <- c(0.87, -1.51, -2.69, 1)

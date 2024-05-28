@@ -764,7 +764,7 @@ We linearize around the fixed point; this gives us the splitting
 \begin{align}
     \mathrm{d}Y_t^{[1]} &= \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[1]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu_0 - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t,\\
     \mathrm{d}Y_t^{[2]} &= -\left(\frac{1}{\sin\left(Y_t^{[2]}\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(Y_t^{[2]}) + \alpha_0 - 2\alpha_0\mu_0\right) \right. \nonumber \\
-    &- \left. \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[2]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu_0 - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right) \right)\mathrm{d}t. \label{eq:jacobiODE}
+    &+ \left. \left(\frac{\sigma^2}{2} - \alpha_0\right)\left(Y_t^{[2]} - \cos^{-1}\left(\frac{2\alpha_0\left(2\mu_0 - 1\right)}{\sigma^2 - 2\alpha_0}\right)\right) \right)\mathrm{d}t. \label{eq:jacobiODE}
 \end{align}
 We solve the linear SDE by the well-known formulas (\ref{eq:OU_mean}) and (\ref{eq:OU_variance}). Given its complexity (\ref{eq:jacobiODE}), its inverse and the derivative of the inverse must be found using the fourth-order Runge-kutta method. The remaining steps in the construction of the Strang pseudo-likelihood is composing the flow from the linear SDE and the ODE in the appropriate way and the maximizing this value over the parameters.
 \subsubsection{Dynamic part}
@@ -813,7 +813,7 @@ Combine this with the quadratic formula and apply the inverse of the cosine. To 
 \end{align}
 The first term is obviously zero when evaluated in the fixed point so
 \begin{align}
-    f'(y^*) = \pm \sqrt{\frac{\sigma^4}{2} + \sigma^2A\left(2m - 1\right) - 4A\lambda_t}
+    f'(y^*) = \pm \sqrt{\frac{\sigma^4}{4} + \sigma^2A\left(2m - 1\right) - 4A\lambda_t}
 \end{align}
 Now, the splitting is done in the usual manner. We experimented with the two branches and it turned out the negative worked the best, so the linearization around the fixed point uses the following parameters 
 \begin{align}

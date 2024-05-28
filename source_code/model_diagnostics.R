@@ -1,6 +1,6 @@
 # Title: Model diagnostics of Stochastic Differential Equations with tipping points.
 # Author: Anders Gantzhorn Kristensen (University of Copenhagen, andersgantzhorn@gmail.com)
-# Date: 2024-02-28 (Last Updated: 2024-04-16)
+# Date: 2024-02-28 (Last Updated: 2024-05-28)
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Project: Tipping Point Estimation in Ecological Systems using Stochastic Differential Equations
 # Description: This script implements diagnostics for the models considered in "model_fitting.R".
@@ -19,8 +19,9 @@
 
 OU_likelihood_resid <- function(par, data, delta){
   alpha0 <- par[1]
-  mu0 <- par[2]
-  sigma <- par[3]
+  mu0    <- par[2]
+  sigma  <- par[3]
+  
   N <- length(data)
 
   Xupp <- data[2:N]
@@ -35,7 +36,8 @@ OU_likelihood_resid <- function(par, data, delta){
   qnorm(p = pnorm(Xupp, mean = m_part, sd = sqrt(v_part)))
 }
 
-OU_dynamic_likelihood_resid <-  function(par, data, delta, alpha0, mu0, sigma){
+OU_dynamic_likelihood_resid <-  function(par, data, delta,
+                                         alpha0, mu0, sigma){
   tau     <- par[1]
   A       <- par[2]
   nu      <- if(length(par) == 3) par[3] else 1
@@ -73,25 +75,25 @@ OU_dynamic_likelihood_resid <-  function(par, data, delta, alpha0, mu0, sigma){
 #-----------------------------------------------------------------------------------------------------------------------------#
 # Implementation of methods that are based on the square-root noise term process
 CIR_quadratic_martingale_resid <- function(par, data, delta) {
+  beta  <- par[1]
+  mu    <- par[2]
+  sigma <- par[3]
   
-  data <- - 4 * par[1] / (par[3]^2 * expm1(-par[1] * delta)) * data
+  data <- - 4 * beta / (sigma^2 * expm1(-beta * delta)) * data
   
   Xlow <- data[1:(length(data) - 1)]
   Xupp <- data[2:length(data)]
-  
-  beta <- par[1]
-  mu <- par[2]
-  sigma <- par[3]
 
-  qnorm(pchisq(Xupp, df = 4 * mu * beta / sigma^2, ncp = Xlow * exp(-beta * delta)))
+  qnorm(pchisq(Xupp, df = 4 * mu * beta / sigma^2,
+               ncp = Xlow * exp(-beta * delta)))
 }
 
 CIR_strang_splitting_resid <- function(par, data, delta) {
-  x0 <- data[1:(length(data) - 1)]
-  x1 <- data[2:length(data)]
+  Xlow <- data[1:(length(data) - 1)]
+  Xupp <- data[2:length(data)]
   
-  beta <- par[1]
-  mu <- par[2]
+  beta  <- par[1]
+  mu    <- par[2]
   sigma <- par[3]
   
   A <- - beta
@@ -100,9 +102,8 @@ CIR_strang_splitting_resid <- function(par, data, delta) {
   diff_f <- function(t, y){beta / 2 * y + (2 * beta * mu - sigma^2) / y -
       2 * sqrt(beta * (beta * mu - sigma^2 / 2))}
   
-  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
-
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  f_h   <- runge_kutta(Xlow, delta / 2, diff_f, n = 1)
+  inv_f <- runge_kutta(Xupp, -delta / 2, diff_f, n = 1)
   
   mu_f <- exp(A * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
@@ -110,7 +111,8 @@ CIR_strang_splitting_resid <- function(par, data, delta) {
   qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
 }
 
-CIR_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma, pen = 0){
+CIR_dynamic_likelihood_resid <- function(par, data, delta,
+                                         alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
   nu      <- if(length(par) == 3) par[3] else 1
@@ -138,22 +140,21 @@ CIR_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma, p
   phi_dot <- fh_half / alpha_seq * (exp(-alpha_seq * delta) - exp(-2 * alpha_seq * delta)) +
     mu_seq / (2 * alpha_seq) * (-expm1(-alpha_seq * delta))^2
   
-  if(any(phi_dot < 0) | any(is.na(phi_dot))){return(100000)}
-  
   sd.part <- sigma * sqrt(phi_dot)
   
   mu.part <- exp(-alpha_seq * delta) * (fh_half - mu_seq) + mu_seq
   qnorm(pnorm(fh_half_inv, mean = mu.part, sd = sd.part))
 }
 
-CIR_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma){
+CIR_transform_dynamic_likelihood_resid <- function(par, data, delta,
+                                                   alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
   nu      <- if(length(par) == 3) par[3] else 1
   
   N       <- length(data)
-  x1      <- data[2:N]
-  x0      <- data[1:(N-1)]
+  Xupp    <- data[2:N]
+  Xlow    <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
   m          <- mu0 - alpha0 / (2 * A)
@@ -164,19 +165,19 @@ CIR_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0
   
   A_linear_part <- - sqrt(4 * inner_sqrt_argument)
   
-  b <- 2 * sqrt((A * m + sqrt(inner_sqrt_argument)) / A)
+  b <- 2 * sqrt(m + sqrt(inner_sqrt_argument) / A)
   
   diff_f <- function(t, y){-2 / y * (A * (y^2 / 4 - m)^2 + lam_seq + sigma^2 / 4) - 
       A_linear_part * (y - b)}
   
   # Solution to ODE
-  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  f_h <- runge_kutta(Xlow, delta / 2, diff_f, n = 1)
   
   mu_f <- exp(A_linear_part * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A_linear_part * delta) / (2 * A_linear_part))
   
   # Inverse of non-linear ODE
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  inv_f <- runge_kutta(Xupp, -delta / 2, diff_f, n = 1)
   
   # Strang likelihood
   qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
@@ -184,9 +185,8 @@ CIR_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0
 
 
 #-----------------------------------------------------------------------------------------------------------------------------#
-
 # Methods that are based on the linear noise process
-
+# For martingale estimation equation 
 mean_reverting_GBM_Kessler_likelihood_resid <- function(par, data, delta){
   beta <- par[1]
   mu <- par[2]
@@ -201,38 +201,43 @@ mean_reverting_GBM_Kessler_likelihood_resid <- function(par, data, delta){
   
   
   var_ks <- ((Xlow-mu)^2  * (1 - exp(-sigma^2 * delta)) -
-               2 * mu * sigma^2 / (beta - sigma^2) * (Xlow - mu) * (1 - exp(-(sigma^2 - beta) * delta)) - 
-               mu^2 * sigma^2 / (2 * beta - sigma^2) * (1 - exp(-(sigma^2 - 2 * beta) * delta))) * exp(-(2 * beta - sigma^2) * delta)
+               2 * mu * sigma^2 / (beta - sigma^2) * (Xlow - mu) *
+               (1 - exp(-(sigma^2 - beta) * delta)) - 
+               mu^2 * sigma^2 / (2 * beta - sigma^2) *
+               (1 - exp(-(sigma^2 - 2 * beta) * delta))) *
+    exp(-(2 * beta - sigma^2) * delta)
   
   sd_ks <- sqrt(var_ks)
   
   qnorm(pnorm(Xupp, mean = mu_ks, sd = sd_ks))
 }
 
-mean_reverting_GBM_alt_strang_resid <- function(par, data, delta, exp_sigma = FALSE) {
-  x0 <- data[1:(length(data) - 1)]
-  x1 <- data[2:length(data)]
+mean_reverting_GBM_alt_strang_resid <- function(par, data, delta,
+                                                exp_sigma = FALSE) {
+  Xlow <- data[1:(length(data) - 1)]
+  Xupp <- data[2:length(data)]
   
   beta  <- par[1]
   mu    <- par[2]
   if(exp_sigma){sigma <- exp(par[3])} else{sigma <- par[3]}
   
   # Solution to non-linear ODE
-  f_h    <- (x0 - mu) * exp(-beta * delta / 2) + mu
+  f_h    <- (Xlow - mu) * exp(-beta * delta / 2) + mu
   
   mu_log <- log(f_h) - sigma^2 / 2 * delta
   
   sd_log <- sigma * sqrt(delta)
   # Inverse to non-linear ODE
-  inv_f  <- (x1 - mu) * exp(beta * delta / 2) + mu
+  inv_f  <- (Xupp - mu) * exp(beta * delta / 2) + mu
   
   # Strang likelihood
   qnorm(plnorm(inv_f, meanlog = mu_log, sdlog = sd_log))
 }
 
-mean_reverting_GBM_strang_resid <- function(par, data, delta, exp_sigma = FALSE) {
-  x0 <- data[1:(length(data) - 1)]
-  x1 <- data[2:length(data)]
+mean_reverting_GBM_strang_resid <- function(par, data, delta,
+                                            exp_sigma = FALSE) {
+  Xlow <- data[1:(length(data) - 1)]
+  Xupp <- data[2:length(data)]
   
   beta  <- par[1]
   mu    <- par[2]
@@ -241,27 +246,29 @@ mean_reverting_GBM_strang_resid <- function(par, data, delta, exp_sigma = FALSE)
   A <- - (sigma^2 + 2 * beta) / 2
   b <- - log((2 * beta + sigma^2) / (2 * beta * mu))
   
-  diff_f <- function(t, y){-beta + beta * mu * exp(-y) - sigma^2 / 2 - A * (y - b)}
+  diff_f <- function(t, y){-beta + beta * mu * exp(-y) -
+      sigma^2 / 2 - A * (y - b)}
   
   
   # Solution to non-linear ODE
-  f_h    <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  f_h    <- runge_kutta(Xlow, delta / 2, diff_f, n = 1)
   mu_f   <- exp(A * delta) * (f_h - b) + b
   sd_f   <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
   
   # Inverse to non-linear ODE
-  inv_f  <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  inv_f  <- runge_kutta(Xupp, -delta / 2, diff_f, n = 1)
   
   # Derivative of inverse using Richardson Extrapolation
-  inv_f2 <- runge_kutta(x1 + 0.01, -delta / 2, diff_f, n = 1)
-  inv_f3 <- runge_kutta(x1 - 0.01, -delta / 2, diff_f, n = 1)
+  inv_f2 <- runge_kutta(Xupp + 0.01, -delta / 2, diff_f, n = 1)
+  inv_f3 <- runge_kutta(Xupp - 0.01, -delta / 2, diff_f, n = 1)
   df     <- (inv_f2 - inv_f3) / (2 * 0.01) 
   
   # Strang likelihood
   qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
 }
 
-mean_reverting_GBM_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma){
+mean_reverting_GBM_dynamic_likelihood_resid <- function(par, data, delta,
+                                                        alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
   nu      <- if(length(par) == 3) par[3] else 1
@@ -290,8 +297,10 @@ mean_reverting_GBM_dynamic_likelihood_resid <- function(par, data, delta, alpha0
   
   sd.part <-  exp(-(alpha_seq - sigma^2) * delta) * sqrt(
     (fh_half - mu_seq)^2 * (1 - exp(-sigma^2 * delta)) - 
-      2 * mu_seq * sigma^2 / (alpha_seq - sigma^2) * (fh_half - mu_seq) * (1 - exp(-(sigma^2 - alpha_seq) * delta)) -
-      mu_seq^2 * sigma^2 / (2 * alpha_seq - sigma^2) * (1 - exp(-(sigma^2 - 2*alpha_seq) * delta))
+      2 * mu_seq * sigma^2 / (alpha_seq - sigma^2) * 
+          (fh_half - mu_seq) * (1 - exp(-(sigma^2 - alpha_seq) * delta)) -
+      mu_seq^2 * sigma^2 / (2 * alpha_seq - sigma^2) * 
+          (1 - exp(-(sigma^2 - 2*alpha_seq) * delta))
   )
   
   mu.part <- exp(-alpha_seq * delta) * (fh_half - mu_seq) + mu_seq
@@ -299,24 +308,24 @@ mean_reverting_GBM_dynamic_likelihood_resid <- function(par, data, delta, alpha0
   qnorm(pnorm(fh_half_inv, mean = mu.part, sd = sd.part))
 }
 
-mean_reverting_GBM_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma){
+mean_reverting_GBM_transform_dynamic_likelihood_resid <- function(par, data, delta,
+                                                                  alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
   nu      <- if(length(par) == 3) par[3] else 1
   
   N       <- length(data)
-  x1    <- data[2:N]
-  x0    <- data[1:(N-1)]
+  Xupp    <- data[2:N]
+  Xlow    <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
   m          <- mu0 - alpha0 / (2 * A)
   lambda0    <- -alpha0^2 / (4 * A)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
 
-  sqrt_argument <- pmax(sigma^4 / 4 - A * (2 * m * sigma^2 + 4 * lam_seq), 0.001)
+  sqrt_argument <- sigma^4 / 4 - A * (2 * m * sigma^2 + 4 * lam_seq)
   
-  exp_b <- max((2 * m * A - 1 / 2 * sigma^2 +
-                  sqrt(sqrt_argument)) / (2 * A), 0.001)
+  exp_b <- (2 * m * A - 1 / 2 * sigma^2 + sqrt(sqrt_argument)) / (2 * A)
   b <- log(exp_b)
   
   A_linear_part <- - 1 / exp_b * (A * exp_b^2 - lam_seq - A * m^2)
@@ -325,13 +334,13 @@ mean_reverting_GBM_transform_dynamic_likelihood_resid <- function(par, data, del
       A_linear_part * (y - b)}
   
   # Solution to ODE
-  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  f_h <- runge_kutta(Xlow, delta / 2, diff_f, n = 1)
   
   mu_f <- exp(A_linear_part * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A_linear_part * delta) / (2 * A_linear_part))
   
   # Inverse of non-linear ODE
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  inv_f <- runge_kutta(Xupp, -delta / 2, diff_f, n = 1)
   
   qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
 }
@@ -340,42 +349,42 @@ mean_reverting_GBM_transform_dynamic_likelihood_resid <- function(par, data, del
 
 # Methods that are based on the t-distributed stationary process
 t_diffusion_strang_splitting_resid <- function(par, data, delta) {
-  x0 <- data[1:(length(data) - 1)]
-  x1 <- data[2:length(data)]
+  Xlow <- data[1:(length(data) - 1)]
+  Xupp <- data[2:length(data)]
   
   beta  <- par[1]
   mu    <- par[2]
   sigma <- par[3]
   
-  asinh_argument <- (2 * mu * beta / (2 * beta + sigma^2))
+  asinh_term <- asinh(2 * mu * beta / (2 * beta + sigma^2))
   
-  asinh_term <- asinh(asinh_argument)
-  
-  diff_f <- function(t, y){(y - tanh(y) - asinh_term) * (beta + 1 / 2 * sigma^2) + mu * beta / cosh(y)}
+  diff_f <- function(t, y){(y - tanh(y) - asinh_term) * (beta + 1 / 2 * sigma^2) +
+      mu * beta / cosh(y)}
   
   # Solution to ODE
-  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  f_h <- runge_kutta(Xlow, delta / 2, diff_f, n = 1)
   
-  A <- - (beta + 1 / 2 * sigma^2)
+  A <- -(beta + 1 / 2 * sigma^2)
   b <- asinh_term
   
   mu_f <- exp(A * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
   
   # Inverse of non-linear ODE
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  inv_f <- runge_kutta(Xupp, -delta / 2, diff_f, n = 1)
   
   qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
 }
 
-t_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma){
+t_transform_dynamic_likelihood_resid <- function(par, data, delta,
+                                                 alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
   nu      <- if(length(par) == 3) par[3] else 1
   
   N       <- length(data)
-  x1    <- data[2:N]
-  x0    <- data[1:(N-1)]
+  Xupp    <- data[2:N]
+  Xlow    <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
   m          <- mu0 - alpha0 / (2 * A)
@@ -391,13 +400,13 @@ t_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
       A_linear_part * (y - b)}
   
   # Solution to ODE
-  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  f_h <- runge_kutta(Xlow, delta / 2, diff_f, n = 1)
   
   mu_f <- exp(A_linear_part * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A_linear_part * delta) / (2 * A_linear_part))
   
   # Inverse of non-linear ODE
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  inv_f <- runge_kutta(Xupp, -delta / 2, diff_f, n = 1)
 
   qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
 }
@@ -406,8 +415,8 @@ t_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
 # Implementation of methods that are based on the process with stationary F-distribution
 
 F_diffusion_strang_splitting_resid <- function(par, data, delta) {
-  x0 <- data[1:(length(data) - 1)]
-  x1 <- data[2:length(data)]
+  Xlow <- data[1:(length(data) - 1)]
+  Xupp <- data[2:length(data)]
   
   beta  <- par[1]
   mu    <- par[2]
@@ -419,25 +428,26 @@ F_diffusion_strang_splitting_resid <- function(par, data, delta) {
   diff_f <- function(t,y){-A * (y - b - cosh(y) / sinh(y)) + beta * (2 * mu + 1) / sinh(y)}
   
   # Solution to ODE
-  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  f_h <- runge_kutta(Xlow, delta / 2, diff_f, n = 1)
   
   mu_f <- exp(A * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
   
   # Inverse of non-linear ODE
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  inv_f <- runge_kutta(Xupp, -delta / 2, diff_f, n = 1)
   
   qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
 }
 
-F_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma){
+F_transform_dynamic_likelihood_resid <- function(par, data, delta,
+                                                 alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
   nu      <- if(length(par) == 3) par[3] else 1
   
   N       <- length(data)
-  x1    <- data[2:N]
-  x0    <- data[1:(N-1)]
+  Xupp    <- data[2:N]
+  Xlow    <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
   m          <- mu0 - alpha0 / (2 * A)
@@ -445,6 +455,7 @@ F_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
   sqrt_argument <- sigma^4 / 4 - A * (sigma^2 * (2 * m + 1) + 4 * lam_seq)
+  
   b <- acosh(((A * (2 * m + 1) - sigma^2 / 2) + sqrt(sqrt_argument)) / A)
   A_linear_part <- -sqrt(sqrt_argument)
   
@@ -454,13 +465,13 @@ F_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
       A_linear_part * (y - b)}
   
   # Solution to ODE
-  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  f_h <- runge_kutta(Xlow, delta / 2, diff_f, n = 1)
   
   mu_f <- exp(A_linear_part * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A_linear_part * delta) / (2 * A_linear_part))
   
   # Inverse of non-linear ODE
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  inv_f <- runge_kutta(Xupp, -delta / 2, diff_f, n = 1)
   
   qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
 }
@@ -469,43 +480,41 @@ F_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, 
 # Implementation of methods that are based on the jacobi diffusion
 
 jacobi_diffusion_strang_splitting_resid <- function(par, data, delta) {
-  x0 <- data[1:(length(data) - 1)]
-  x1 <- data[2:length(data)]
+  Xlow <- data[1:(length(data) - 1)]
+  Xupp <- data[2:length(data)]
   
   beta  <- par[1]
   mu    <- par[2]
   sigma <- par[3]
   
-  if(abs(beta * (2 * mu - 1) / (sigma^2 / 2 - beta))>1){return(50000)}
-  
   A <- 1/2 * sigma^2 - beta
   
   b <- acos(beta * (2 * mu - 1) / (sigma^2 / 2 - beta))
   
-  diff_f <- function(t, y){-1 / sin(y) * (beta * (1 - cos(y) - 2 * mu) + sigma^2 / 2 * cos(y)) - A * (y - b)}
+  diff_f <- function(t, y){-1 / sin(y) * (beta * (1 - cos(y) - 2 * mu) +
+                                            sigma^2 / 2 * cos(y)) - A * (y - b)}
   
   # Solution to ODE
-  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
-  
-  if(any(is.na(f_h))){return(50000)}
+  f_h <- runge_kutta(Xlow, delta / 2, diff_f, n = 1)
   
   mu_f <- exp(A * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A * delta) / (2 * A))
   
   # Inverse of non-linear ODE
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  inv_f <- runge_kutta(Xupp, -delta / 2, diff_f, n = 1)
   
   qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
 }
 
-jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta, alpha0, mu0, sigma){
+jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta,
+                                                                alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
   nu      <- if(length(par) == 3) par[3] else 1
   
   N       <- length(data)
-  x1    <- data[2:N]
-  x0    <- data[1:(N-1)]
+  Xupp    <- data[2:N]
+  Xlow    <- data[1:(N-1)]
   time    <- delta * (1:(N-1))
   
   m          <- mu0 - alpha0 / (2 * A)
@@ -525,13 +534,13 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
       A_linear_part * (y - b)}
   
   # Solution to ODE
-  f_h <- runge_kutta(x0, delta / 2, diff_f, n = 1)
+  f_h <- runge_kutta(Xlow, delta / 2, diff_f, n = 1)
   
   mu_f <- exp(A_linear_part * delta) * (f_h - b) + b
   sd_f <- sigma * sqrt(expm1(2 * A_linear_part * delta) / (2 * A_linear_part))
   
   # Inverse of non-linear ODE
-  inv_f <- runge_kutta(x1, -delta / 2, diff_f, n = 1)
+  inv_f <- runge_kutta(Xupp, -delta / 2, diff_f, n = 1)
   
   qnorm(pnorm(inv_f, mean = mu_f, sd = sd_f))
 }
@@ -639,7 +648,7 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #   ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #   ggplot2::geom_qq() + ggplot2::geom_qq_line()
 
-# CIR_dynamic_part_estimated_param_strang_alt <- 
+# CIR_dynamic_part_estimated_param_strang_alt <-
 #   optimize_dynamic_likelihood(likelihood_fun = CIR_transform_dynamic_likelihood,
 #                               data = 2 * sqrt(sim_res_sqrt$X_t[sim_res_sqrt$t > t_0]),
 #                               init_par = dynamic_part_true_param,
@@ -686,7 +695,7 @@ jacobi_diffusion_transform_dynamic_likelihood_resid <- function(par, data, delta
 #                  ggplot2::ggplot(ggplot2::aes(sample = obsSample)) +
 #                  ggplot2::geom_qq() + ggplot2::geom_qq_line()
 
-# GBM_stationary_part_estimated_param_strang <- 
+# GBM_stationary_part_estimated_param_strang <-
 #   optimize_stationary_likelihood(mean_reverting_GBM_strang, log(sim_res_linear$X_t[sim_res_linear$t<t_0]),
 #                                init_par = stationary_part_true_param, delta = actual_dt,
 #                                exp_sigma = FALSE)$par
