@@ -40,7 +40,7 @@ This SDE has the following Scalar weak order 2.0 based scheme
 \end{align}
 \\
 \textbf{Skew t-distribution}\\
-For the $t$-diffusion based model the governing SDE is
+For the $t$-diffusion-based model the governing SDE is
 \begin{align}
     \mathrm{d}X_t = -\left(A(X_t - m)^2 + \lambda_t\right)\mathrm{d}t + \sigma \sqrt{\left(X_t^2 + 1\right)}\mathrm{d}W_t.
 \end{align}
@@ -146,7 +146,7 @@ In the stationary part the usual first order Taylor-expansion of the drift of th
 which is the square-root process with $\alpha_0 = 2\sqrt{-\lambda_0A}$ and $\mu_0 = m + \sqrt{-\frac{\lambda_0}{A}}$. 
 We first introduce estimators based on the Strang splitting scheme, and then we consider an estimator based on martingale estimating equations.\\\\
 \noindent \textbf{The Strang-based Estimator}\\
-To obtain the Strang estimator, we first use the lamperti transformation of (\ref{eq:squarerootAppendix}), which by table \ref{table:ergodicDiffusions} is $Y_t := g(X_t, t) = 2\sqrt{X_t}$. To confirm this and get the resulting SDE, we use Ito's formula. First note
+To obtain the Strang estimator, we first use the Lamperti transformation of (\ref{eq:squarerootAppendix}), which by table \ref{table:ergodicDiffusions} is $Y_t := g(X_t, t) = 2\sqrt{X_t}$. To confirm this and get the resulting SDE, we use Ito's formula. First note
 \begin{align}
     \frac{\partial}{\partial x}g(X_t, t) = \frac{1}{\sqrt{X_t}}, \qquad \frac{\partial^2}{\partial x^2}g(X_t, t) = - \frac{1}{2X_t^{3/2}}.
 \end{align}
@@ -265,7 +265,7 @@ This particular choice of splitting is done by letting the square-root process p
     \left(X_{t_n + \Delta t} | X_{t_n} = x\right) = \left(\varphi_{\Delta t/2}^{(2)} \circ \varphi_{\Delta t}^{(1)} \circ \varphi_{\Delta t/2}^{(2)}\right)(x),
 \end{align} 
 which gives rise to a pseudo-likelihood similar to \cite[(14)]{SplittingSchemes}. The approximation based on Kessler's method induces a gaussian likelihood, so the likelihood is a transformation with $\varphi_{\Delta t}^{(2)}$ of this, which by the density transformation theorem yields a likelihood very similar to (\ref{eq:Strang_likelihood}); we just have to adjust the conditional mean- and variance to fit the square-root process. The maximizer of the pseudo-likelihood, we call the alternative Strang based estimator.\\\\
-On the other hand,we can also construct a pseudo-likelihood with the regular Strang-likelihood that uses a splitting similar to (\ref{SDE_split}) and (\ref{ODE_Split}). For this we need the lamperti-transform. As this map only depends on the noise term, (\ref{eq:dynamicsquarerootSDE}) has the same lamperti-transform as the square-root process. To no surprise this reasoning generalizes to all the models.\\\\
+On the other hand,we can also construct a pseudo-likelihood with the regular Strang-likelihood that uses a splitting similar to (\ref{SDE_split}) and (\ref{ODE_Split}). For this we need the Lamperti transform. As this map only depends on the noise term, (\ref{eq:dynamicsquarerootSDE}) has the same Lamperti transform as the square-root process. To no surprise this reasoning generalizes to all the models.\\\\
 Therefore let $Y_t:= g(X_t, t) = 2\sqrt{X_t}$ and use Ito's formula on (\ref{eq:dynamicsquarerootSDE})
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(-\frac{A(X_t - m)^2 + \lambda_t}{\sqrt{X_t}} + \frac{\sigma^2}{2}X_t\left(-\frac{1}{2X_t^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t\nonumber \\
@@ -302,7 +302,7 @@ All in all, we get by linearizing around the fixed point of the drift the follow
     \mathrm{d}Y_t^{[2]} &= - \left(\frac{2}{Y_t^{[2]}}\left(A\left(\frac{\left(Y_t^{[2]}\right)^2}{4} - m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\right) + f'(y^*)\left(Y_t^{[2]} - y^*\right)\right)\mathrm{d}t,
 \end{align}
 Not surprisingly, the fixed point and the slope of the linear SDE depends on the ramping of $\lambda_t$, i.e. they are not constant throughout. \\\\
-We solve these flows using the solution to the Ornstein-Uhlenbeck process and a fourth-order Runge-kutta respectively. The solutions in the usual composition of (\ref{eq:classicStrangSplitting}) gives us the Strang-flow, which we maximize in order to get the Strang-based estimator for the lamperti-transformed process.
+We solve these flows using the solution to the Ornstein-Uhlenbeck process and a fourth-order Runge-kutta respectively. The solutions in the usual composition of (\ref{eq:classicStrangSplitting}) gives us the Strang-flow, which we maximize in order to get the Strang-based estimator for the Lamperti transformed process.
 \newpage
 \subsection{Mean-reverting Geometric Brownian Motion}\label{subsec:meanrevertingGBM}
 This section derives the estimators for the stationary- and non-stationary part of the model based on the noise term from the mean-reverting geometric brownian motion. That is the model governed by the following SDE
@@ -343,7 +343,7 @@ This is the transformation given by (\ref{eq:meanRevertingODESolution}) of a log
     l_S(\alpha_0, \mu_0, \sigma) = \sum_{i = 1}^{N} g(f_{\Delta t}^{-1}(x_i); \alpha_0,\mu_0, \sigma) - \frac{\alpha_0\Delta t(N - 1)}{2},
 \end{align}
 where $g$ is minus the logarithm of the log-normal density with parameters, $\mu_{\mathrm{log}}$ and $\sigma_{\mathrm{log}}$, and $N$ the number of samples.\\\\
-Conversely, we can use the lamperti transformation of the mean-reverting GBM and the familiar Strang likelihood (\ref{eq:Strang_likelihood}). The lamperti transform of (\ref{eq:GBM_simple}) is $Y_t = g(X_t, t) = \log(X_t)$, so
+Conversely, we can use the Lamperti transformation of the mean-reverting GBM and the familiar Strang likelihood (\ref{eq:Strang_likelihood}). The Lamperti transform of (\ref{eq:GBM_simple}) is $Y_t = g(X_t, t) = \log(X_t)$, so
 \begin{align}
     \frac{\partial}{\partial x}g(X_t, t) = \frac{1}{X_t}, \qquad \frac{\partial^2}{\partial x^2}g(X_t, t) = -\frac{1}{X_t^2},
 \end{align}
@@ -436,12 +436,12 @@ and as in section \ref{subsubsec:squarerootDynamic} we assume that we have estim
 \end{align}
 with $\alpha(\lambda_t) = 2\sqrt{-A\lambda_t}$ and $\mu(\lambda_t) = m + \sqrt{-\frac{\lambda_t}{A}}$.
 Again, this splitting is obtained by letting the mean-reverting GBM be the linearization around the fixed point of the drift in (\ref{eq:GBMSplit1}). To get the Strang estimator we simply use kessler's method on the mean-reverting GBM in (\ref{eq:GBMSplit1}); by previous computations we again have the conditional mean- and variance at our disposal. The flow for (\ref{eq:GBMSplit2}) is naturally identical to the one in (\ref{eq:squareRootSplit2}). Finally, the Strang approximation of the transition density is constructed in the usual manner. The maximizer of the resulting pseudo-likelihood is once more the Strang-based estimator.\\\\
-However, as we did with the square-root process, we also explore the option of finding a Strang estimator based on splitting the lamperti-transformed process. For sake of notation let
+However, as we did with the square-root process, we also explore the option of finding a Strang estimator based on splitting the Lamperti transformed process. For sake of notation let
 \begin{align}
     \zeta &= \frac{2mA - \frac{1}{2}\sigma^2 + \sqrt{\sigma^4/4 - A\left(2m\sigma^2 + 4\lambda_t\right)}}{2A},\\
     A_{\mathrm{linear\_part}} &= - \frac{1}{\zeta}\left(A \zeta^2 - \lambda_t - Am^2\right).
 \end{align}
-As in the stationary part (\ref{eq:GBM_dynamic_SDE}) has lamperti transform $Y_t:= g(X_t, t) = \log(X_t)$. Therefore, we get from Ito's formula
+As in the stationary part (\ref{eq:GBM_dynamic_SDE}) has Lamperti transform $Y_t:= g(X_t, t) = \log(X_t)$. Therefore, we get from Ito's formula
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(-\frac{A\left(X_t-m\right)^2 + \lambda_t}{X_t} + \frac{\sigma^2}{2}X_t^2\left(-\frac{1}{X_t^{2}}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t \nonumber \\
     &= -\left(\frac{A\left(X_t-m\right)^2 + \lambda_t}{X_t} + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma \mathrm{d}W_t
@@ -481,7 +481,7 @@ This gives us the splitting scheme
     \mathrm{d}Y_t^{[2]} &= \left(-\frac{A\left(\exp\left(Y_t^{[2]}\right)-m\right)^2 + \lambda_t}{\exp\left(Y_t^{[2]}\right)} - \frac{\sigma^2}{2}%\right. \nonumber \\
     - A_{\mathrm{linear\_part}}\left(Y_t^{[2]} - \log\left(\zeta\right)\right)\right)\mathrm{d}t. \label{eq:GBMLampertiBasedStrang}
 \end{align}
-We solve the linear SDE using (\ref{eq:OU_solution}). Unsurprisingly, the non-linear ODE's solution, the inverse of the solution and the derivative of the inverse of the solution will be found numerically with the fourth-order Runge-kutta. Putting together the pieces as (\ref{eq:classicStrangSplitting}); we get the strang-estimator of the lamperti-transformed process in the typical manner.
+We solve the linear SDE using (\ref{eq:OU_solution}). Unsurprisingly, the non-linear ODE's solution, the inverse of the solution and the derivative of the inverse of the solution will be found numerically with the fourth-order Runge-kutta. Putting together the pieces as (\ref{eq:classicStrangSplitting}); we get the strang-estimator of the Lamperti transformed process in the typical manner.
 \newpage
 \subsection{Skew t-distribution}
 In this section we introduce the estimators for the model, where the noise is assumed to correspond to a pearson diffusion with stationary distribution equal to the Skew t-distribution. In other words, the model is
@@ -545,7 +545,7 @@ With estimates for $\alpha_0, \mu_0, \sigma$ we continue by turning to the dynam
     \mathrm{d}X_t &= -\left(A(X_t - m)^2 + \lambda_t\right)\mathrm{d}t + \sigma \sqrt{\left(X_t^2 + 1\right)}\mathrm{d}W_t,\\
     \lambda_t &= \lambda_0 \left(1 - \frac{t - t_0}{\tau_c}\right)^\nu.
 \end{align}
-Once again, we use the lamperti-transform: Let $Y_t = \sinh^{-1}(X_t)$. By similar calculations as done in the stationary part, we get from Ito's formula that
+Once again, we use the Lamperti transform: Let $Y_t = \sinh^{-1}(X_t)$. By similar calculations as done in the stationary part, we get from Ito's formula that
 \begin{align}
     \mathrm{d}Y_t = -\frac{1}{\cosh(Y_t)}\left(A\left(\sinh(Y_t) - m\right)^2 + \lambda_t + \frac{\sigma^2}{2}\sinh(Y_t)\right)\mathrm{d}t + \sigma \mathrm{d}W_t. \label{eq:LampertiTDistributionDynamic}
 \end{align}
@@ -596,7 +596,7 @@ In the stationary part of the process we do estimation with the usual first-orde
     \mathrm{d}X_t = -\alpha_0\left(X_t - \mu_0\right)\mathrm{d}t + \sigma \sqrt{\left(X_t\left(X_t + 1\right)\right)}\mathrm{d}W_t,
 \end{align}
 where $\alpha_0 = 2\sqrt{-\lambda_0 A}$ and $\mu_0 = m + \sqrt{-\frac{\lambda_0}{a}}$.
-The lamperti-transform is $Y_t := g(X_t, t) = 2 \sinh^{-1}\left(\sqrt{X_t}\right)$. Note that
+The Lamperti transform is $Y_t := g(X_t, t) = 2 \sinh^{-1}\left(\sqrt{X_t}\right)$. Note that
 \begin{align}
     \frac{\partial}{\partial x}g(x, t) = \frac{1}{\sqrt{x\left(x + 1\right)}}, \qquad \frac{\partial^2}{\partial x^2}g(x, t) = \frac{-2x + 1}{2\left(x\left(x + 1\right)\right)^{3/2}}.
 \end{align}
@@ -648,7 +648,7 @@ We continue the estimation for the model with the same stochastic part as the $F
     \mathrm{d}X_t &= -\left(A(X_t - m)^2 + \lambda_t\right)\mathrm{d}t + \sigma \sqrt{\left(X_t\left(X_t + 1\right)\right)}\mathrm{d}W_t,\\
     \lambda_t &= \lambda_0 \left(1 - \frac{t - t_0}{\tau_c}\right)^\nu.
 \end{align}
-Naturally, the lamperti transform is the same here as in the stationary part, ergo $Y_t := g(X_t, t) = 2\sinh^{-1}\left(\sqrt{X_t}\right)$. Ito's formula gives 
+Naturally, the Lamperti transform is the same here as in the stationary part, ergo $Y_t := g(X_t, t) = 2\sinh^{-1}\left(\sqrt{X_t}\right)$. Ito's formula gives 
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(-\frac{A\left(X_t - m\right)^2 + \lambda_t}{\sqrt{X_t\left(X_t + 1\right)}}+ \frac{\sigma^2}{2}X_t\left(X_t + 1\right)\left(-\frac{2X_t + 1}{2\left(X_t\left(X_t + 1\right)\right)^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t \nonumber \\
     &= -\frac{1}{\sqrt{X_t\left(X_t + 1\right)}}\left(A\left(X_t - m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\left(2X_t + 1\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t
@@ -718,7 +718,7 @@ During the non-dynamic part, we do a first-order Taylor-expansion of the drift
     \mathrm{d}X_t = -\alpha_0\left(X_t - \mu_0\right)\mathrm{d}t + \sigma \sqrt{X_t\left(1 - X_t\right)}\mathrm{d}W_t.
 \end{align}
 The parameters $\alpha_0 = 2\sqrt{-\lambda_0 A}$ and $\mu_0 = m + \sqrt{-\frac{\lambda_0}{A}}$, as usual.\\\\
-The lamperti transform of this process is: $Y_t := g(X_t,t) = 2 \sin^{-1}\left(\sqrt{X_t}\right)$.
+The Lamperti transform of this process is: $Y_t := g(X_t,t) = 2 \sin^{-1}\left(\sqrt{X_t}\right)$.
 Note that
 \begin{align}
     \frac{\partial}{\partial x}g(X_t,t) = \frac{1}{\sqrt{X_t\left(1 - X_t\right)}}, \qquad \frac{\partial^2}{\partial x^2}g(X_t,t) = -\frac{1 - 2X_t}{2\left(X_t\left(1 - X_t\right)\right)^{3/2}}.
@@ -872,7 +872,7 @@ In this section we show the results of a few benchmarks using the \code{microben
 \begin{figure}[h!]
     \begin{center}
     \includegraphics[scale = .1]{figures/estimation_duration_dynamic.jpeg}
-    \caption{The median run-time from invokation to convergence in the dynamic part. The ARE of the estimators are shown in figure \ref{figure:parameter_precision_dynamic}}
+    \caption{The median run-time from invokation to convergence in the dynamic part. The ARE of the estimators are shown in Figure \ref{figure:parameter_precision_dynamic}}
     \label{figure:estimation_duration_dynamic}
     \end{center}
 \end{figure}
@@ -880,7 +880,7 @@ In this section we show the results of a few benchmarks using the \code{microben
 \begin{figure}[h!]
     \begin{center}
     \includegraphics[scale = .1]{figures/ARE_dist_result_plot_F.jpeg}
-    \caption{Distribution of the ARE of the parameters in the $F$-diffusion based model shown for the numeric and closed form type estimation methds. A similar result for the linear noise model is shown in figure \ref{figure:ARE_dist_linear_noise}}
+    \caption{Distribution of the ARE of the parameters in the $F$-diffusion-based model shown for the numeric and closed form type estimation methds. A similar result for the linear noise model is shown in Figure \ref{figure:ARE_dist_linear_noise}}
     \label{figure:ARE_dist_numeric_F_diffusion}
     \end{center}
 \end{figure}
@@ -888,7 +888,7 @@ In this section we show the results of a few benchmarks using the \code{microben
 \begin{figure}[h!]
     \begin{center}
     \includegraphics[scale = .08]{figures/function_gradient_count_F_plot.jpeg}     
-    \caption{Number of gradient- and function evaluations for the two methods in the experiment on the $F$-diffusion based model. A similar result for the linear-noise model is shown in figure \ref{figure:linearFunctionGradientCount}.}
+    \caption{Number of gradient- and function evaluations for the two methods in the experiment on the $F$-diffusion-based model. A similar result for the linear-noise model is shown in Figure \ref{figure:linearFunctionGradientCount}.}
     \label{figure:FFunctionGradientCount}   
     \end{center}
 \end{figure}
@@ -927,7 +927,7 @@ In this section we show the results of a few benchmarks using the \code{microben
         Dynamic part & 1924 & -2.20 & -1.75 & -0.91 & -0.43 & -0.04 & 0.35 & 0.86 & 2.09 & 2.45 \\ 
            \hline
         \end{tabular}
-        \caption{Tabularization of the quantiles at selected values for the stationary- and dynamic parts grouped by the $t_0$ used along with the standard normal quantiles. Supports figure \ref{figure:AMOC_QQ_t_0}}
+        \caption{Tabularization of the quantiles at selected values for the stationary- and dynamic parts grouped by the $t_0$ used along with the standard normal quantiles. Supports Figure \ref{figure:AMOC_QQ_t_0}}
         \label{table:QQ_table_parts}
         \end{table}
     
@@ -946,30 +946,30 @@ In this section we show the results of a few benchmarks using the \code{microben
             $\mathbf{290.17}$ & $2.71$ & $-0.01$ & $0.24$& $0.25$ & $0.48$ & $197.33$ & $2121.33$ \\ 
              \hline
         \end{tabular}
-        \caption{Table of estimates that were removed. The reason behind the removing of the estimate has been bolded - though in any case the $m$-estimate is also rather extreme in comparison with the typical distribution in figure \ref{figure:AMOC_parametric_bootstrap}}
+        \caption{Table of estimates that were removed. The reason behind the removing of the estimate has been bolded - though in any case the $m$-estimate is also rather extreme in comparison with the typical distribution in Figure \ref{figure:AMOC_parametric_bootstrap}}
         \label{table:extreme_amoc_estimates}
     \end{table}
     \begin{figure}[h!]
         \begin{center}
             \includegraphics[scale = .1]{figures/AMOC_alt_plot.jpeg}
-            \caption{Time series for the three types of fingerprints for the AMOC. Note that \textit{AMOC2} corresponds to "\textit{AMOC fingerprint}" on figure \ref{figure:AMOC_plot}.}
+            \caption{Time series for the three types of fingerprints for the AMOC. Note that \textit{AMOC2} corresponds to "\textit{AMOC fingerprint}" in Figure \ref{figure:AMOC_plot}.}
             \label{figure:allAMOCFingerprints}
         \end{center}
     \end{figure}
 \newpage
 \subsubsection{Robustness analysis and the additive noise model}\label{subsubsec:RobustnessAnalysisAppendix}
-Here we illustrate the results from the parametric bootstrap of the estimates from the $t$-diffusion based model applied to the AMOC1- and AMOC3 fingerprints. The AMOC2-fingerprint bootstrap can be seen in figure \ref{figure:AMOC_parametric_bootstrap}.
+Here we illustrate the results from the parametric bootstrap of the estimates from the $t$-diffusion-based model applied to the AMOC1- and AMOC3 fingerprints. The AMOC2-fingerprint bootstrap can be seen in Figure \ref{figure:AMOC_parametric_bootstrap}.
 \begin{figure}[h!]
     \begin{center}
         \includegraphics[scale = .09]{figures/estim_tibble_AMOC1_plot.jpeg}
-        \caption{Result from parametric bootstrap of the parameters fitted to the AMOC1-fingerprint with the $t$-diffusion based model}
+        \caption{Result from parametric bootstrap of the parameters fitted to the AMOC1-fingerprint with the $t$-diffusion-based model}
         \label{figure:AMOC1_t_diffusion_bootstrap}
     \end{center}
 \end{figure}\\
 \begin{figure}[h!]
     \begin{center}
         \includegraphics[scale = .09]{figures/estim_tibble_AMOC3_plot.jpeg}
-        \caption{Result from parametric bootstrap of the parameters fitted to the AMOC3-fingerprint with the $t$-diffusion based model}
+        \caption{Result from parametric bootstrap of the parameters fitted to the AMOC3-fingerprint with the $t$-diffusion-based model}
         \label{figure:AMOC3_t_diffusion_bootstrap}
     \end{center}
 \end{figure}\\

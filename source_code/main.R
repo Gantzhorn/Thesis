@@ -1,4 +1,4 @@
-# Title: Main function for the thesis
+# Title: Main file for the thesis
 # Author: Anders Gantzhorn Kristensen (University of Copenhagen, andersgantzhorn@gmail.com)
 # Date: 2024-01-31 (Last Updated: 2024-05-27)
 #-----------------------------------------------------------------------------------------------------------------------------#
@@ -4693,7 +4693,7 @@ mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) *  sqrt(abs(true_param[
 alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
 stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 
-# Different values of actual_dt
+# Potentially different values of actual_dt
 actual_dts <- c(0.05)
 
 # Number of repetitions
@@ -4744,18 +4744,3 @@ results_df_OU |> group_by(Method, Parameter) |>
           probs = c(0.025, 0.165, 0.5, 0.835, 0.975)) |> 
   pivot_wider(id_cols = c(Method, Parameter), values_from = quantile, names_from = probs) |> 
   xtable::xtable()
-  
-# Potential plot of co2 levels
-
-co2_annmean_mlo <- read_csv("data/co2_annmean_mlo.csv", 
-                            comment = "#")
-
-co2_annmean_mlo |> ggplot(aes(x = year, y = mean)) + geom_line()
-
-AMOC_data |> mutate(time = floor(time)) |> group_by(time) |> 
-  summarise(AMOC0 = mean(AMOC0), AMOC1 = mean(AMOC1), AMOC2 = mean(AMOC0), AMOC3 = mean(AMOC3)) |> 
-  inner_join(co2_annmean_mlo, by = join_by(time == year)) |> 
-  select(time, AMOC1, AMOC2, AMOC3, mean) |> 
-  pivot_longer(-c(time, mean), values_to = "Value", names_to = "Type") |> 
-  ggplot(aes(x = mean, y = Value, col = Type)) + geom_step() + 
-  scale_x_log10()
