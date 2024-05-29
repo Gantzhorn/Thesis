@@ -1,7 +1,7 @@
 \section{Source code}
-The source code for this project, licensed under the MIT License, is hosted on \href{https://github.com/Gantzhorn/Thesis}{Github}. In the repository the source code can be found in the \textit{"source\_code"}-directory. To recreate the main results from the thesis run the \code{R}-script: \textit{"main.R"}. The main-file is mostly boilerplate code to create setup the experiments, though. If one wants to understand the methods themselves, it is easier to read the other \code{R}-files in the same directory. In those files there are, apart from the code itself, also information about the code as well as minimal examples on how to actually run it. 
+The source code for this project, licensed under the MIT License, is hosted on \href{https://github.com/Gantzhorn/Thesis}{Github}. In the repository the source code can be found in the \textit{"source\_code"}-directory. To recreate the main results from the thesis run the \code{R}-script: \textit{"main.R"}. The main-file is mostly boilerplate code to setup the experiments, though. If one wants to understand the methods themselves, it is easier to read the other \code{R}-files in the same directory. In those files there are, apart from the code itself, also information about the code as well as numerous examples on how to actually run it. 
 \section{Simulation Methods}\label{appendix:simMethods}
-This section focuses on constructing the simulation schemes that support the analytical work presented in this thesis. We considered the Euler-maruyama - as well the Milstein scheme. However, as the processes are quite non-linear our final choice was the Scalar weak order 2.0 Ito–Taylor method \cite[algorithm 8.5]{Srkk2019}. In the general setup we simulate $X_0,X_{t_1},\dots, X_{t_N}$ according to the schemes by sampling $N$ random variables $\Delta W_{t_k}\sim\mathcal{N}\left(0, \Delta t_k\right)$. Note that we let $X_{t_0} = \mu_0$, i.e. mean-reverting parameter in the stationary parts of the processes. Recall that all six models use the same ramping of $\lambda_t$, given by (\ref{eq:lambdaRampDefinition}). To switch between the two versions of the normal form of the saddle-node bifurcation, we use positive or negative values for $A$ and correspondingly negative or positive values of $\lambda_0$. \\\\
+This section focuses on constructing the simulation schemes that support the analytical work presented in this thesis. We considered the Euler-maruyama - as well the Milstein scheme. However, as the processes are quite non-linear our final choice was the Scalar weak order 2.0 Itō–Taylor method \cite[algorithm 8.5]{Srkk2019}. In the general setup we simulate $X_0,X_{t_1},\dots, X_{t_N}$ according to the schemes by sampling $N$ random variables $\Delta W_{t_k}\sim\mathcal{N}\left(0, \Delta t_k\right)$. Note that we let $X_{t_0} = \mu_0$, i.e. mean-reverting parameter in the stationary parts of the processes. Recall that all six models use the same ramping of $\lambda_t$, given by (\ref{eq:lambdaRampDefinition}). To switch between the two versions of the normal form of the saddle-node bifurcation, we use positive or negative values for $A$ and correspondingly negative or positive values of $\lambda_0$. \\\\
 \noindent \textbf{Additive noise}\\
 The additive noise model is governed by the SDE
 \begin{align}
@@ -70,7 +70,7 @@ Basing the modelling on the jacobi diffusion gives an SDE
 \begin{align}
     \mathrm{d}X_t = -\left(A(X_t - m)^2 + \lambda_t\right)\mathrm{d}t + \sigma \sqrt{\left(X_t\left(1 - X_t\right)\right)}\mathrm{d}W_t,
 \end{align}
-yields a scheme
+this model has the following sampling scheme
 \begin{align}
     X_{t_{k + 1}} &= X_{t_k} - \left(A(X_{t_k} - m)^2 + \lambda_{t_k}\right) \Delta t_k + \sigma \sqrt{X_{t_k}\left(1-X_{t_k}\right)} \Delta W_{k} \nonumber\\
     &+ \frac{\sigma^2}{4}\left(1 - 2X_{t_k}\right)\left(\Delta W_k^2 - \Delta t_k\right) - A\left(X_{t_k} - m\right)\sigma \sqrt{X_{t_k}\left(1 - X_{t_k}\right)}\Delta W_k\Delta t_k \nonumber \\
@@ -79,7 +79,7 @@ yields a scheme
 \end{align}
 \newpage
 \section{Derivation of Estimators}\label{sec:AppendixEstim}
-In this section, we derive the estimators that have been employed throughout the thesis. For sake of readibility, we leave out some of the more lengthy algebraic manipulations
+In this section, we derive the estimators that have been employed throughout the thesis. The derivations are somewhat lengthy, but we present most of them to ensure transparency in our work.
 \subsection{The Ornstein-Uhlenbeck based model}\label{subsec:OUprocess}
 This section introduces the estimators for the dynamical system with additive noise. This is the model
 \begin{align}
@@ -93,23 +93,24 @@ In the stationary part of the process a first order Taylor-expansion of the drif
     \mathrm{d}X_t = -\alpha_0\left(X_t-\mu_0\right) \mathrm{d}t + \sigma \mathrm{d}W_t,
 \end{align}
 where $\alpha_0 = 2\sqrt{-A\lambda_0}$ and $\mu_0 = m + \sqrt{-\frac{\lambda_0}{A}}$.\\\\
-Let $\rho = \exp\left(-\alpha_0\Delta t\right)$ and $\gamma^2 = \sigma^2/2\alpha_0$. The OU-process is a gaussian process, thus it has transition density \cite[equation (S3)]{DitlevsenSupplementary}
+Let $\rho = \exp\left(-\alpha_0\Delta t\right)$ and $\gamma^2 = \sigma^2/2\alpha_0$. The first-order taylor expansion gives an OU process, which is a gaussian process, thus it has transition density \cite[equation (S3)]{DitlevsenSupplementary}
 \begin{align}
     p\left(\Delta t, x_{i-1}, x_i;\theta\right) = \frac{1}{\sqrt{2\pi\gamma^2\left(1-\rho^2\right)}}\exp\left(-\frac{\left(x_i-x_{i-1}\rho - \mu_0\left(1-\rho\right)\right)^2}{2\gamma^2\left(1-\rho^2\right)}\right), \label{eq:OULikelihood}
 \end{align}
 which is the gaussian density with conditional mean and -variance
 \begin{align}
     \mathbb{E}\left[X_i\middle|X_{i-1} = x_{i-1}\right] &= x_{i - 1}\rho - \mu_0\left(1-\rho\right),\\
-    \mathrm{Var}\left(X_i\middle|X_{i-1} = x_{i-1}\right) &= \gamma^2\left(1-\rho^2\right).
+    \mathrm{Var}\left(X_i\middle|X_{i-1} = x_{i-1}\right) &= \gamma^2\left(1-\rho^2\right),
 \end{align}
-Unfortunately, we cannot get closed form solution to all of the estimators from this. However, we can still maximize (\ref{eq:OULikelihood}) with respect to $\theta$ to get the MLEs. Alternatively, we can derive the score equations by taking the derivative of the log-likelihood, and numerically solve the non-linear equations we get from doing so. The score equations are present in \cite[p.1, bottom]{DitlevsenSupplementary}. To solve the equations, we use the $\code{nleqslv::nleqslv}$-method \cite{nleqslv}. For starting values in both methods we use the approximation for the MLE of $\mu_0$ in equation \cite[(S4)]{DitlevsenSupplementary} along with (S5) and (S6) for $\rho$ $\gamma^2$, respectively. These values are good closed form approximations of the MLEs for thhe number of samples, $N$, sufficiently large.
+as we also proved in the main part of the thesis.\\\\
+Unfortunately, we cannot get closed form solution to the estimators from this. However, we can still maximize (\ref{eq:OULikelihood}) with respect to $\theta$ to get the MLEs. Alternatively, we can derive the score equations by taking the derivative of the log-likelihood, and numerically solve the non-linear equations we get from doing so. The score equations are present in \cite[p.1, bottom]{DitlevsenSupplementary}. To solve these equations, we use the $\code{nleqslv::nleqslv}$-method \cite{nleqslv}. For starting values in both methods we use the approximation for the MLE of $\mu_0$ in equation \cite[(S4)]{DitlevsenSupplementary} along with (S5) and (S6) for $\rho$ and $\gamma^2$, respectively. These values are good closed form approximations of the MLEs for the number of samples, $N$, sufficiently large.
 \subsubsection{Dynamic part}\label{subsubsec:OUprocessDynamic}
-This part of the estimation procedure has to do with the estimation of the parameters linked to the dynamic part of the process. Our estimation procedure mostly follows \cite{Ditlevsen2023}. We, of course, have the addition of the $\nu$-parameter. Additionally, \cite{Ditlevsen2023} uses regularization in the form of a penalization parameter that punishes values of $A$ significantly smaller than $1$; we do not explore this option here. Recall the dynamics for $t>t_0$
+This part of the estimation procedure has to do with the estimation of the parameters linked to the dynamic part of the process. Our estimation procedure mostly follows \cite{Ditlevsen2023}. We, of course, have the addition of the $\nu$-parameter. Additionally, \cite{Ditlevsen2023} uses regularization in the form of a penalization parameter that punishes values of $A$ smaller than $1$; we do not explore this option here. Recall the dynamics for $t>t_0$
 \begin{align}
     \mathrm{d}X_t &= -\left(A\left(X_t - m\right)^2 + \lambda_t\right)\mathrm{d}t + \sigma \mathrm{d}W_t \label{eq:additiveDynamicPart},\\
     \lambda_t &= \lambda_0\left(1 - \frac{t - t_0}{\tau_c}\right)^\nu.
 \end{align}
-For this part of the process, we utilize the estimation method described in \cite{DitlevsenSupplementary}. The fixed point of the process is $\mu\left(\lambda\right) = \sqrt{-\frac{\lambda_t}{A}}$. Linearizing the process around this value yields the splitting
+For this part of the process, we utilize the estimation method described in \cite{DitlevsenSupplementary}. The fixed point of the drift is $\mu\left(\lambda\right) = \sqrt{-\frac{\lambda_t}{A}}$. Linearizing the process around this value yields the splitting
 \begin{align}
     \mathrm{d}X_t^{(1)} &= -\alpha\left(\lambda\right)\left(X_t^{(1)} - \mu\left(\lambda\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t, \label{eq:additiveSDE}\\
     \mathrm{d}X_t^{(2)} &= -A \left(X_t^{(2)} - \mu\left(\lambda\right)\right)^2\mathrm{d}t. \label{eq:additiveODE}
@@ -146,7 +147,7 @@ In the stationary part the usual first order Taylor-expansion of the drift of th
 which is the square-root process with $\alpha_0 = 2\sqrt{-\lambda_0A}$ and $\mu_0 = m + \sqrt{-\frac{\lambda_0}{A}}$. 
 We first introduce estimators based on the Strang splitting scheme, and then we consider an estimator based on martingale estimating equations.\\\\
 \noindent \textbf{The Strang-based Estimator}\\
-To obtain the Strang estimator, we first use the Lamperti transformation of (\ref{eq:squarerootAppendix}), which by table \ref{table:ergodicDiffusions} is $Y_t := g(X_t, t) = 2\sqrt{X_t}$. To confirm this and get the resulting SDE, we use Ito's formula. First note
+To obtain the Strang estimator, we first use the Lamperti transformation of (\ref{eq:squarerootAppendix}), which by table \ref{table:ergodicDiffusions} is $Y_t := g(X_t, t) = 2\sqrt{X_t}$. To confirm this and get the resulting SDE, we use Itō's formula. First note
 \begin{align}
     \frac{\partial}{\partial x}g(X_t, t) = \frac{1}{\sqrt{X_t}}, \qquad \frac{\partial^2}{\partial x^2}g(X_t, t) = - \frac{1}{2X_t^{3/2}}.
 \end{align}
@@ -168,7 +169,7 @@ in terms of $y$. By the quadratic formula this is $y^* = \pm 2\sqrt{\frac{\alpha
     \mathrm{d}Y_t^{[1]} &= -\alpha_0 \left(Y_t^{[1]} - 2\sqrt{\frac{\alpha_0\mu_0 - \sigma^2 / 2}{\alpha_0}}\right)\mathrm{d}t + \sigma \mathrm{d}W_t , \label{eq:squarerootStationarySplit1} \\
     \mathrm{d}Y_t^{[2]} &= \left(\frac{\alpha_0 Y_t^{[2]}}{2} + \frac{2\alpha_0 \mu_0 - \sigma^2}{Y_t} - 2\sqrt{\alpha_0\left(\alpha_0\mu_0 - \sigma^2 / 2\right)}\right)\mathrm{d}t. \label{eq:squarerootStationarySplit2}
 \end{align}
-The coefficient in front of the linear SDE (\ref{eq:squarerootStationarySplit1}) is naturally first computing the derivative of $f$
+The coefficient in front of the linear SDE (\ref{eq:squarerootStationarySplit1}) is naturally found by computing the derivative of $f$
 \begin{align}
     f'(y) &= \frac{2}{y^2}\left(\alpha_0\frac{y^2}{4}-\alpha_0\mu_0+\frac{\sigma^2}{2}\right) - \alpha_0,
 \end{align}
@@ -189,14 +190,14 @@ That gives us our psuedo-likelihood; a non-linear transformation of a gaussian r
 \noindent \textbf{Approximate Quadratic Martingale Estimating Equation}\\
 We start by deriving the expressions for the one-step ahead conditional mean and variances. The infinitesemal generator (\ref{eq:infinitesemalGeneratorDefinition}) for the square-root process (\ref{eq:squarerootAppendix}) is 
 \begin{align}
-    \mathcal{L}f = \frac{1}{2}\sigma^2x\frac{\mathrm{d}}{\mathrm{d}x^2}f -\alpha_0\left(x - \mu_0\right)\frac{\mathrm{d}}{\mathrm{d}x}f. \label{eq:infinitesemalGeneratorSquareRootProcess}
+    \mathcal{L}f = \frac{1}{2}\sigma^2x\frac{\mathrm{d^2}}{\mathrm{d}x^2}f -\alpha_0\left(x - \mu_0\right)\frac{\mathrm{d}}{\mathrm{d}x}f. \label{eq:infinitesemalGeneratorSquareRootProcess}
 \end{align}
 By direct computation one can find 
 \begin{align}
     \phi_1(x) &= x-\mu_0, &&\; \lambda_1 = \alpha_0, \label{squarerooteigen1}\\
     \phi_2(x) &= x^2 - \left(2\mu_0 + \frac{\sigma^2}{\alpha_0}\right)x + \mu_0^2 + \frac{\sigma^2\mu_0}{2\alpha_0}, &&\; \lambda_2 = 2\alpha_0. \label{squarerooteigen2}
 \end{align}
-For completeness, we verify by inserting into (\ref{eq:infinitesemalGeneratorSquareRootProcess}) that (\ref{squarerooteigen1}) and \ref{squarerooteigen2} in fact represent eigenvalues and eigenfuncitons.
+For completeness, we verify by inserting into (\ref{eq:infinitesemalGeneratorSquareRootProcess}) that (\ref{squarerooteigen1}) and \ref{squarerooteigen2} in fact represent eigenvalues and eigenfunctions.
 \begin{align}
     \mathcal{L}\phi_1(x) = -\alpha_0\left(x - \mu_0\right)\cdot 1 + \frac{1}{2}\sigma^2 x \cdot 0 = -\alpha_0\left(x - \mu_0\right) = -\lambda_1\phi_1(x). \label{eq:directVerificationCondMean}
 \end{align}
@@ -260,13 +261,13 @@ In other words, our objective is to estimate $A, \tau_c, \nu$, where $\tau_c$ is
     \mathrm{d}X_t^{[2]} &= - A \left(X_t^{[2]} - \mu(\lambda)\right)^2 \mathrm{d}t, \label{eq:squareRootSplit2}
 \end{align}
 with $\alpha(\lambda) = 2\sqrt{-A\lambda_t}$ and $\mu(\lambda) = m + \sqrt{-\frac{\lambda_t}{A}}$.
-This particular choice of splitting is done by letting the square-root process part be the linearization around the fixed point of the process. It is evident that equation (\ref{eq:squareRootSplit2}) is identical to equation \cite[(S10)]{DitlevsenSupplementary}; thus the flows are the same. However, the square-root dependency in the noise-term (\ref{eq:squareRootSplit1}) yields a flow that is different to the flow of \cite[(S9)]{DitlevsenSupplementary}. To address this, we adopt the approach developed by Kessler \cite{Kessler1997} to (\ref{eq:squareRootSplit1}). Though, we can approximate its transition density using Kessler's method, which assumes a gaussian transition density, but uses the true conditional mean and- variance. The process, (\ref{eq:squareRootSplit1}), is the square-root process, for which we just found exactly these quantities (\ref{eq:squarerootCondMean}) and (\ref{eq:squarerootCondVariance}). Of course, we have to insert appropriate values into these definitions in accordance with the splitting scheme. Denote the flows with steplength, $\Delta t$, of \ref{eq:squareRootSplit1} and \ref{eq:squareRootSplit2} $\varphi_{\Delta t}^{(1)}$ and $\varphi_{\Delta t}^{(2)}$ respectively, then the Strang based flow is 
+This particular choice of splitting is done by computing (\ref{eq:squareRootSplit1}) as the linearization around the fixed point of the process (\ref{eq:dynamicsquarerootSDE}). It is evident that equation (\ref{eq:squareRootSplit2}) is identical to equation \cite[(S10)]{DitlevsenSupplementary}; thus the flows are the same. However, the square-root dependency in the noise-term (\ref{eq:squareRootSplit1}) yields a flow that is different to the flow of \cite[(S9)]{DitlevsenSupplementary}. To address this, we adopt the approach developed by Kessler \cite{Kessler1997} to (\ref{eq:squareRootSplit1}). Though, we can approximate its transition density using Kessler's method, which assumes a gaussian transition density, but uses the true conditional mean and- variance. The process, (\ref{eq:squareRootSplit1}), is the square-root process, for which we just found exactly these quantities (\ref{eq:squarerootCondMean}) and (\ref{eq:squarerootCondVariance}). Of course, we have to insert appropriate values into these definitions in accordance with the splitting scheme. Denote the flows with steplength, $\Delta t$, of \ref{eq:squareRootSplit1} and \ref{eq:squareRootSplit2} $\varphi_{\Delta t}^{(1)}$ and $\varphi_{\Delta t}^{(2)}$ respectively, then the Strang based flow is 
 \begin{align}
     \left(X_{t_n + \Delta t} | X_{t_n} = x\right) = \left(\varphi_{\Delta t/2}^{(2)} \circ \varphi_{\Delta t}^{(1)} \circ \varphi_{\Delta t/2}^{(2)}\right)(x),
 \end{align} 
 which gives rise to a pseudo-likelihood similar to \cite[(14)]{SplittingSchemes}. The approximation based on Kessler's method induces a gaussian likelihood, so the likelihood is a transformation with $\varphi_{\Delta t}^{(2)}$ of this, which by the density transformation theorem yields a likelihood very similar to (\ref{eq:Strang_likelihood}); we just have to adjust the conditional mean- and variance to fit the square-root process. The maximizer of the pseudo-likelihood, we call the alternative Strang based estimator.\\\\
 On the other hand,we can also construct a pseudo-likelihood with the regular Strang-likelihood that uses a splitting similar to (\ref{SDE_split}) and (\ref{ODE_Split}). For this we need the Lamperti transform. As this map only depends on the noise term, (\ref{eq:dynamicsquarerootSDE}) has the same Lamperti transform as the square-root process. To no surprise this reasoning generalizes to all the models.\\\\
-Therefore let $Y_t:= g(X_t, t) = 2\sqrt{X_t}$ and use Ito's formula on (\ref{eq:dynamicsquarerootSDE})
+Therefore let $Y_t:= g(X_t, t) = 2\sqrt{X_t}$ and use Itō's formula on (\ref{eq:dynamicsquarerootSDE})
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(-\frac{A(X_t - m)^2 + \lambda_t}{\sqrt{X_t}} + \frac{\sigma^2}{2}X_t\left(-\frac{1}{2X_t^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t\nonumber \\
     &= -\frac{1}{\sqrt{X_t}}\left(A\left(X_t - m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\right)\mathrm{d}t + \sigma\mathrm{d}W_t
@@ -287,7 +288,7 @@ By the quadratic formula, $z^* = \pm\frac{\sqrt{-A\left(\lambda_t + \frac{\sigma
 \begin{align}
     y^* = 2\sqrt{m + \frac{\sqrt{-A\left(\lambda_t + \frac{\sigma^2}{4}\right)}}{A}},
 \end{align}
-where we once again disregard the negative root branch of the square-root, as $y$ must be non-negative. To linearize around the fixed point we need to evaluate $f'(y^*)$. So we derive the derivative
+where we once again disregard the negative root branch of the square-root, as $y$ must be non-negative. To linearize around the fixed point we need to evaluate $f'(y^*)$. So we calculate the derivative
 \begin{align}
     f'(y) = \frac{2}{y^2}\left(A\left(\frac{y^2}{4}-m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\right) - 2A\left(\frac{y^2}{4} - m\right)
 \end{align}
@@ -347,7 +348,7 @@ Conversely, we can use the Lamperti transformation of the mean-reverting GBM and
 \begin{align}
     \frac{\partial}{\partial x}g(X_t, t) = \frac{1}{X_t}, \qquad \frac{\partial^2}{\partial x^2}g(X_t, t) = -\frac{1}{X_t^2},
 \end{align}
-and by Itos formula
+and by Itō's formula
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(-\frac{\alpha_0\left(X_t - \mu_0\right)}{X_t}+\frac{\sigma^2}{2}X_t^2\left(-\frac{1}{X_t^2}\right)\right) + \sigma\mathrm{d}W_t\nonumber\\
     &= -\left(\alpha_0\left(1-\mu_0X_t^{-1}\right) + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma\mathrm{d}W_t
@@ -436,12 +437,12 @@ and as in section \ref{subsubsec:squarerootDynamic} we assume that we have estim
 \end{align}
 with $\alpha(\lambda_t) = 2\sqrt{-A\lambda_t}$ and $\mu(\lambda_t) = m + \sqrt{-\frac{\lambda_t}{A}}$.
 Again, this splitting is obtained by letting the mean-reverting GBM be the linearization around the fixed point of the drift in (\ref{eq:GBMSplit1}). To get the Strang estimator we simply use kessler's method on the mean-reverting GBM in (\ref{eq:GBMSplit1}); by previous computations we again have the conditional mean- and variance at our disposal. The flow for (\ref{eq:GBMSplit2}) is naturally identical to the one in (\ref{eq:squareRootSplit2}). Finally, the Strang approximation of the transition density is constructed in the usual manner. The maximizer of the resulting pseudo-likelihood is once more the Strang-based estimator.\\\\
-However, as we did with the square-root process, we also explore the option of finding a Strang estimator based on splitting the Lamperti transformed process. For sake of notation let
+However, as we did with the square-root process, we also explore the option of finding a Strang estimator based on splitting the Lamperti transformed process. For the sake of notation let
 \begin{align}
     \zeta &= \frac{2mA - \frac{1}{2}\sigma^2 + \sqrt{\sigma^4/4 - A\left(2m\sigma^2 + 4\lambda_t\right)}}{2A},\\
     A_{\mathrm{linear\_part}} &= - \frac{1}{\zeta}\left(A \zeta^2 - \lambda_t - Am^2\right).
 \end{align}
-As in the stationary part (\ref{eq:GBM_dynamic_SDE}) has Lamperti transform $Y_t:= g(X_t, t) = \log(X_t)$. Therefore, we get from Ito's formula
+As in the stationary part (\ref{eq:GBM_dynamic_SDE}) has Lamperti transform $Y_t:= g(X_t, t) = \log(X_t)$. Therefore, we get from Itō's formula
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(-\frac{A\left(X_t-m\right)^2 + \lambda_t}{X_t} + \frac{\sigma^2}{2}X_t^2\left(-\frac{1}{X_t^{2}}\right)\right)\mathrm{d}t + \sigma \mathrm{d}W_t \nonumber \\
     &= -\left(\frac{A\left(X_t-m\right)^2 + \lambda_t}{X_t} + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma \mathrm{d}W_t
@@ -500,7 +501,7 @@ Define $Y_t := g(X_t , t) = \sinh^{-1}(X_t)$. Note that
 \begin{align}
     \frac{\partial}{\partial x}g(x, t) = \frac{1}{\sqrt{(x^2 + 1)}}, \qquad \frac{\partial^2}{\partial x^2}g(x, t) = -\frac{x}{\left(x^2 + 1\right)^{3/2}},
 \end{align}
-so by Ito's formula
+so by Itō's formula
 \begin{align}
     \mathrm{d}g(X_t , t) &= \left(-\frac{\alpha_0\left(X_t - \mu_0\right)}{\sqrt{(X_t^2 + 1)}}+\frac{\sigma^2}{2}\left(X_t^2 + 1\right)\left(-\frac{X_t}{\left(X_t^2 + 1\right)^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t\nonumber \\
     &= -\frac{1}{\sqrt{X_t^2 + 1}}\left(\alpha_0\left(X_t - \mu_0\right) + \frac{\sigma^2}{2}X_t\right)\mathrm{d}t + \sigma\mathrm{d}W_t
@@ -545,7 +546,7 @@ With estimates for $\alpha_0, \mu_0, \sigma$ we continue by turning to the dynam
     \mathrm{d}X_t &= -\left(A(X_t - m)^2 + \lambda_t\right)\mathrm{d}t + \sigma \sqrt{\left(X_t^2 + 1\right)}\mathrm{d}W_t,\\
     \lambda_t &= \lambda_0 \left(1 - \frac{t - t_0}{\tau_c}\right)^\nu.
 \end{align}
-Once again, we use the Lamperti transform: Let $Y_t = \sinh^{-1}(X_t)$. By similar calculations as done in the stationary part, we get from Ito's formula that
+Once again, we use the Lamperti transform: Let $Y_t = \sinh^{-1}(X_t)$. By similar calculations as done in the stationary part, we get from Itō's formula that
 \begin{align}
     \mathrm{d}Y_t = -\frac{1}{\cosh(Y_t)}\left(A\left(\sinh(Y_t) - m\right)^2 + \lambda_t + \frac{\sigma^2}{2}\sinh(Y_t)\right)\mathrm{d}t + \sigma \mathrm{d}W_t. \label{eq:LampertiTDistributionDynamic}
 \end{align}
@@ -600,7 +601,7 @@ The Lamperti transform is $Y_t := g(X_t, t) = 2 \sinh^{-1}\left(\sqrt{X_t}\right
 \begin{align}
     \frac{\partial}{\partial x}g(x, t) = \frac{1}{\sqrt{x\left(x + 1\right)}}, \qquad \frac{\partial^2}{\partial x^2}g(x, t) = \frac{-2x + 1}{2\left(x\left(x + 1\right)\right)^{3/2}}.
 \end{align}
-and Ito's formula gives us
+and Itō's formula gives us
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(-\frac{\alpha_0\left(X_t - \mu_0\right)}{\sqrt{X_t\left(x + 1\right)}} + \frac{\sigma^2}{2}\left(X_t\left(X_t + 1\right)\right)\left(-\frac{2X_t + 1}{2\left(X_t\left(X_t + 1\right)\right)^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t \nonumber\\
     &= -\frac{1}{\sqrt{X_t\left(X_t + 1\right)}}\left(\alpha_0\left(X_t - \mu_0\right) + \frac{\sigma^2}{4}\left(2X_t + 1\right)\right) + \sigma\mathrm{d}W_t.
@@ -614,7 +615,7 @@ Now, using $X_t = \sinh^2\left(\frac{Y_t}{2}\right)$.
 \end{align}
 Where $(\dagger_1)$ uses the identity from earlier in the denominator and the following double-angle identity twice
 \begin{align*}
-    2\sinh^2\left(\frac{x}{2}\right) = \cosh(x)
+    2\sinh^2\left(\frac{x}{2}\right) + 1 = \cosh(x)
 \end{align*}
 $(\dagger_2)$ follows by the identity
 \begin{align*}
@@ -648,7 +649,7 @@ We continue the estimation for the model with the same stochastic part as the $F
     \mathrm{d}X_t &= -\left(A(X_t - m)^2 + \lambda_t\right)\mathrm{d}t + \sigma \sqrt{\left(X_t\left(X_t + 1\right)\right)}\mathrm{d}W_t,\\
     \lambda_t &= \lambda_0 \left(1 - \frac{t - t_0}{\tau_c}\right)^\nu.
 \end{align}
-Naturally, the Lamperti transform is the same here as in the stationary part, ergo $Y_t := g(X_t, t) = 2\sinh^{-1}\left(\sqrt{X_t}\right)$. Ito's formula gives 
+Naturally, the Lamperti transform is the same here as in the stationary part, ergo $Y_t := g(X_t, t) = 2\sinh^{-1}\left(\sqrt{X_t}\right)$. Itō's formula gives 
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(-\frac{A\left(X_t - m\right)^2 + \lambda_t}{\sqrt{X_t\left(X_t + 1\right)}}+ \frac{\sigma^2}{2}X_t\left(X_t + 1\right)\left(-\frac{2X_t + 1}{2\left(X_t\left(X_t + 1\right)\right)^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t \nonumber \\
     &= -\frac{1}{\sqrt{X_t\left(X_t + 1\right)}}\left(A\left(X_t - m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\left(2X_t + 1\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t
@@ -723,7 +724,7 @@ Note that
 \begin{align}
     \frac{\partial}{\partial x}g(X_t,t) = \frac{1}{\sqrt{X_t\left(1 - X_t\right)}}, \qquad \frac{\partial^2}{\partial x^2}g(X_t,t) = -\frac{1 - 2X_t}{2\left(X_t\left(1 - X_t\right)\right)^{3/2}}.
 \end{align}
-And we get by Ito's formula
+And we get by Itō's formula
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(\frac{-\alpha_0\left(X_t - \mu_0\right)}{\sqrt{X_t\left(1 - X_t\right)}} + \frac{\sigma^2}{2}X_t\left(1 - X_t\right)\left(-\frac{1 - 2X_t}{2\left(X_t\left(1 - X_t\right)\right)^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t \nonumber \\
     &= -\frac{1}{\sqrt{X_t\left(1 - X_t\right)}}\left(\alpha_0\left(X_t - \mu_0\right) + \frac{\sigma^2}{4}\left(1 - 2X_t\right)\right) + \sigma\mathrm{d}W_t.
@@ -778,7 +779,7 @@ As we did in the stationary part, let $Y_t := g(X_t, t) = 2 \sin^{-1}\left(\sqrt
     \mathrm{d}g(X_t, t) &= \left(-\frac{A(X_t - m)^2 + \lambda_t}{\sqrt{X_t\left(1 - X_t\right)}} + \frac{\sigma^2}{2}X_t\left(1 - X_t\right)\left(-\frac{1 - 2X_t}{2\left(X_t\left(1 - X_t\right)\right)^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t \nonumber\\
     &= -\frac{1}{\sqrt{X_t\left(1 - X_t\right)}}\left(A\left(X_t - m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\left(1 - 2X_t\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t
 \end{align}
-by Ito's formula. Using $X_t = \sin^2\left(\frac{Y_t}{2}\right)$, we get
+by Itō's formula. Using $X_t = \sin^2\left(\frac{Y_t}{2}\right)$, we get
 \begin{align}
     \mathrm{d}Y_t &= -\frac{\left(A\left(\sin^2\left(\frac{Y_t}{2}\right) - m\right)^2 + \lambda_t + \frac{\sigma^2}{4}\left(1 - 2\sin^2\left(\frac{Y_t}{2}\right)\right)\right)}{\sqrt{\sin^2\left(\frac{Y_t}{2}\right)\left(1 - \sin^2\left(\frac{Y_t}{2}\right)\right)}}\mathrm{d}t + \sigma\mathrm{d}W_t \nonumber \\
     &= -\frac{2}{\sin(Y_t)}\left(\frac{A}{4}\left(\left(1 - 2m\right) - \cos(Y_t)\right)^2 + \lambda_t + \frac{\sigma^2}{4}\cos(Y_t)\right)\mathrm{d}t + \sigma\mathrm{d}W_t\nonumber \\
@@ -868,7 +869,7 @@ In this section we show the results of a few benchmarks using the \code{microben
         \label{figure:samplesFromFiveDifferentModelsReversed}
     \end{center}
 \end{figure}
-\subsection{Simulation studies}
+\subsection{Simulation Studies}
 \begin{figure}[h!]
     \begin{center}
     \includegraphics[scale = .1]{figures/estimation_duration_dynamic.jpeg}
@@ -968,7 +969,7 @@ Here we illustrate the results from the parametric bootstrap of the estimates fr
 \end{figure}\\
 \begin{figure}[h!]
     \begin{center}
-        \includegraphics[scale = .09]{figures/estim_tibble_AMOC3_plot.jpeg}
+        \includegraphics[scale = .095]{figures/estim_tibble_AMOC3_plot.jpeg}
         \caption{Result from parametric bootstrap of the parameters fitted to the AMOC3-fingerprint with the $t$-diffusion-based model}
         \label{figure:AMOC3_t_diffusion_bootstrap}
     \end{center}
@@ -992,8 +993,8 @@ We now depict the figures, but for the additive models in our application, i.e. 
 
 \begin{figure}[h!]
     \begin{center}
-        \includegraphics[scale = .09]{figures/estim_tibble_AMOC3_plot.jpeg}
-        \caption{Result from parametric bootstrap of the parameters fitted to the AMOC3-fingerprint using the model with additive noise}
+        \includegraphics[scale = .095]{figures/estim_tibble_AMOC3_plot.jpeg}
+        \caption{Result from parametric bootstrap of the parameters fitted to the AMOC3-fingerprint using the model with additive noise\\}
         \label{figure:AMOC3_additive_bootstrap}
     \end{center}
 \end{figure}
@@ -1013,8 +1014,7 @@ We now depict the figures, but for the additive models in our application, i.e. 
     \caption{Table of quantiles of the uniform residuals stratified after model and part of process along with the theoretical quantiles for the standard gaussian distribution. Supports figure \ref{figure:OU_t_diffusion_QQ_plot}.}
     \label{table:QQ_OU_vs_t_diffusion}
 \end{table}
-
-\newpage
+\newpage 
 \subsection{Discussion}
 In this section we showcase auxilliary results for the discussion section
 \begin{table}[ht]

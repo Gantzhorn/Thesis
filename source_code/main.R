@@ -376,6 +376,14 @@ potential_plot_data |>
   ) + theme(ggthemes::theme_base())
 
 # Plot the normal form
+normal_form_potential <- function(x, lambda, const = 1/12){
+  -(x-1/sqrt(3))*(2/(sqrt(3)*3)-lambda) - (1/sqrt(3)-x)^3 / sqrt(3) + const
+}
+
+approx_DW_normal_form <- function(x, lambda){
+  -sqrt(3)*(x - 1/sqrt(3))^2 - (lambda - 2 /(sqrt(3) * 3))
+}
+
 normal_form <- function(x, A, lambda, m){
   -(A*(x-m)^2 + lambda)
 }
@@ -403,7 +411,6 @@ dat_half_circle1 <- circleFun(c(m, 0), 0.225, start = 1/2, end = 3/2)
 dat_half_circle1 <- rbind(dat_half_circle1, dat_half_circle1[1,])
 dat_half_circle1$lambda <- factor(0) 
 
-
 normal_form_plot_data |> 
   ggplot(aes(x = x, y = ys, col = lambda)) + 
   geom_line(linewidth = 1.25) + 
@@ -420,6 +427,48 @@ normal_form_plot_data |>
         axis.text.y = element_text(size = 12)) +
   guides(color = guide_legend(title = expression(lambda))) + 
   coord_fixed()
+
+potential_plot_normal_form_data <- tibble(
+    xs = rep(seq(-1.5, 1.5, length.out = 2500), length(lambda_double_well_vec)),
+    consts = rep(c(-1/7, 0.01, 1/12), each = 2500),
+    lambda = rep(lambda_double_well_vec, each = 2500),
+    normal_form_potential = normal_form_potential(xs, lambda, consts),
+    double_well_potential = double_well(xs, lambda),
+    normal_form_dynamics  = approx_DW_normal_form(xs, lambda),
+    double_well_dynamics  = double_well_deriv(xs, lambda)
+  )
+
+
+potential_dynamic_plot <- potential_plot_normal_form_data |> 
+  pivot_longer(-c(xs, lambda, consts), names_to = "Type", values_to = "Value") |> 
+  mutate(lambda = factor(lambda),
+         Model = ifelse(str_detect(Type, "normal"), "Normal", "Double-well"),
+         Form = ifelse(str_detect(Type, "potential"), "Potential", "Dynamics")) |>
+  mutate(Form = factor(Form, levels = c("Potential", "Dynamics"))) |> 
+  ggplot(aes(x = xs, y = Value, col = lambda, linetype = Model)) +
+  geom_hline(yintercept = 0, linetype = "dashed") + 
+  geom_step(linewidth = 1.25) +
+  facet_wrap(~Form) +
+  xlab("x") + ylab("") +
+  guides(color = guide_legend(
+    override.aes = list(linewidth = 5),
+    title = expression(lambda)
+  )) + 
+  theme(
+    strip.text = element_text(face = "bold", size = 16),
+    legend.title = element_text(size = 18),
+    legend.text = element_text(size = 17, margin = margin(t = 5)),
+    axis.title = element_text(size = 18)
+  ) + 
+  ylim(c(-1,1)) + 
+  scale_color_manual(values = thesis_palette,
+                     labels = c("0", "0.25", expression(lambda*phantom(.)[c])))
+
+
+ggsave(potential_dynamic_plot, path = paste0(getwd(), "/tex_files/figures"),
+       filename = "potential_dynamic_plot.jpeg",
+       height = 6, width = 14, dpi = 300, units = "in", device = "jpeg",
+       limitsize = FALSE, scale = 1)
 
 # Bifurcation diagram
 bifurcation_diagram <- tibble(lambda = seq(-1.5, 0, length.out = 5000), stable = m + sqrt(A*abs(lambda)), 
@@ -2774,33 +2823,37 @@ estimators_base_plot <- likelihood_tibble |>
   select(-c(stationary_likelihood, dynamic_likelihood)) |> 
   pivot_longer(cols = -index, names_to = "Parameter", values_to = "Estimate") |>
   ggplot(aes(x = index, y = Estimate)) + 
-  geom_step(linewidth = 1.25, aes(col = Parameter)) +
+  geom_step(linewidth = 1.5, aes(col = Parameter)) +
   facet_wrap(Parameter~., scales = "free_y") + 
   xlab(expression(t[0])) +
   theme(
     strip.text = element_blank(),
-    legend.text = element_text(size = 18),
-    legend.title = element_text(face = "bold", size = 18),
-    axis.text = element_text(face = "bold", size = 14),
-    axis.title = element_text(face = "bold", size = 18),
+    legend.text = element_text(size = 22),
+    legend.title = element_text(face = "bold", size = 22),
+    axis.text = element_text(face = "bold", size = 16),
+    axis.title = element_text(face = "bold", size = 24),
     theme(panel.spacing = unit(2, "lines"))
   ) + 
-  scale_color_manual(labels = c("A", expression(alpha),  expression(mu), expression(sigma), expression(tau),
-                               "Tipping year"), 
+  scale_color_manual(
+    labels = c("A", expression(alpha*phantom(.)[0]),
+               expression(mu*phantom(.)[0]), expression(sigma),
+               expression(tau*phantom(.)[c]), "Tipping year"), 
                                values = thesis_palette[-c(5,6,7, 8)]) + 
   guides(col = guide_legend(override.aes = list(linewidth = 4))) +
-  scale_y_continuous(breaks = scales::pretty_breaks())
+  scale_y_continuous(breaks = scales::pretty_breaks()) +
+  guides(col = guide_legend(override.aes = list(linewidth = 8)))
 
 estimators_full_plot <- estimators_base_plot +  ggnewscale::new_scale_colour() + 
-geom_point(data = highlight_points, aes(x = index, y = Estimate, col = Part), size = 3) +
+geom_point(data = highlight_points, aes(x = index, y = Estimate, col = Part), size = 5) +
   geom_hline(data = highlight_points, aes(yintercept = Estimate, col = Part),
-             linewidth = 0.8, linetype = "dashed", show.legend = FALSE) +
+             linewidth = 1, linetype = "dashed", show.legend = FALSE) +
   scale_color_manual(labels = c("1924", "1912"), values = thesis_palette[5:6]) +
-  guides(col = guide_legend(override.aes = list(linewidth = 4), title = expression(t[0])))
+  theme(legend.position = "bottom") +
+  guides(col = guide_legend(override.aes = list(size = 5), title = expression(t[0])))
 
 # ggsave(estimators_full_plot, path = paste0(getwd(), "/tex_files/figures"),
 #        filename = "estimators_full_plot.jpeg",
-#        height = 8, width = 15, dpi = 300, units = "in", device = "jpeg",
+#        height = 7, width = 15, dpi = 300, units = "in", device = "jpeg",
 #        limitsize = FALSE, scale = 1)
 
 
