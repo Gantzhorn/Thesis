@@ -176,7 +176,7 @@ The coefficient in front of the linear SDE (\ref{eq:squarerootStationarySplit1})
 which naturally means $f'(y^*) = - \alpha_0$ and this is exactly the coefficient found in (\ref{eq:squarerootStationarySplit1}). Note that, as always, the deterministic ODE in (\ref{eq:squarerootStationarySplit2}) is the residual of (\ref{eq:lampertiSquarerootAppendix}) and (\ref{eq:squarerootStationarySplit1}).
 Equation (\ref{eq:squarerootStationarySplit1}) is an Ornstein-Uhlenbeck process, which with stepsize, $\Delta t$, has a gaussian flow with conditional mean 
 \begin{align}
-    \mu_{\Delta t}(x) = \exp\left(-\alpha_0 \Delta t\right) \left(x - 2\sqrt{\frac{\alpha_0\mu_0 - \sigma^2 / 2}{\alpha_0}}\right) + 2\sqrt{\frac{\alpha_0\mu_0 - \sigma^2 / 2}{\alpha_0}}.
+    \mu_{\Delta t}(x) = \exp\left(-\alpha_0 \Delta t\right) \left(x - 2\sqrt{\frac{\alpha_0\mu_0 - \sigma^2 / 2}{\alpha_0}}\;\right) + 2\sqrt{\frac{\alpha_0\mu_0 - \sigma^2 / 2}{\alpha_0}}.
 \end{align}
 Additionally, it has conditional variance
 \begin{align}
@@ -350,7 +350,7 @@ Conversely, we can use the Lamperti transformation of the mean-reverting GBM and
 \end{align}
 and by Itō's formula
 \begin{align}
-    \mathrm{d}g(X_t, t) &= \left(-\frac{\alpha_0\left(X_t - \mu_0\right)}{X_t}+\frac{\sigma^2}{2}X_t^2\left(-\frac{1}{X_t^2}\right)\right) + \sigma\mathrm{d}W_t\nonumber\\
+    \mathrm{d}g(X_t, t) &= \left(-\frac{\alpha_0\left(X_t - \mu_0\right)}{X_t}+\frac{\sigma^2}{2}X_t^2\left(-\frac{1}{X_t^2}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t\nonumber\\
     &= -\left(\alpha_0\left(1-\mu_0X_t^{-1}\right) + \frac{\sigma^2}{2}\right)\mathrm{d}t + \sigma\mathrm{d}W_t
 \end{align}
 As $X_t = \exp(Y_t)$, the resulting SDE is
@@ -427,7 +427,7 @@ Solving the equation $G_N^{GBM} = 0$ then yields the approximate quadratic margi
 \subsubsection{Dynamic part}\label{subsubsec:meanrevertingGBMDynamic}
 In its dynamic part the model with the same noise as the mean-reverting geometric brownian motion is modelled using the stochastic differential equation
 \begin{align}
-    \mathrm{d}X_t &= -\left(A\left(X_t - m\right)^2 + \lambda_t\right) + \sigma X_t \mathrm{d}W_t, \label{eq:GBM_dynamic_SDE}\\
+    \mathrm{d}X_t &= -\left(A\left(X_t - m\right)^2 + \lambda_t\right)\mathrm{d}t + \sigma X_t \mathrm{d}W_t, \label{eq:GBM_dynamic_SDE}\\
     \lambda_t &= \lambda_0\left(1 - \frac{t - t_0}{\tau_c}\right)^\nu,
 \end{align}
 and as in section \ref{subsubsec:squarerootDynamic} we assume that we have estimated $\lambda_0, \sigma, m$ or are able to compute them from the parameters of the stationary part of the process with the usual plug-in estimators. Initially, we explore the same choice of splitting as we also started with in section \ref{subsubsec:squarerootDynamic}
@@ -604,13 +604,13 @@ The Lamperti transform is $Y_t := g(X_t, t) = 2 \sinh^{-1}\left(\sqrt{X_t}\right
 and Itō's formula gives us
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(-\frac{\alpha_0\left(X_t - \mu_0\right)}{\sqrt{X_t\left(x + 1\right)}} + \frac{\sigma^2}{2}\left(X_t\left(X_t + 1\right)\right)\left(-\frac{2X_t + 1}{2\left(X_t\left(X_t + 1\right)\right)^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t \nonumber\\
-    &= -\frac{1}{\sqrt{X_t\left(X_t + 1\right)}}\left(\alpha_0\left(X_t - \mu_0\right) + \frac{\sigma^2}{4}\left(2X_t + 1\right)\right) + \sigma\mathrm{d}W_t.
+    &= -\frac{1}{\sqrt{X_t\left(X_t + 1\right)}}\left(\alpha_0\left(X_t - \mu_0\right) + \frac{\sigma^2}{4}\left(2X_t + 1\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t.
 \end{align}
 Now, using $X_t = \sinh^2\left(\frac{Y_t}{2}\right)$.
 \begin{align}
-    \mathrm{d}Y_t &=  -\frac{\left(\alpha_0\left(\sinh^2\left(\frac{Y_t}{2}\right) - \mu_0\right) + \frac{\sigma^2}{4}\left(2\sinh^2\left(\frac{Y_t}{2}\right) + 1\right)\right)}{\sqrt{\sinh^2\left(\frac{Y_t}{2}\right)\left(\sinh^2\left(\frac{Y_t}{2}\right) + 1\right)}} + \sigma\mathrm{d}W_t \nonumber \\
-     &\overset{\left(\dagger_1\right)}{=} -\frac{\left(\frac{\alpha_0}{2}\left(\cosh(Y_t) - 2\mu_0 - 1\right)+\frac{\sigma^2}{4}\cosh(Y_t)\right)}{\sqrt{\sinh^2\left(\frac{Y_t}{2}\right)\left(\cosh^2\left(\frac{Y_t}{2}\right)\right)}} + \sigma\mathrm{d}W_t \nonumber \\
-     &\overset{(\dagger_2)}{=} -\frac{\left(\frac{\alpha_0}{2}\left(\cosh(Y_t) - 2\mu_0 - 1\right)+\frac{\sigma^2}{4}\cosh(Y_t)\right)}{\sqrt{\frac{\sinh^2(Y_t)}{4}}} + \sigma\mathrm{d}W_t \nonumber \\
+    \mathrm{d}Y_t &=  -\frac{\left(\alpha_0\left(\sinh^2\left(\frac{Y_t}{2}\right) - \mu_0\right) + \frac{\sigma^2}{4}\left(2\sinh^2\left(\frac{Y_t}{2}\right) + 1\right)\right)}{\sqrt{\sinh^2\left(\frac{Y_t}{2}\right)\left(\sinh^2\left(\frac{Y_t}{2}\right) + 1\right)}}\mathrm{d}t  + \sigma\mathrm{d}W_t \nonumber \\
+     &\overset{\left(\dagger_1\right)}{=} -\frac{\left(\frac{\alpha_0}{2}\left(\cosh(Y_t) - 2\mu_0 - 1\right)+\frac{\sigma^2}{4}\cosh(Y_t)\right)}{\sqrt{\sinh^2\left(\frac{Y_t}{2}\right)\left(\cosh^2\left(\frac{Y_t}{2}\right)\right)}}\mathrm{d}t  + \sigma\mathrm{d}W_t \nonumber \\
+     &\overset{(\dagger_2)}{=} -\frac{\left(\frac{\alpha_0}{2}\left(\cosh(Y_t) - 2\mu_0 - 1\right)+\frac{\sigma^2}{4}\cosh(Y_t)\right)}{\sqrt{\frac{\sinh^2(Y_t)}{4}}}\mathrm{d}t  + \sigma\mathrm{d}W_t \nonumber \\
      &= - \frac{1}{\sinh(Y_t)}\left(\left(\alpha_0 + \frac{\sigma^2}{2}\right)\cosh(Y_t) - \alpha_0\left(2\mu_0 + 1\right)\right) \mathrm{d}t + \sigma \mathrm{d}W_t. \label{eq:F_diffusion_lamperti_SDE}
 \end{align}
 Where $(\dagger_1)$ uses the identity from earlier in the denominator and the following double-angle identity twice
@@ -727,12 +727,12 @@ Note that
 And we get by Itō's formula
 \begin{align}
     \mathrm{d}g(X_t, t) &= \left(\frac{-\alpha_0\left(X_t - \mu_0\right)}{\sqrt{X_t\left(1 - X_t\right)}} + \frac{\sigma^2}{2}X_t\left(1 - X_t\right)\left(-\frac{1 - 2X_t}{2\left(X_t\left(1 - X_t\right)\right)^{3/2}}\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t \nonumber \\
-    &= -\frac{1}{\sqrt{X_t\left(1 - X_t\right)}}\left(\alpha_0\left(X_t - \mu_0\right) + \frac{\sigma^2}{4}\left(1 - 2X_t\right)\right) + \sigma\mathrm{d}W_t.
+    &= -\frac{1}{\sqrt{X_t\left(1 - X_t\right)}}\left(\alpha_0\left(X_t - \mu_0\right) + \frac{\sigma^2}{4}\left(1 - 2X_t\right)\right)\mathrm{d}t + \sigma\mathrm{d}W_t.
 \end{align}
 Note that $X_t = \sin^2\left(\frac{Y_t}{2}\right)$, thus
 \begin{align}
-    \mathrm{d}Y_t & = -\frac{\left(\alpha_0\left(\sin^2\left(\frac{Y_t}{2}\right) - \mu_0\right) + \frac{\sigma^2}{4}\left(1 - 2\sin^2\left(\frac{Y_t}{2}\right)\right)\right)}{\sqrt{\sin^2\left(\frac{Y_t}{2}\right)\left(1 - \sin^2\left(\frac{Y_t}{2}\right)\right)}} + \sigma\mathrm{d}W_t \nonumber \\
-    & \overset{(\dagger_1)}{=} -\frac{\left(-\frac{\alpha_0}{2}\left(\sin\left(Y_t\right) + 2\mu_0 - 1\right) + \frac{\sigma^2}{4}\cos(Y_t)\right)}{\sqrt{\sin^2\left(\frac{Y_t}{2}\right)\cos^2\left(\frac{Y_t}{2}\right)}} + \sigma\mathrm{d}W_t \nonumber \\
+    \mathrm{d}Y_t & = -\frac{\left(\alpha_0\left(\sin^2\left(\frac{Y_t}{2}\right) - \mu_0\right) + \frac{\sigma^2}{4}\left(1 - 2\sin^2\left(\frac{Y_t}{2}\right)\right)\right)}{\sqrt{\sin^2\left(\frac{Y_t}{2}\right)\left(1 - \sin^2\left(\frac{Y_t}{2}\right)\right)}}\mathrm{d}t  + \sigma\mathrm{d}W_t \nonumber \\
+    & \overset{(\dagger_1)}{=} -\frac{\left(-\frac{\alpha_0}{2}\left(\sin\left(Y_t\right) + 2\mu_0 - 1\right) + \frac{\sigma^2}{4}\cos(Y_t)\right)}{\sqrt{\sin^2\left(\frac{Y_t}{2}\right)\cos^2\left(\frac{Y_t}{2}\right)}}\mathrm{d}t  + \sigma\mathrm{d}W_t \nonumber \\
     & \overset{(\dagger_2)}{=} -\frac{1}{\sin\left(Y_t\right)}\left(\left(\frac{\sigma^2}{2}-\alpha_0\right)\cos(Y_t) + \alpha_0 - 2\alpha_0\mu_0\right)\mathrm{d}t + \sigma \mathrm{d}W_t. \label{eq:JacobiLampertiSDE}
 \end{align}
 Where we have used the following trigonometric identity in $(\dagger_1)$
@@ -907,14 +907,13 @@ In this section we show the results of a few benchmarks using the \code{microben
       $250$ &  $4$ & $0$ \\ 
        \hline
     \end{tabular}
-    \caption{Overview of how many times each model had an absolute relative error of above 1.5 stratified after $\tau$ in relation to the simulation study on model misspecification}
+    \caption{Overview of how many times each model had an absolute relative error of above 1.5 stratified after $\tau$ in relation to the simulation study on model misspecification.}
     \label{table:AREabove1.5tauSim}
     \end{table}
 \newpage
-    \subsection{Results}
-    \subsubsection{Estimating tipping of the Atlantic meridional overturning circulation with the \texorpdfstring{$t$}{t}-diffusion based model.}
-    In this section we provide supporting information to the results section. Tabels and figures are illustrated in the order they appear in the original section
-
+\subsection{Results}
+\subsubsection{Estimating tipping of the Atlantic meridional overturning circulation with the \texorpdfstring{$t$}{t}-diffusion based model.}
+In this section we provide supporting information to the results section. Tabels and figures are illustrated in the order they appear in the original section
     \begin{table}[h!]
         \centering
         \begin{tabular}{rllrrrrrrrrr}
@@ -957,7 +956,7 @@ In this section we show the results of a few benchmarks using the \code{microben
             \label{figure:allAMOCFingerprints}
         \end{center}
     \end{figure}
-\newpage
+\clearpage
 \subsubsection{Robustness analysis and the additive noise model}\label{subsubsec:RobustnessAnalysisAppendix}
 Here we illustrate the results from the parametric bootstrap of the estimates from the $t$-diffusion-based model applied to the AMOC1- and AMOC3 fingerprints. The AMOC2-fingerprint bootstrap can be seen in Figure \ref{figure:AMOC_parametric_bootstrap}.
 \begin{figure}[h!]
@@ -974,7 +973,7 @@ Here we illustrate the results from the parametric bootstrap of the estimates fr
         \label{figure:AMOC3_t_diffusion_bootstrap}
     \end{center}
 \end{figure}\\
-We now depict the figures, but for the additive models in our application, i.e. the one additive model without penalization in the optimization. Here we sketch both the AMOC1-, AMOC2- and AMOC3 fingerprints.
+We now depict the figures, but for the additive models in our application, i.e. the one additive model without penalization in the optimization. Here we sketch the AMOC1-, AMOC2- and AMOC3 fingerprints.
 \begin{figure}[h!]
     \begin{center}
         \includegraphics[scale = .09]{figures/estim_tibble_AMOC1_plot.jpeg}
@@ -1014,10 +1013,10 @@ We now depict the figures, but for the additive models in our application, i.e. 
     \caption{Table of quantiles of the uniform residuals stratified after model and part of process along with the theoretical quantiles for the standard gaussian distribution. Supports figure \ref{figure:OU_t_diffusion_QQ_plot}.}
     \label{table:QQ_OU_vs_t_diffusion}
 \end{table}
-\newpage 
+\clearpage
 \subsection{Discussion}
 In this section we showcase auxilliary results for the discussion section
-\begin{table}[ht]
+\begin{table}[h!]
     \centering
     \begin{tabular}{lllrrrrr}
       \hline 

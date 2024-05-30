@@ -133,6 +133,7 @@ xs_all_reversed <- bind_rows(
                         levels = c("Additive", "Square root", "Linear",
                                    "t-distribution", "F-distribution", "Jacobi diffusion")))
 
+
 sample_paths_plot_small_scale_reversed <- ggplot(xs_all_reversed, aes(x = t, y = X_t, color = Model)) +
   geom_line(data = fixed_point_lines, aes(x = t, y = upper), linewidth = 1, linetype = "dashed", color = "grey25") +
   geom_line(data = fixed_point_lines, aes(x = t, y = lower), linewidth = 0.85, linetype = "solid", color = "grey25") +
@@ -194,16 +195,17 @@ fixed_point_lines_big <- tibble(
 sample_paths_plot_big_scale <- ggplot(xs_all, aes(x = t, y = X_t, color = Model)) +
   geom_line(data = fixed_point_lines_big, aes(x = t, y = upper), linewidth = 1, linetype = "solid", color = "grey25") +
   geom_line(data = fixed_point_lines_big, aes(x = t, y = lower), linewidth = 0.75, linetype = "dashed", color = "grey25") +
-  geom_step(linewidth = 0.5) + 
+  geom_step(linewidth = 0.7) + 
   geom_hline(yintercept = true_param[2], linetype = "dashed") +
   facet_grid(sample_id ~ Model) +
   scale_color_manual(values = thesis_palette) +
   labs(y = expression(X[t])) + 
-  theme(legend.text=element_text(size=20),
+  theme(legend.text=element_text(size=22),
         legend.title = element_text(size = 22),
-        axis.title = element_text(size = 22),
+        axis.title = element_text(size = 24),
         strip.text.x = element_blank(),
         strip.text.y = element_blank(),
+        axis.text = element_text(size = 20),
         legend.key.width = unit(2, "lines"),
         legend.key.height = unit(1, "lines"),
         legend.position = "bottom") +
