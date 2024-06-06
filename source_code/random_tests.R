@@ -597,3 +597,119 @@ t_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
   
   -sum(stats::dnorm(fh_half_inv, mu.part, sd.part, log = TRUE)) - sum(log(abs(det_Dfh_half_inv)))
 }
+
+
+# New idea
+OU_dynamic_likelihood_new <- function(par, data, delta,
+                                             alpha0, mu0, sigma){
+  tau     <-  par[1]
+  A       <-  par[2]
+  
+  nu      <- if(length(par) == 3) exp(par[3]) else 1
+  
+  N       <- length(data)
+  Xupp    <- data[2:N]
+  Xlow    <- data[1:(N-1)]
+  time    <- delta * (1:(N-1))
+  
+  m          <- mu0 - alpha0 / (2 * A)
+  lambda0    <- -alpha0^2 / (4 * A)
+  lam_seq    <- lambda0 * (1 - time / tau)^nu
+  
+  sd.part <- (1 - A * (Xlow - m) * delta) * sigma * sqrt(delta)
+  
+  mu.part <- Xlow - (A * (Xlow - m)^2 + lam_seq) * delta * (1 - A * (Xlow - m) * delta) - 
+    A / 2 * sigma^2 * (delta)^2
+  
+  -sum(stats::dnorm(Xupp, mu.part, sd.part, log = TRUE), na.rm = TRUE)
+}
+
+OU_dynamic_likelihood_new_numeric_grad <- function(par, data, delta,
+                                                   alpha0, mu0, sigma){#, grMethod = "Richardson"){
+  numDeriv::grad(func = OU_dynamic_likelihood_new, x = par,
+                 method = "Richardson",  
+                 delta = delta,
+                 data = data,
+                 alpha0 = alpha0,
+                 mu0 = mu0,
+                 sigma = sigma)
+}
+
+# Additive noise model
+true_param <- c(0.87, -1.51, -2.69, 0.1, 1.5)
+actual_dt <- 0.1
+tau <- 150
+t_0 <- 50
+sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
+sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step() +
+  geom_line(aes(y = mu_t))
+# Stationary part
+# Parameters for stationary part
+mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) *  sqrt(abs(true_param[3] / true_param[1]))
+alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+
+stationary_param_estim <- optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
+                               data = sim_res_add$X_t[sim_res_add$t < t_0],
+                               init_par = stationary_part_true_param,
+                               delta = actual_dt, exp_sigma = FALSE)$par
+
+dynamic_part_true_param <- c(tau, true_param[1], true_param[5])
+
+
+optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
+                            data = sim_res_add$X_t[sim_res_add$t > t_0],
+                            init_par = c(150, 1, 1),
+                            delta = actual_dt,
+                            alpha0 = stationary_param_estim[1],
+                            mu0 = stationary_param_estim[2],
+                            sigma = stationary_param_estim[3],
+                            control = list(reltol = sqrt(.Machine$double.eps) / 1000)
+                            )
+
+optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood_new,
+                            data = sim_res_add$X_t[sim_res_add$t > t_0],
+                            init_par = c(150, 1, 0),
+                            delta = actual_dt,
+                            alpha0 = stationary_param_estim[1],
+                            mu0 = stationary_param_estim[2],
+                            sigma = stationary_param_estim[3],
+                            control = list(reltol = sqrt(.Machine$double.eps) / 1000))
+
+nleqslv::nleqslv(x = c(160, 1, 1), fn = OU_dynamic_likelihood_new_numeric_grad,
+                 data = sim_res_add$X_t[sim_res_add$t > t_0],
+                 delta = actual_dt,
+                 alpha0 = stationary_param_estim[1],
+                 mu0 = stationary_param_estim[2],
+                 sigma = stationary_param_estim[3])$x
+
+sum_gradients <- function(par){
+  sum(OU_dynamic_likelihood_new_numeric_grad(par,
+                                             data = sim_res_add$X_t[sim_res_add$t > t_0],
+                                             delta = actual_dt,
+                                             alpha0 = stationary_param_estim[1],
+                                             mu0 = stationary_param_estim[2],
+                                             sigma = stationary_param_estim[3]))^2
+}
+
+optimx::optimx(par = c(150, 1, 1), fn = sum_gradients, method = "L-BFGS-B")
+
+sim_res_add$t[sim_res_add$t > t_0] - t_0
+
+stats::nls(X_t ~ stationary_param_estim[2] -
+             stationary_param_estim[1] / (2 * A) * (1 + sqrt((1 - (t - t_0) / tau)^nu)),
+           data = filter(sim_res_add, t > t_0), start = list(A = dynamic_part_true_param[1],
+                                            tau = dynamic_part_true_param[2],
+                                            nu = dynamic_part_true_param[3]))
+
+tibble(t = sim_res_add$t[sim_res_add$t > t_0],
+       mu_estim_real = true_param[2] -
+         sqrt(-true_param[3] *(1 - (sim_res_add$t[sim_res_add$t > t_0] - t_0) /
+                   dynamic_part_true_param[1])^dynamic_part_true_param[3] / true_param[1]),
+       
+       mu_estim = stationary_part_true_param[2] +
+         stationary_part_true_param[1] / (2 * dynamic_part_true_param[2]) * (1 +
+  (sqrt((1 - (sim_res_add$t[sim_res_add$t > t_0] - t_0) /
+             dynamic_part_true_param[1])^dynamic_part_true_param[3]))),
+  mu_real = sim_res_add$mu_t[sim_res_add$t > t_0])
+

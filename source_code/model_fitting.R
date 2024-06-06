@@ -145,7 +145,7 @@ OU_dynamic_likelihood <-  function(par, data, delta,
                                    pen = 0){
   tau     <- par[1]
   A       <- par[2]
-  nu      <- if(length(par) == 3) par[3] else 1
+  nu      <- if(length(par) == 3) exp(par[3]) else 1
   
   N       <- length(data)
   Xupp    <- data[2:N]
@@ -250,7 +250,7 @@ CIR_dynamic_likelihood <- function(par, data, delta,
                                    alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
-  nu      <- if(length(par) == 3) par[3] else 1
+  nu      <- if(length(par) == 3) exp(par[3]) else 1
   
   N       <- length(data)
   Xupp    <- data[2:N]
@@ -289,7 +289,7 @@ CIR_transform_dynamic_likelihood <- function(par, data, delta,
                                              alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
-  nu      <- if(length(par) == 3) par[3] else 1
+  nu      <- if(length(par) == 3) exp(par[3]) else 1
   
   N       <- length(data)
   Xupp    <- data[2:N]
@@ -415,7 +415,7 @@ mean_reverting_GBM_dynamic_likelihood <- function(par, data, delta,
                                                   alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
-  nu      <- if(length(par) == 3) par[3] else 1
+  nu      <- if(length(par) == 3) exp(par[3]) else 1
   
   N       <- length(data)
   Xupp    <- data[2:N]
@@ -457,7 +457,7 @@ mean_reverting_GBM_transform_dynamic_likelihood <- function(par, data, delta,
                                                             alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
-  nu      <- if(length(par) == 3) par[3] else 1
+  nu      <- if(length(par) == 3) exp(par[3]) else 1
   
   N       <- length(data)
   Xupp    <- data[2:N]
@@ -539,7 +539,7 @@ t_diffusion_strang_splitting <- function(par, data, delta,
 t_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
-  nu      <- if(length(par) == 3) par[3] else 1
+  nu      <- if(length(par) == 3) exp(par[3]) else 1
   
   N       <- length(data)
   Xupp    <- data[2:N]
@@ -550,10 +550,10 @@ t_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma)
   lambda0    <- -alpha0^2 / (4 * A)
   lam_seq    <- lambda0 * (1 - time / tau)^nu
   
-  if(any((sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) < 0) |
-     any(is.na(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)))){
-    return(50000)
-    }
+  # if(any((sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)) < 0) |
+  #    any(is.na(sigma^4 - 8 * A * (2 * lam_seq + m * sigma^2)))){
+  #   return(50000)
+  #   }
   
   A_linear_part <- -sqrt(sigma^4 / 4 - 2 * A * (2 * lam_seq + m * sigma^2))
   
@@ -619,7 +619,7 @@ F_diffusion_strang_splitting <- function(par, data, delta, exp_sigma = FALSE) {
 F_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
-  nu      <- if(length(par) == 3) par[3] else 1
+  nu      <- if(length(par) == 3) exp(par[3]) else 1
   
   N       <- length(data)
   Xupp    <- data[2:N]
@@ -703,7 +703,7 @@ jacobi_diffusion_strang_splitting <- function(par, data, delta, exp_sigma = FALS
 jacobi_diffusion_transform_dynamic_likelihood <- function(par, data, delta, alpha0, mu0, sigma){
   tau     <-  par[1]
   A       <-  par[2]
-  nu      <- if(length(par) == 3) par[3] else 1
+  nu      <- if(length(par) == 3) exp(par[3]) else 1
   
   N       <- length(data)
   Xupp    <- data[2:N]
@@ -781,6 +781,9 @@ optimize_dynamic_likelihood <- function(likelihood_fun, data,
                             data = data, delta = delta,
                             alpha0 = alpha0 , mu0 = mu0, sigma = sigma, ...)
   
+  if(length(res_optim$par) == 3){
+  res_optim$par[3] <- exp(res_optim$par[3])
+  }
   if(return_all) {
     return(res_optim)
   } else {
@@ -805,42 +808,42 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 # source("source_code/tipping_simulations.R")
 
 # Additive noise model
-# true_param <- c(0.87, -1.51, -2.69, 0.2, 0.5)
-# actual_dt <- 0.005
-# tau <- 150
-# t_0 <- 50
-# sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
-# sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step() +
-#   geom_line(aes(y = mu_t))
+true_param <- c(0.87, -1.51, -2.69, 0.2, 0.8)
+actual_dt <- 0.005
+tau <- 150
+t_0 <- 50
+sim_res_add <- simulate_additive_noise_tipping_model(actual_dt, true_param, tau, t_0)
+sample_n(sim_res_add, min(nrow(sim_res_add), 10000)) |> ggplot(aes(x = t, y = X_t)) + geom_step() +
+  geom_line(aes(y = mu_t))
 # Stationary part
 # Parameters for stationary part
-# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) *  sqrt(abs(true_param[3] / true_param[1]))
-# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
-# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
+mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) *  sqrt(abs(true_param[3] / true_param[1]))
+alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
-# optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
-#                                data = sim_res_add$X_t[sim_res_add$t < t_0],
-#                                init_par = stationary_part_true_param,
-#                                delta = actual_dt, exp_sigma = FALSE)
+optimize_stationary_likelihood(likelihood_fun = OU_likelihood,
+                               data = sim_res_add$X_t[sim_res_add$t < t_0],
+                               init_par = stationary_part_true_param,
+                               delta = actual_dt, exp_sigma = FALSE)
 
 # 
-# nleqslv::nleqslv(x = stationary_part_true_param,
-#                  fn = OU_score,
-#                  data = sim_res_add$X_t[sim_res_add$t < t_0],
-#                  delta = actual_dt)$x
+nleqslv::nleqslv(x = stationary_part_true_param,
+                 fn = OU_score,
+                 data = sim_res_add$X_t[sim_res_add$t < t_0],
+                 delta = actual_dt)$x
 
 
 ## Dynamic part
-# dynamic_part_true_param <- c(tau, true_param[1], 1)
+dynamic_part_true_param <- c(tau, true_param[1], 0)
 # 
 # 
-# optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
-#                             data = sim_res_add$X_t[sim_res_add$t > t_0],
-#                             init_par = dynamic_part_true_param,
-#                             delta = actual_dt,
-#                             alpha0 = stationary_part_true_param[1],
-#                             mu0 = stationary_part_true_param[2],
-#                             sigma = stationary_part_true_param[3])
+optimize_dynamic_likelihood(likelihood_fun = OU_dynamic_likelihood,
+                            data = sim_res_add$X_t[sim_res_add$t > t_0],
+                            init_par = dynamic_part_true_param,
+                            delta = actual_dt,
+                            alpha0 = stationary_part_true_param[1],
+                            mu0 = stationary_part_true_param[2],
+                            sigma = stationary_part_true_param[3])
 
 
 
@@ -979,36 +982,36 @@ optimize_dynamic_simulation_likelihood <- function(likelihood_fun, data, times, 
 
 ## F-distributed stationary distribution model
 # 
-# true_param <- c(0.5, 1, -2, 0.1)
-# actual_dt <- 0.01
-# t_0 <- 100
-# tau <- 100
-# F_sim_dynamic <- simulate_F_distribution_tipping_model(actual_dt, true_param, t_0 = t_0, tau = tau)
-# F_sim_dynamic |> ggplot(aes(x = t, y = X_t)) + geom_step()
-# ## Stationary part
-# # Parameters for stationary part
-# mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
-# alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+true_param <- c(0.5, 1, -2, 0.1, 0.8)
+actual_dt <- 0.005
+t_0 <- 100
+tau <- 100
+F_sim_dynamic <- simulate_F_distribution_tipping_model(actual_dt, true_param, t_0 = t_0, tau = tau)
+F_sim_dynamic |> ggplot(aes(x = t, y = X_t)) + geom_step()
+## Stationary part
+# Parameters for stationary part
+mu0 <- true_param[2] + ifelse(true_param[1] >= 0, 1, -1) * sqrt(abs(true_param[3] / true_param[1]))
+alpha0 <- 2 * sqrt(abs(true_param[1] * true_param[3]))
+
+stationary_part_true_param <- c(alpha0, mu0, true_param[4])
 # 
-# stationary_part_true_param <- c(alpha0, mu0, true_param[4])
-# 
-# optimize_stationary_likelihood(
-#   likelihood_fun = F_diffusion_strang_splitting,
-#   data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
-#   init_par = stationary_part_true_param,
-#   delta = actual_dt,
-#   exp_sigma = TRUE)
+optimize_stationary_likelihood(
+  likelihood_fun = F_diffusion_strang_splitting,
+  data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t<t_0])),
+  init_par = stationary_part_true_param,
+  delta = actual_dt,
+  exp_sigma = FALSE)
 
 # ## Dynamic part
-# dynamic_part_true_param <- c(tau, true_param[1])
-# optimize_dynamic_likelihood(likelihood_fun = F_transform_dynamic_likelihood,
-#                             data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t>t_0])),
-#                             init_par = dynamic_part_true_param,
-#                             delta = actual_dt,
-#                             alpha0 = stationary_part_true_param[1],
-#                             mu0 = stationary_part_true_param[2],
-#                             sigma = stationary_part_true_param[3],
-#                             control = list(reltol = sqrt(.Machine$double.eps) / 100))
+dynamic_part_true_param <- c(tau, true_param[1], true_param[5])
+optimize_dynamic_likelihood(likelihood_fun = F_transform_dynamic_likelihood,
+                            data = 2 * asinh(sqrt(F_sim_dynamic$X_t[F_sim_dynamic$t>t_0])),
+                            init_par = c(85, true_param[1], 0),
+                            delta = actual_dt,
+                            alpha0 = stationary_part_true_param[1],
+                            mu0 = stationary_part_true_param[2],
+                            sigma = stationary_part_true_param[3],
+                            control = list(reltol = sqrt(.Machine$double.eps) / 10))
 # 
 #-----------------------------------------------------------------------------------------------------------------------------#
 
